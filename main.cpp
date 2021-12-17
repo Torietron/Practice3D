@@ -21,16 +21,23 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetDrawScreen(DX_SCREEN_BACK);
 
 	//main loop
-	while(1)
+	while(ProcessMessage() >= 0) //check app's process state
 	{
 	    ClearDrawScreen();
 		{
-			LoadGraphScreen(Width/2,Height/2-20,_T("core/ph0.png"),TRUE);
-		}
+			//Update
+			{
+				//code
+			}
 
+			//Draw
+			{
+				LoadGraphScreen(Width/2,Height/2-20,_T("core/ph0.png"),TRUE);
+			}
+		}
 		ScreenFlip();
 
-		if(ProcessMessage() < 0 ) break;
+		//Window Management
 		if(CheckHitKey(KEY_INPUT_RALT) == 1 && CheckHitKey(KEY_INPUT_RETURN) == 1) 
 		{
 			if(WinMode == FALSE) WinMode = TRUE;
