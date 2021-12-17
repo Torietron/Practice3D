@@ -14,8 +14,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
 	//window init
 	ChangeWindowMode(WinMode);
-    SetWindowSizeChangeEnableFlag(TRUE, TRUE);
-    SetWindowSizeExtendRate(1.0);
+    	SetWindowSizeChangeEnableFlag(TRUE, TRUE);
+    	SetWindowSizeExtendRate(1.0);
 	SetMainWindowText("Test");
 	SetGraphMode(Width, Height, 16);
 
