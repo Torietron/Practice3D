@@ -34,9 +34,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int ModelH = 0, EnvH1, EnvH2, SkyH;
 	int AttachIndex = 0;
 	float TotalTime, PlayTime = 0.0f;
-	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f, deter = 0.0f, dv; 
+	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f; 
 	float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f;
-	VECTOR Camera, Player, pRot, cRot, S, cv;
+	VECTOR Camera, Player, pRot, cRot, S;
 	Camera = VGet(0.0f, 20.0f, -20.0f);
 	Player = VGet(0.0f, 0.0f, 0.0f);
 	pRot = VGet(0.0f, DX_PI_F/3, 0.0f);
@@ -53,7 +53,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				//On screen event
 				if(NewScreen == TRUE)
 				{
-					if(ModelH != 0) //if unset
+					if(ModelH != 0) //if already set
 					{
 						MV1DetachAnim(ModelH,AttachIndex);
 						MV1DeleteModel(ModelH);
@@ -73,6 +73,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				
 				//Controls
 				{
+					//Player
 					if(CheckHitKey(KEY_INPUT_A) == 1) pRot.y -= ROTATE_SPEED;
 					if(CheckHitKey(KEY_INPUT_D) == 1) pRot.y += ROTATE_SPEED;
 					if(CheckHitKey(KEY_INPUT_W) == 1) 
@@ -113,7 +114,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 					//Camera
 					//keep the camera a set distance from player
-					//cam's anchored point around the player is a circle controlled by cRot.y
+					//cam's circular anchored point around the player is controlled by cRot.y
 					Camera.z = Player.z + cos(cRot.y)*40;
 					Camera.x = Player.x + sin(cRot.y)*40;
 					if(CheckHitKey(KEY_INPUT_J) == 1) cRot.y -= ROTATE_SPEED;
@@ -132,7 +133,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					S.x = Camera.x - Player.x;
 					S.y = Camera.y - Player.y; 
 					S.z = Camera.z - Player.z;
-					angleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - 0.46f);
+					angleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - 0.46f); // .46 radian offset
 				}
 				
 				//Simple Jump
