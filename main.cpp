@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #include "DxLib.h"
 #include <cstdint>
 #include <cmath>
@@ -9,6 +8,8 @@ uint_fast8_t WinMode = TRUE, NewScreen = TRUE;
 int_fast16_t Width = 640, Height = 480;
 
 void pRotate(float &x, float &y, const float angle, const float tX, const float tY);
+void SetCross(const VECTOR &a, const VECTOR &b, VECTOR &c);
+void SetDot(const VECTOR &a, const VECTOR &b, float &dot);
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				 LPSTR lpCmdLine, int nCmdShow )
@@ -25,16 +26,17 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	
 	//Preload Setup
 	SetDrawScreen(DX_SCREEN_BACK);
+	SetCameraNearFar(0.1f, 1000.0f);
 	NewScreen = TRUE;
 	uint_fast8_t pDir = 0, AnimSet = 0, pReverse = FALSE, pJump = FALSE, pGrounded = TRUE;
 	int_fast16_t tempX, tempY;
 	int_fast32_t pPace = 0;
-	int ModelH, EnvH1, EnvH2, SkyH;
-	int AttachIndex;
+	int ModelH = 0, EnvH1, EnvH2, SkyH;
+	int AttachIndex = 0;
 	float TotalTime, PlayTime = 0.0f;
-	float anchorY = 0.0f, angleV, angleH; 
+	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f, deter = 0.0f, dv; 
 	float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f;
-	VECTOR Camera, Player, pRot, cRot, S;
+	VECTOR Camera, Player, pRot, cRot, S, cv;
 	Camera = VGet(0.0f, 20.0f, -20.0f);
 	Player = VGet(0.0f, 0.0f, 0.0f);
 	pRot = VGet(0.0f, DX_PI_F/3, 0.0f);
@@ -51,14 +53,21 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				//On screen event
 				if(NewScreen == TRUE)
 				{
+					if(ModelH != 0) //if unset
+					{
+						MV1DetachAnim(ModelH,AttachIndex);
+						MV1DeleteModel(ModelH);
+						MV1DeleteModel(EnvH1);
+						MV1DeleteModel(SkyH);
+					}
+					SetCameraNearFar(0.1f, 1000.0f);
 					ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_Normal.pmd"));
 					EnvH1 = MV1LoadModel(_T("dat/batokin-island/batokin_island5.mqo"));
 					//EnvH2 = MV1LoadModel(_T("dat/batokin-island/batokin_island5.x"));
 					SkyH = MV1LoadModel(_T("dat/batokin-island/skydome.x"));
-					SetCameraNearFar(0.1f, 1000.0f);
-					SetCameraPositionAndTarget_UpVecY(VGet(Camera.x, Camera.y, Camera.z),VGet(targetX, targetY, targetZ));
 					AttachIndex = MV1AttachAnim(ModelH, 0, -1, FALSE);
 					TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
+					pPace = 0;
 					NewScreen = FALSE;
 				}
 				
@@ -103,20 +112,27 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					}
 
 					//Camera
+					//keep the camera a set distance from player
+					//cam's anchored point around the player is a circle controlled by cRot.y
 					Camera.z = Player.z + cos(cRot.y)*40;
 					Camera.x = Player.x + sin(cRot.y)*40;
 					if(CheckHitKey(KEY_INPUT_J) == 1) cRot.y -= ROTATE_SPEED;
 					if(CheckHitKey(KEY_INPUT_K) == 1) cRot.y += ROTATE_SPEED;
+					if(CheckHitKey(KEY_INPUT_DOWN) == 1) Player.y -= 2; //using to test vertical lock, use jump to get back up
+					if(CheckHitKey(KEY_INPUT_LEFT) == 1) angleV += ROTATE_SPEED;
+					if(CheckHitKey(KEY_INPUT_RIGHT) ==1) angleV -= ROTATE_SPEED;
 					
+					//horizontal lock formula
 					S.x = Player.x - Camera.x;
 					S.y = Player.y - Camera.y; 
 					S.z = Player.z - Camera.z;
+					angleH = atan2f(S.x,S.z); 
 
-					angleH = atan2f(S.x,S.z);
-					//angleV = atan2f(S.x,S.y);
-
-					angleV = ((atan2f(Camera.y,Player.y)) * 0.25) - .39;
-					tempY = atan2f(S.z,S.y);
+					//vertical lock formula
+					S.x = Camera.x - Player.x;
+					S.y = Camera.y - Player.y; 
+					S.z = Camera.z - Player.z;
+					angleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - 0.46f);
 				}
 				
 				//Simple Jump
@@ -197,4 +213,16 @@ void pRotate(float &x, float &y, const float angle, const float tX, const float 
 	y = ox * sin(angle) + oy * cos(angle);
 	x += tX;
 	y += tY;
+}
+
+void SetCross(const VECTOR &a, const VECTOR &b, VECTOR &c)
+{
+	c.x = (a.y * b.z - a.z * b.y);
+	c.y = (a.z * b.x - a.x * b.z);
+	c.z = (a.x * b.y - a.y * b.x);
+}
+
+void SetDot(const VECTOR &a, const VECTOR &b, float &dot)
+{
+	dot = (a.x * b.x + a.y * b.y + a.z * b.z);
 }
