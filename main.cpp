@@ -27,6 +27,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetWindowSizeExtendRate(1.0);
 	SetMainWindowText(_T("Test"));
 	SetGraphMode(Width, Height, 16);
+	
 
 	//Check DXlibrary
 	if( DxLib_Init() == -1 ) return -1;
@@ -41,7 +42,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int_fast32_t pPace = 0;
 	int ModelH = 0, EnvH1, EnvH2, SkyH, Light;
 	int AttachIndex = 0;
-	float TotalTime, PlayTime = 0.0f;
+	float TotalTime, PlayTime = 0.0f, vOffset = 0.46f;
 	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f; 
 	float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f;
 	VECTOR Camera, Player, pRot, cRot, S;
@@ -49,7 +50,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	Player = VGet(0.0f, 0.0f, 0.0f);
 	pRot = VGet(0.0f, DX_PI_F/3, 0.0f);
 	cRot = VGet(0.0f, DX_PI_F/3, 0.0f);
-	SetMousePoint((int)Player.x,(int)Player.z);
 	MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 	Sphere_t sphere[SPHERES];
 	SDFlag[0] = 1, SDFlag[1] = 1;
@@ -71,6 +71,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 						MV1DetachAnim(ModelH,AttachIndex);
 						MV1DeleteModel(ModelH);
 					}
+					SetMouseDispFlag(FALSE);
 					SetCameraNearFar(0.1f, 1000.0f);
 					SetUseZBuffer3D(TRUE);
 					SetWriteZBuffer3D(TRUE);
@@ -133,6 +134,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					Camera.x = Player.x + sin(cRot.y)*40;
 					if(CheckHitKey(KEY_INPUT_J) == 1) cRot.y -= ROTATE_SPEED;
 					if(CheckHitKey(KEY_INPUT_K) == 1) cRot.y += ROTATE_SPEED;
+					if(Mouse.Moved())
+					{
+						DrawFormatString(0,60,-256,"delta_x=%d, x=%d",Mouse.GetDeltaX(),Mouse.x);
+						cRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
+						//vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
+						if(vOffset > 0.81f) vOffset = 0.81f;
+						if(vOffset < -.41f) vOffset = -0.41f;
+						
+						Mouse.Reset(Width/2,Height/2);
+					}
 					if(CheckHitKey(KEY_INPUT_DOWN) == 1) Player.y -= 2; //using to test vertical lock, use jump to get back up
 					if(CheckHitKey(KEY_INPUT_LEFT) == 1) angleV += ROTATE_SPEED;
 					if(CheckHitKey(KEY_INPUT_RIGHT) ==1) angleV -= ROTATE_SPEED;
@@ -147,7 +158,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					S.x = Camera.x - Player.x;
 					S.y = Camera.y - Player.y; 
 					S.z = Camera.z - Player.z;
-					angleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - 0.46f); // .46 radian offset
+					angleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - vOffset);
 				}
 				
 				//Simple Jump

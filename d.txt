@@ -1,3 +1,2 @@
-mouse controls
 target system
 new abstractions
