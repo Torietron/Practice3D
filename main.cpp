@@ -1,14 +1,21 @@
 #include "DxLib.h"
 #include <cstdint>
 #include <cmath>
+#include "MousePoll.h"
+
+typedef struct {
+	VECTOR v;
+	float r;
+} Sphere_t;
 
 static const float ROTATE_SPEED = DX_PI_F/45;
-static const float MOVEMENT_SPEED = DX_PI_F/10;
+static const float MOVEMENT_SPEED = DX_PI_F/5;
 uint_fast8_t WinMode = TRUE, NewScreen = TRUE;
 int_fast16_t Width = 640, Height = 480;
+MousePoll Mouse;
 
-void pRotate(float &x, float &y, const float angle, const float tX, const float tY);
-void SetCross(const VECTOR &a, const VECTOR &b, VECTOR &c);
+void Rotate(float &x, float &y, const float angle, const float tX, const float tY);
+DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
 void SetDot(const VECTOR &a, const VECTOR &b, float &dot);
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -28,10 +35,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetDrawScreen(DX_SCREEN_BACK);
 	SetCameraNearFar(0.1f, 1000.0f);
 	NewScreen = TRUE;
+	const uint_fast8_t SPHERES = 2;
 	uint_fast8_t pDir = 0, AnimSet = 0, pReverse = FALSE, pJump = FALSE, pGrounded = TRUE;
-	int_fast16_t tempX, tempY;
+	uint_fast8_t SDFlag[SPHERES] = {0};
 	int_fast32_t pPace = 0;
-	int ModelH = 0, EnvH1, EnvH2, SkyH;
+	int ModelH = 0, EnvH1, EnvH2, SkyH, Light;
 	int AttachIndex = 0;
 	float TotalTime, PlayTime = 0.0f;
 	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f; 
@@ -42,6 +50,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	pRot = VGet(0.0f, DX_PI_F/3, 0.0f);
 	cRot = VGet(0.0f, DX_PI_F/3, 0.0f);
 	SetMousePoint((int)Player.x,(int)Player.z);
+	MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
+	Sphere_t sphere[SPHERES];
+	SDFlag[0] = 1, SDFlag[1] = 1;
+	sphere[0].v = VGet(-0.5f,10.0f,-46.0f), sphere[0].r = 6.0f;
+	sphere[1].v = VGet(-40.0f,10.0f,-60.0f), sphere[1].r = 6.0f;
 
 	//Main Loop
 	while(ProcessMessage() >= 0) //Check app's process state
@@ -57,22 +70,23 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					{
 						MV1DetachAnim(ModelH,AttachIndex);
 						MV1DeleteModel(ModelH);
-						MV1DeleteModel(EnvH1);
-						MV1DeleteModel(SkyH);
 					}
 					SetCameraNearFar(0.1f, 1000.0f);
-					ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_Normal.pmd"));
-					EnvH1 = MV1LoadModel(_T("dat/batokin-island/batokin_island5.mqo"));
-					//EnvH2 = MV1LoadModel(_T("dat/batokin-island/batokin_island5.x"));
-					SkyH = MV1LoadModel(_T("dat/batokin-island/skydome.x"));
+					SetUseZBuffer3D(TRUE);
+					SetWriteZBuffer3D(TRUE);
+					Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
+					SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
+					ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
 					AttachIndex = MV1AttachAnim(ModelH, 0, -1, FALSE);
 					TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
+					MV1SetupCollInfo(ModelH, -1, 1, 1, 1);
 					pPace = 0;
 					NewScreen = FALSE;
 				}
 				
 				//Controls
 				{
+					Mouse.Update();
 					//Player
 					if(CheckHitKey(KEY_INPUT_A) == 1) pRot.y -= ROTATE_SPEED;
 					if(CheckHitKey(KEY_INPUT_D) == 1) pRot.y += ROTATE_SPEED;
@@ -178,14 +192,33 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 				//Update Camera
 				SetCameraPositionAndAngle(Camera,angleV,angleH,0.0f);
+
+				//Collision
+				MV1RefreshCollInfo(ModelH,-1);
+				for(uint_fast8_t i = 0; i < SPHERES; i++)
+				{
+					HitPolyDim[i] = MV1CollCheck_Sphere(ModelH, -1, sphere[i].v, sphere[i].r);
+					if(HitPolyDim[i].HitNum >= 1)
+					{
+						SDFlag[i] = 0;
+					}
+					MV1CollResultPolyDimTerminate(HitPolyDim[i]);
+				}
+				
 			}
 
 			//Draw
 			{
+				for(uint_fast8_t i = 0; i < SPHERES; i++)
+				{
+					if(SDFlag[i] == 1)
+					{
+						DrawSphere3D(sphere[i].v, sphere[i].r, 200, GetColor(200,0,120), GetColor(100,0,60), TRUE);
+					}
+				}
+				SetGlobalAmbientLight(GetColorF(0.0f,0.2f,0.0f,0.0f));
+				DrawCone3D(VGet(-10.0f,-30.0f,10.0f),VGet(-10.0f,-40.0f,10.0f),1000.0f,32,GetColor(40,30,70),GetColor(90,150,120),TRUE);
 				MV1DrawModel(ModelH);
-				MV1DrawModel(SkyH);
-				MV1DrawModel(EnvH1);
-				//MV1DrawModel(EnvH2);
 				DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);
 				DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",angleV, angleH);
 			}
@@ -206,7 +239,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	return 0;					
 }
 
-void pRotate(float &x, float &y, const float angle, const float tX, const float tY)
+void Rotate(float &x, float &y, const float angle, const float tX, const float tY)
 {
 	float ox = x-tX;
 	float oy = y-tY;
@@ -216,14 +249,18 @@ void pRotate(float &x, float &y, const float angle, const float tX, const float 
 	y += tY;
 }
 
-void SetCross(const VECTOR &a, const VECTOR &b, VECTOR &c)
+DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b)
 {
+	VECTOR c;
 	c.x = (a.y * b.z - a.z * b.y);
 	c.y = (a.z * b.x - a.x * b.z);
 	c.z = (a.x * b.y - a.y * b.x);
+	return c;
 }
 
-void SetDot(const VECTOR &a, const VECTOR &b, float &dot)
+float SetDot(const VECTOR &a, const VECTOR &b)
 {
+	float dot;
 	dot = (a.x * b.x + a.y * b.y + a.z * b.z);
+	return dot;
 }
