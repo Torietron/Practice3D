@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/ae/**",
                 "D:\\Grimoire\\DxLib ライブラリ\\プロジェクトに追加すべきファイル_VC用"
             ],
             "defines": [

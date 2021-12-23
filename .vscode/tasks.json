@@ -6,7 +6,7 @@
 			"label": "C/C++: msbuild.exe build active file",
 			"command": "msbuild.exe",
 			"args": [
-				"",
+				"D:\\Grimoire\\DxLib ライブラリ\\Practice3D\\test.sln",
 			],
 			"options": {
 				"cwd": "${fileDirname}"
