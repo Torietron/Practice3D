@@ -16,7 +16,7 @@ MousePoll Mouse;
 
 void Rotate(float &x, float &y, const float angle, const float tX, const float tY);
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
-void SetDot(const VECTOR &a, const VECTOR &b, float &dot);
+float SetDot(const VECTOR &a, const VECTOR &b);
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				 LPSTR lpCmdLine, int nCmdShow )
@@ -37,15 +37,15 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetCameraNearFar(0.1f, 1000.0f);
 	NewScreen = TRUE;
 	const uint_fast8_t SPHERES = 2;
-	uint_fast8_t pDir = 0, AnimSet = 0, pReverse = FALSE, pJump = FALSE, pGrounded = TRUE;
+	uint_fast8_t pIndex = 0, AnimSet = 0, pReverse = FALSE, pJump = FALSE, pGrounded = TRUE, CameraLock = TRUE;
 	uint_fast8_t SDFlag[SPHERES] = {0};
 	int_fast32_t pPace = 0;
-	int ModelH = 0, EnvH1, EnvH2, SkyH, Light;
+	int ModelH = 0, Light;
 	int AttachIndex = 0;
 	float TotalTime, PlayTime = 0.0f, vOffset = 0.46f;
 	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f; 
 	float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f;
-	VECTOR Camera, Player, pRot, cRot, S;
+	VECTOR Camera, Player, pRot, pOffset, cRot, S;
 	Camera = VGet(0.0f, 20.0f, -20.0f);
 	Player = VGet(0.0f, 0.0f, 0.0f);
 	pRot = VGet(0.0f, DX_PI_F/3, 0.0f);
@@ -71,6 +71,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 						MV1DetachAnim(ModelH,AttachIndex);
 						MV1DeleteModel(ModelH);
 					}
+					ChangeWindowMode(WinMode);
 					SetMouseDispFlag(FALSE);
 					SetCameraNearFar(0.1f, 1000.0f);
 					SetUseZBuffer3D(TRUE);
@@ -89,25 +90,52 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				{
 					Mouse.Update();
 					//Player
-					if(CheckHitKey(KEY_INPUT_A) == 1) pRot.y -= ROTATE_SPEED;
-					if(CheckHitKey(KEY_INPUT_D) == 1) pRot.y += ROTATE_SPEED;
+					if(CheckHitKey(KEY_INPUT_Q) == 1) pRot.y -= ROTATE_SPEED;
+					if(CheckHitKey(KEY_INPUT_E) == 1) pRot.y += ROTATE_SPEED;
+					if(CheckHitKey(KEY_INPUT_A) == 1)
+					{
+						Player.z -= cos(pRot.y-(DX_PI_F/2))*MOVEMENT_SPEED;
+						Player.x -= sin(pRot.y-(DX_PI_F/2))*MOVEMENT_SPEED;
+						pRot.x = DX_PI_F*2;
+						if(pGrounded == TRUE) pIndex = 1;
+						else pIndex = 2;
+						pReverse = FALSE;
+						pOffset.y = (DX_PI_F/2) * -1;
+						
+					}
+					if(CheckHitKey(KEY_INPUT_D) == 1)
+					{
+						Player.z -= cos(pRot.y+(DX_PI_F/2))*MOVEMENT_SPEED;
+						Player.x -= sin(pRot.y+(DX_PI_F/2))*MOVEMENT_SPEED;
+						pRot.x = DX_PI_F*2;
+						if(pGrounded == TRUE) pIndex = 1;
+						else pIndex = 2;
+						pReverse = FALSE;
+						pOffset.y = DX_PI_F/2;
+					}
 					if(CheckHitKey(KEY_INPUT_W) == 1) 
 					{
 						Player.z -= cos(pRot.y)*MOVEMENT_SPEED;
 						Player.x -= sin(pRot.y)*MOVEMENT_SPEED;
 						pRot.x = DX_PI_F*2;
-						if(pGrounded == TRUE) pDir = 1;
-						else pDir = 2;
+						if(pGrounded == TRUE) pIndex = 1;
+						else pIndex = 2;
 						pReverse = FALSE;
+						pOffset.y = 0;
+						if(CheckHitKey(KEY_INPUT_A) == 1) pOffset.y = (DX_PI_F/4) * -1;
+						if(CheckHitKey(KEY_INPUT_D) == 1) pOffset.y = DX_PI_F/4;
 					}
 					if(CheckHitKey(KEY_INPUT_S) == 1) 
 					{
 						Player.z += cos(pRot.y)*(MOVEMENT_SPEED*0.75f);
 						Player.x += sin(pRot.y)*(MOVEMENT_SPEED*0.75f);
 						pRot.x = DX_PI_F/10; //Center of gravity would've been visually inconsistent
-						if(pGrounded == TRUE) pDir = 1;
-						else pDir = 2;
+						if(pGrounded == TRUE) pIndex = 1;
+						else pIndex = 2;
 						pReverse = TRUE;
+						pOffset.y = 0;
+						if(CheckHitKey(KEY_INPUT_A) == 1) pOffset.y = DX_PI_F/7;
+						if(CheckHitKey(KEY_INPUT_D) == 1) pOffset.y = (DX_PI_F/7)* -1;
 					}
 					if(CheckHitKey(KEY_INPUT_SPACE) == 1)
 					{
@@ -118,35 +146,65 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 							pJump = TRUE;
 							pGrounded = FALSE;
 							pRot.x = DX_PI_F*2;
-							pDir = 2;
+							pIndex = 2;
 						}
 					}
-					if(CheckHitKey(KEY_INPUT_W) == 0 && CheckHitKey(KEY_INPUT_S) == 0)
+					if(CheckHitKey(KEY_INPUT_W) == 0 && CheckHitKey(KEY_INPUT_S) == 0
+					&& CheckHitKey(KEY_INPUT_A) == 0 && CheckHitKey(KEY_INPUT_D) == 0)
 					{
-						if(pGrounded == TRUE) pDir = 0, pRot.x = DX_PI_F*2, pReverse = FALSE;
-						if(pGrounded == FALSE) pDir = 2, pRot.x = DX_PI_F*2, pReverse = FALSE;
+						if(pGrounded == TRUE) pIndex = 0, pRot.x = DX_PI_F*2, pReverse = FALSE;
+						if(pGrounded == FALSE) pIndex = 2, pRot.x = DX_PI_F*2, pReverse = FALSE;
+						pOffset.y = 0.0f;
 					}
 
 					//Camera
 					//keep the camera a set distance from player
 					//cam's circular anchored point around the player is controlled by cRot.y
-					Camera.z = Player.z + cos(cRot.y)*40;
-					Camera.x = Player.x + sin(cRot.y)*40;
-					if(CheckHitKey(KEY_INPUT_J) == 1) cRot.y -= ROTATE_SPEED;
-					if(CheckHitKey(KEY_INPUT_K) == 1) cRot.y += ROTATE_SPEED;
-					if(Mouse.Moved())
+					if(CheckHitKey(KEY_INPUT_J) == 1)
 					{
-						DrawFormatString(0,60,-256,"delta_x=%d, x=%d",Mouse.GetDeltaX(),Mouse.x);
+						pRot.y -= ROTATE_SPEED;
+						cRot.y = pRot.y;
+					}
+					if(CheckHitKey(KEY_INPUT_K) == 1)
+					{
+						pRot.y += ROTATE_SPEED; 
+						cRot.y = pRot.y;
+					}
+					if(Mouse.Poll[MOUSE_INPUT_RIGHT] == 1)
+					{
+						if(CameraLock == TRUE) CameraLock = FALSE;
+						else CameraLock = TRUE, pRot.y = cRot.y;
+					}
+					if(Mouse.Moved() && CameraLock == FALSE)
+					{
 						cRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
 						//vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
-						if(vOffset > 0.81f) vOffset = 0.81f;
-						if(vOffset < -.41f) vOffset = -0.41f;
-						
-						Mouse.Reset(Width/2,Height/2);
+						//if(vOffset > 0.81f) vOffset = 0.81f;
+						//if(vOffset < -0.41f) vOffset = -0.41f;
+						if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
+						|| (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+						{
+							Mouse.Reset(Width/2,Height/2);
+						}
 					}
-					if(CheckHitKey(KEY_INPUT_DOWN) == 1) Player.y -= 2; //using to test vertical lock, use jump to get back up
-					if(CheckHitKey(KEY_INPUT_LEFT) == 1) angleV += ROTATE_SPEED;
-					if(CheckHitKey(KEY_INPUT_RIGHT) ==1) angleV -= ROTATE_SPEED;
+					else if(Mouse.Moved() && CameraLock == TRUE)
+					{
+						pRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
+						cRot.y = pRot.y;
+						if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
+						|| (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+						{
+							Mouse.Reset(Width/2,Height/2);
+						}
+					}
+					DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
+					DrawFormatString(0,80,-1,"cLock=%d",CameraLock);
+					Camera.z = Player.z + cos(cRot.y)*40;
+					Camera.x = Player.x + sin(cRot.y)*40;
+					
+					//if(CheckHitKey(KEY_INPUT_DOWN) == 1) Player.y -= 2; //using to test vertical lock, use jump to get back up
+					if(CheckHitKey(KEY_INPUT_LEFT) == 1) angleH += ROTATE_SPEED;
+					if(CheckHitKey(KEY_INPUT_RIGHT) ==1) angleH -= ROTATE_SPEED;
 					
 					//horizontal lock formula
 					S.x = Player.x - Camera.x;
@@ -172,13 +230,13 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				//3DAnimation Handler
 				{
 					//Check&Update
-					if(AnimSet != pDir)
+					if(AnimSet != pIndex)
 					{
 						MV1DetachAnim(ModelH,AttachIndex);
-						AttachIndex = MV1AttachAnim(ModelH, pDir, -1, FALSE);
+						AttachIndex = MV1AttachAnim(ModelH, pIndex, -1, FALSE);
 						TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
 						PlayTime = 0.0f;
-						AnimSet = pDir; 
+						AnimSet = pIndex; 
 					}
 
 					//Advance frame time
@@ -199,7 +257,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 				//Update ModelH position/pRotation
 				MV1SetPosition(ModelH,VGet(Player.x,Player.y,Player.z));
-				MV1SetRotationXYZ(ModelH,VGet(pRot.x,pRot.y,pRot.z));
+				MV1SetRotationXYZ(ModelH,VGet(pRot.x,(pRot.y+pOffset.y),pRot.z));
 
 				//Update Camera
 				SetCameraPositionAndAngle(Camera,angleV,angleH,0.0f);
@@ -233,6 +291,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);
 				DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",angleV, angleH);
 			}
+			
+			
 		}
 		ScreenFlip();
 
@@ -241,7 +301,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		{
 			if(WinMode == FALSE) WinMode = TRUE;
 			else WinMode = FALSE;
-			ChangeWindowMode(WinMode);
 			NewScreen = TRUE;
 		}
 		if(CheckHitKey(KEY_INPUT_ESCAPE)) break;
