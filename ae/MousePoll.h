@@ -7,16 +7,17 @@ class MousePoll {
 	public:
 		int Poll[4];
 		int_fast16_t x, y;
-		MousePoll();
-		int Update(uint_fast16_t rate = 5);
+		MousePoll(float decay = 0.55f);
+		int Update(uint_fast16_t rate = 10);
 		bool Moved();
-		int_fast16_t GetDeltaX();
-		int_fast16_t GetDeltaY();
+		float GetDeltaX(uint_fast8_t type = 0);
+		float GetDeltaY(uint_fast8_t type = 0);
 		void Reset(int_fast16_t a, int_fast16_t b);
 	private:
+		const float SMOOTH_DECAY;
 		int_fast16_t last_x, last_y;
-		int_fast16_t delta_x, delta_y;
-		int_fast16_t distance_x, distance_y;
+		float delta_x, delta_y;
+		float posdelta_x, posdelta_y;
 };
 
 #endif
