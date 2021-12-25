@@ -8,8 +8,8 @@ MousePoll::MousePoll(float decay)
 :SMOOTH_DECAY(decay)
 {
     x = 0, y = 0;
-    delta_x = 0, delta_y = 0;
-    posdelta_x = 0, posdelta_y = 0;
+    delta_x = 0.0f, delta_y = 0.0f;
+    posdelta_x = 0.0f, posdelta_y = 0.0f;
     last_x = 0, last_y = 0;
     for(uint_fast16_t i = 0; i < 4; i++)
     {

@@ -42,7 +42,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int_fast32_t pPace = 0;
 	int ModelH = 0, Light;
 	int AttachIndex = 0;
-	float TotalTime, PlayTime = 0.0f, vOffset = 0.46f;
+	float TotalTime, PlayTime = 0.0f, vOffset = 0.46f, cZoom = 0.0f;
 	float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f; 
 	float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f;
 	VECTOR Camera, Player, pRot, pOffset, cRot, S;
@@ -101,7 +101,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 						else pIndex = 2;
 						pReverse = FALSE;
 						pOffset.y = (DX_PI_F/2) * -1;
-						
 					}
 					if(CheckHitKey(KEY_INPUT_D) == 1)
 					{
@@ -178,9 +177,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					if(Mouse.Moved() && CameraLock == FALSE)
 					{
 						cRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
-						//vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
-						//if(vOffset > 0.81f) vOffset = 0.81f;
-						//if(vOffset < -0.41f) vOffset = -0.41f;
+						vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
+						if(vOffset > 0.81f) vOffset = 0.81f;
+						if(vOffset < -0.41f) vOffset = -0.41f;
 						if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
 						|| (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
 						{
@@ -191,20 +190,18 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					{
 						pRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
 						cRot.y = pRot.y;
+						vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
+						if(vOffset > 0.81f) vOffset = 0.81f;
+						if(vOffset < -0.41f) vOffset = -0.41f;
 						if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
 						|| (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
 						{
 							Mouse.Reset(Width/2,Height/2);
 						}
 					}
-					DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
-					DrawFormatString(0,80,-1,"cLock=%d",CameraLock);
+
 					Camera.z = Player.z + cos(cRot.y)*40;
 					Camera.x = Player.x + sin(cRot.y)*40;
-					
-					//if(CheckHitKey(KEY_INPUT_DOWN) == 1) Player.y -= 2; //using to test vertical lock, use jump to get back up
-					if(CheckHitKey(KEY_INPUT_LEFT) == 1) angleH += ROTATE_SPEED;
-					if(CheckHitKey(KEY_INPUT_RIGHT) ==1) angleH -= ROTATE_SPEED;
 					
 					//horizontal lock formula
 					S.x = Player.x - Camera.x;
@@ -290,6 +287,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				MV1DrawModel(ModelH);
 				DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);
 				DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",angleV, angleH);
+				DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
+				DrawFormatString(0,80,-1,"K=%d",CheckHitKey(KEY_INPUT_K));
 			}
 			
 			
