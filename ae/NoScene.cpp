@@ -1,6 +1,5 @@
 #include "DxLib.h"
 #include "SceneControl.h"
-#include "SceneVirt.h"
 #include "NoScene.h"
 
 void NoScene::Init()
