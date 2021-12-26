@@ -80,9 +80,8 @@ float MousePoll::GetDeltaX(uint_fast8_t type)
         case 1:
             return posdelta_x;
         default:
-            break;
+            return 0.0f;
     }
-    return delta_x;
 }
 
 float MousePoll::GetDeltaY(uint_fast8_t type)
@@ -94,9 +93,8 @@ float MousePoll::GetDeltaY(uint_fast8_t type)
         case 1:
             return posdelta_y;
         default:
-            break;
+            return 0.0f;
     }
-    return delta_y;
 }
 
 void MousePoll::Reset(int_fast16_t a, int_fast16_t b)
