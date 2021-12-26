@@ -7,7 +7,6 @@
 NoScene noscene;
 DebugScene debugscene;
 PracticeScene practicescene;
-SceneVirt *sPtr;
 
 SceneControl::SceneControl(uint_fast8_t startup)
 :nScene(startup)
@@ -31,8 +30,6 @@ int SceneControl::Init()
 int SceneControl::End()
 {
     sPtr->End();
-    delete sPtr;
-    sPtr = 0;
     return 0;
 }
 
