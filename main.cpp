@@ -20,7 +20,7 @@ KeyPoll Key;
 
 void Rotate(float &x, float &y, const float angle, const float tX, const float tY);
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
-float SetDot(const VECTOR &a, const VECTOR &b);
+float Dot3(const VECTOR &a, const VECTOR &b);
 float Dot2(const float &x, const float &z);
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -227,7 +227,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					}
 					if(Selected == -1) TargetLock = FALSE;
 
-					//Handle Target
+					//Handle TargetLock
 					if(TargetLock == TRUE)
 					{
 						if(sphere[Selected].active)
@@ -342,8 +342,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
 				DrawFormatString(0,80,-1,"Target=%d",Selected);
 			}
-			
-			
 		}
 		ScreenFlip();
 
