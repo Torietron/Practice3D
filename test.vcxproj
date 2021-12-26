@@ -154,10 +154,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ae\MousePoll.cpp" />
+    <ClCompile Include="ae\KeyPoll.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\プロジェクトに追加すべきファイル_VC用\DxLib.h" />
     <ClInclude Include="ae\MousePoll.h" />
+    <ClInclude Include="ae\KeyPoll.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
