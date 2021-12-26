@@ -3,6 +3,7 @@
 #include <cmath>
 #include "MousePoll.h"
 #include "KeyPoll.h"
+#include "SceneControl.h"
 
 typedef struct {
 	VECTOR v;
@@ -17,6 +18,7 @@ int_fast16_t Width = 640, Height = 480;
 
 MousePoll Mouse;
 KeyPoll Key;
+SceneControl Scene(DEBUG_SCENE);
 
 void Rotate(float &x, float &y, const float angle, const float tX, const float tY);
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
