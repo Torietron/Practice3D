@@ -31,6 +31,7 @@ static VECTOR Camera, Player, pRot, pOffset, cRot, S;
 MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 Sphere_t sphere[SPHERES];
 
+extern bool debugflag;
 extern uint_fast8_t WinMode, NewScreen;
 extern int_fast16_t Width, Height;
 extern MousePoll Mouse;
@@ -329,10 +330,13 @@ void PracticeScene::Draw()
         DrawBillboard3D(VGet(sphere[Selected].v.x,(sphere[Selected].v.y+16.0f+flux),sphere[Selected].v.z),1.0f,1.0f,markerSize,0.0f,TargetH,TRUE);
     }
     MV1DrawModel(ModelH);
-    DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);
-    DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",angleV, angleH);
-    DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
-    DrawFormatString(0,80,-1,"Target=%d",Selected);
+    if(debugflag)
+    {
+        DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);
+        DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",angleV, angleH);
+        DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
+        DrawFormatString(0,80,-1,"Target=%d",Selected);
+    }   
 }
 
 

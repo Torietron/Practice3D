@@ -3,16 +3,18 @@
 #define DEF_SCENECONTROL_H
 
 #include <cstdint>
+#include "SceneVirt.h"
 class SceneControl
 {
     public:
         SceneControl(uint_fast8_t startup = 1);
         void Change(uint_fast8_t nextscene);
-        void Init();
-        void End();
+        int Init();
+        int End();
         int Update();
         int Draw();
-    private:
+    private:  
+        SceneVirt *sPtr;
         uint_fast8_t lScene;
         uint_fast8_t nScene;
 };

@@ -5,12 +5,14 @@
 #include "KeyPoll.h"
 #include "SceneControl.h"
 
+bool debugflag = true;
 uint_fast8_t WinMode = FALSE, NewScreen = TRUE;
 int_fast16_t Width = 640, Height = 480;
 
 MousePoll Mouse;
 KeyPoll Key;
 SceneControl Scene(PRACTICE_SCENE);
+//FpsControl Fps;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				 LPSTR lpCmdLine, int nCmdShow )
@@ -22,15 +24,13 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetMainWindowText(_T("Test"));
 	SetGraphMode(Width, Height, 16);
 
-	//Check DXlibrary
-	if(DxLib_Init() == -1) return -1;
+	//Systems Check
+	if(DxLib_Init() == -1 || Scene.Init() == -1) return -1;
 	
 	//Preload Setup
-	if(Scene.Init() == -1) return -1;
 	SetDrawScreen(DX_SCREEN_BACK);
 	SetCameraNearFar(0.1f, 1000.0f);
 	NewScreen = TRUE;
-	
 
 	//Main Loop
 	while(ProcessMessage() >= 0) //Check app's process state
@@ -39,11 +39,13 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		{
 			//Update
 			{
+				//if(debugflag) Fps.Update();
 				Scene.Update();
 			}
 			
 			//Draw
 			{
+				//if(debugflag) Fps.Draw();
 				Scene.Draw();
 			}
 			
