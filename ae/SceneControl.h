@@ -19,7 +19,8 @@ class SceneControl
 
 typedef enum {
     NO_SCENE,
-    DEBUG_SCENE
+    DEBUG_SCENE,
+    PRACTICE_SCENE
 } scenes_t;
 
 #endif

@@ -1,11 +1,12 @@
 #include "DxLib.h"
 #include "SceneControl.h"
-#include "SceneVirt.h"
 #include "NoScene.h"
 #include "DebugScene.h"
+#include "PracticeScene.h"
 
 NoScene noscene;
 DebugScene debugscene;
+PracticeScene practicescene;
 SceneVirt *sPtr;
 
 SceneControl::SceneControl(uint_fast8_t startup)
@@ -20,14 +21,19 @@ void SceneControl::Change(uint_fast8_t nextscene)
     nScene = nextscene;
 }
 
-void SceneControl::Init()
+int SceneControl::Init()
 {
-    //code
+    if(SetDrawScreen(DX_SCREEN_BACK) != 0 || ScreenFlip() != 0 
+    || ProcessMessage() != 0 || ClearDrawScreen() != 0) return -1;
+    else return 0;
 }
 
-void SceneControl::End()
+int SceneControl::End()
 {
-    //code
+    sPtr->End();
+    delete sPtr;
+    sPtr = 0;
+    return 0;
 }
 
 int SceneControl::Update()
