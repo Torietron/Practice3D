@@ -3,8 +3,7 @@
 #define DEF_DEBUGSCENE_H
 
 #include "SceneVirt.h"
-class DebugScene: public SceneVirt
-{
+class DebugScene: public SceneVirt {
     public:
         void Init();
         void End();

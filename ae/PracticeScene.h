@@ -3,8 +3,7 @@
 #define DEF_PRACTICESCENE_H
 
 #include "SceneVirt.h"
-class PracticeScene: public SceneVirt
-{
+class PracticeScene: public SceneVirt {
     public:
         void Init();
         void End();
