@@ -4,8 +4,7 @@
 
 #include <cstdint>
 #include "SceneVirt.h"
-class SceneControl
-{
+class SceneControl {
     public:
         SceneControl(uint_fast8_t startup = 1);
         void Change(uint_fast8_t nextscene);

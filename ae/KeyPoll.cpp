@@ -10,7 +10,8 @@ KeyPoll::KeyPoll()
 	}  
 }
 
-int KeyPoll::Update(){
+int KeyPoll::Update()
+{
 	char tempKey[256];
 	GetHitKeyStateAll(tempKey);
 	for(uint_fast16_t i = 0; i < 256; i++){

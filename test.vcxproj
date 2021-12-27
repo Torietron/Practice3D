@@ -155,6 +155,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ae\MousePoll.cpp" />
     <ClCompile Include="ae\KeyPoll.cpp" />
+    <ClCompile Include="ae\ScreenControl.cpp" />
     <ClCompile Include="ae\SceneControl.cpp" />
     <ClCompile Include="ae\NoScene.cpp" />
     <ClCompile Include="ae\DebugScene.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="..\プロジェクトに追加すべきファイル_VC用\DxLib.h" />
     <ClInclude Include="ae\MousePoll.h" />
     <ClInclude Include="ae\KeyPoll.h" />
+    <ClInclude Include="ae\ScreenControl.h" />
     <ClInclude Include="ae\SceneVirt.h" />
     <ClInclude Include="ae\SceneControl.h" />
     <ClInclude Include="ae\NoScene.h" />

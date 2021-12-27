@@ -1,6 +1,7 @@
 #include "DxLib.h"
 #include <cmath>
 #include "SceneControl.h"
+#include "ScreenControl.h"
 #include "PracticeScene.h"
 #include "KeyPoll.h"
 #include "MousePoll.h"
@@ -32,8 +33,8 @@ MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 Sphere_t sphere[SPHERES];
 
 extern bool debugflag;
-extern uint_fast8_t WinMode, NewScreen;
 extern int_fast16_t Width, Height;
+extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
 extern SceneControl Scene;
@@ -63,15 +64,13 @@ void PracticeScene::End()
 void PracticeScene::Update()
 {
     //On screen event
-    if(NewScreen == TRUE)
+    if(Screen.Update() == 1)
     {
         if(ModelH != 0) //if already set
         {
             MV1DetachAnim(ModelH,AttachIndex);
             MV1DeleteModel(ModelH);
         }
-        ChangeWindowMode(WinMode);
-        SetMouseDispFlag(FALSE);
         SetCameraNearFar(0.1f, 1000.0f);
         SetUseZBuffer3D(TRUE);
         SetWriteZBuffer3D(TRUE);
@@ -83,8 +82,8 @@ void PracticeScene::Update()
         TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
         MV1SetupCollInfo(ModelH, -1, 1, 1, 1);
         pPace = 0;
-        NewScreen = FALSE;
     }
+    
 
     //Controls
     {
@@ -184,10 +183,13 @@ void PracticeScene::Update()
             if(vOffset > 0.81f) vOffset = 0.81f;
             if(vOffset < -0.41f) vOffset = -0.41f;
 
-            if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
-            || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+            if(Screen.ShowCursor = FALSE)
             {
-                Mouse.Reset(Width/2,Height/2);
+                if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
+                || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+                {
+                    Mouse.Reset(Width/2,Height/2);
+                }
             }
         }
         else if(Mouse.Moved() && CameraLock == TRUE)
@@ -199,10 +201,13 @@ void PracticeScene::Update()
             if(vOffset > 0.81f) vOffset = 0.81f;
             if(vOffset < -0.41f) vOffset = -0.41f;
             
-            if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
-            || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+            if(Screen.ShowCursor == FALSE)
             {
-                Mouse.Reset(Width/2,Height/2);
+                if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
+                || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+                {
+                    Mouse.Reset(Width/2,Height/2);
+                }
             }
         }
 

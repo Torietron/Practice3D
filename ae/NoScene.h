@@ -3,8 +3,7 @@
 #define DEF_NOSCENE_H
 
 #include "SceneVirt.h"
-class NoScene: public SceneVirt
-{
+class NoScene: public SceneVirt {
     public:
         void Init();
         void End();
