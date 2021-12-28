@@ -8,4 +8,5 @@
 -Tab to cycle targets <br />
 -Shift to deactivate targeting <br />
 -Y to escape mouse cursor <br />
+-Right-Alt + Enter to switch window modes (fullscreen/window)
 
