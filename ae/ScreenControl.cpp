@@ -90,20 +90,23 @@ void ScreenControl::DrawFPS(uint_fast8_t y)
 }
 
 //Image Cursor
-void ScreenControl::DrawCursor(int_fast32_t image, int_fast16_t padRight, int_fast16_t padLeft, int_fast16_t padBottom, int_fast16_t padTop)
+int ScreenControl::DrawCursor(int_fast32_t image, int_fast16_t padRight, int_fast16_t padLeft, int_fast16_t padBottom, int_fast16_t padTop)
 {
     if(Cursor == TRUE && CursorH != 0) 
     {
-        GetMousePoint(&x,&y);
+        GetMousePoint(&cursor_x,&cursor_y);
         if(WinMode == FALSE)
         {
-            if(x > Width - padRight)    x = Width - padRight;  
-            if(x < 0 + padLeft)         x = padLeft;
-            if(y > Height - padBottom)  y = Height - padBottom;
-            if(y < 0 + padTop)          y = padTop;
+            if(cursor_x > Width - padRight)    cursor_x = Width - padRight;  
+            if(cursor_x < 0 + padLeft)         cursor_x = padLeft;
+            if(cursor_y > Height - padBottom)  cursor_y = Height - padBottom;
+            if(cursor_y < 0 + padTop)          cursor_y = padTop;
         }
-        DrawGraph(x,y,image,TRUE);
+        DrawGraph(cursor_x,cursor_y,image,TRUE);
+
+        return 1;
     }
+    return 0;
 }
 
 void ScreenControl::SetFPSLimit(uint_fast16_t a)

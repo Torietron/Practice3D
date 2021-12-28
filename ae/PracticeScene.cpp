@@ -329,7 +329,6 @@ void PracticeScene::Draw()
         DrawBillboard3D(VGet(sphere[Selected].v.x,(sphere[Selected].v.y+16.0f+flux),sphere[Selected].v.z),1.0f,1.0f,markerSize,0.0f,TargetH,TRUE);
     }
     MV1DrawModel(ModelH);
-    Screen.DrawCursor(Screen.CursorH);
     if(debugflag)
     {
         DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);

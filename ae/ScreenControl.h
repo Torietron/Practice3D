@@ -14,13 +14,13 @@ class ScreenControl {
         int Update();
         void CountFPS();
         void DrawFPS(uint_fast8_t y = 0);
-        void DrawCursor(int_fast32_t image, int_fast16_t padRight = 20, int_fast16_t padLeft = 2, int_fast16_t padBottom = 20, int_fast16_t padTop = 2);
+        int DrawCursor(int_fast32_t image, int_fast16_t padRight = 20, int_fast16_t padLeft = 2, int_fast16_t padBottom = 20, int_fast16_t padTop = 2);
         void SetFPSLimit(uint_fast16_t a);
         uint_fast16_t GetFPSLimit();
         void Wait();
         void End();
     private:
-        int_fast16_t x, y;
+        int_fast16_t cursor_x, cursor_y;
         uint_fast16_t frame_count, limit;
         int_fast32_t wait_time, time_spent;
         uint_fast32_t start_time, end_time; 
