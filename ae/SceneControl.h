@@ -9,6 +9,7 @@ class SceneControl {
         SceneControl(uint_fast8_t startup = 1);
         void Change(uint_fast8_t nextscene);
         int Init();
+        int Load();
         int End();
         int Update();
         int Draw();

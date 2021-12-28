@@ -77,14 +77,12 @@ void PracticeScene::Load()
 
 void PracticeScene::End()
 {
-    //code
+    MV1DetachAnim(ModelH,AttachIndex);
+    MV1DeleteModel(ModelH);
 }
 
 void PracticeScene::Update()
 {
-    //On screen event
-    if(Screen.Update() == 1) PracticeScene::Load();
-
     //Controls
     {
         Key.Update();
