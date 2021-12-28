@@ -75,6 +75,7 @@ void PracticeScene::Update()
         SetWriteZBuffer3D(TRUE);
         TargetH = LoadGraph(_T("core/ph3.png"));
         Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
+        Screen.CursorH = LoadGraph(_T("core/ph7.png"));
         SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
         ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
         AttachIndex = MV1AttachAnim(ModelH, 0, -1, FALSE);
@@ -182,14 +183,12 @@ void PracticeScene::Update()
             if(vOffset > 0.81f) vOffset = 0.81f;
             if(vOffset < -0.41f) vOffset = -0.41f;
 
-            if(Screen.Cursor == FALSE)
+            if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
+            || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
             {
-                if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
-                || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
-                {
-                    Mouse.Reset(Screen.Width/2,Screen.Height/2);
-                }
+                Mouse.Reset(Screen.Width/2,Screen.Height/2);
             }
+            
         }
         else if(Mouse.Moved() && CameraLock == TRUE && Screen.Cursor == FALSE)
         {
@@ -199,15 +198,13 @@ void PracticeScene::Update()
             vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
             if(vOffset > 0.81f) vOffset = 0.81f;
             if(vOffset < -0.41f) vOffset = -0.41f;
-            
-            if(Screen.Cursor == FALSE)
+
+            if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
+            || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
             {
-                if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
-                || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
-                {
-                    Mouse.Reset(Screen.Width/2,Screen.Height/2);
-                }
+                Mouse.Reset(Screen.Width/2,Screen.Height/2);
             }
+            
         }
 
         //Pick Target
@@ -334,6 +331,7 @@ void PracticeScene::Draw()
         DrawBillboard3D(VGet(sphere[Selected].v.x,(sphere[Selected].v.y+16.0f+flux),sphere[Selected].v.z),1.0f,1.0f,markerSize,0.0f,TargetH,TRUE);
     }
     MV1DrawModel(ModelH);
+    Screen.DrawCursor(Screen.CursorH);
     if(debugflag)
     {
         DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.x,Player.y,Player.z);
