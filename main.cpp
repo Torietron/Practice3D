@@ -21,12 +21,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SetMainWindowText(_T("Test"));
 	Screen.Init();
 
-	//Systems Check
+	//Systems Check and Load
 	if(DxLib_Init() == -1 || Scene.Init() == -1) return -1;
-	
-	//Preload Setup
-	SetDrawScreen(DX_SCREEN_BACK);
-	SetCameraNearFar(0.1f, 1000.0f);
 
 	//Main Loop
 	while(ProcessMessage() >= 0) //Check app's process state

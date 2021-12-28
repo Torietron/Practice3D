@@ -5,7 +5,7 @@
 #include <cstdint>
 class ScreenControl {
     public: 
-        uint_fast8_t WinMode, New, Lock, BitDepth, ShowCursor;
+        uint_fast8_t WinMode, New, Lock, BitDepth, Cursor;
         int_fast16_t Width, Height; 
         uint_fast16_t TargetFPS;
         ScreenControl(int_fast16_t W, int_fast16_t H);
