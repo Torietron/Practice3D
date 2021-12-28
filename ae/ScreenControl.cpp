@@ -5,10 +5,11 @@
 static uint_fast16_t Key_Y = 0;
 
 ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uint_fast16_t f)
-:Width(w),Height(h),BitDepth(b),TargetFPS(f)
+:Width(w),Height(h),BitDepth(b),MaxFPS(f)
 {
-    WinMode = TRUE, New = TRUE, Lock = FALSE, Cursor = FALSE;
+    WinMode = TRUE, New = TRUE, LimitFPS = FALSE, Cursor = FALSE;
     frame_count = 0, wait_time = 0, start_time = 0;
+    limit = MaxFPS;
     average = 0.0f; 
 }
 
@@ -18,7 +19,7 @@ int ScreenControl::Init()
 	SetWindowSizeChangeEnableFlag(TRUE, TRUE);
 	SetWindowSizeExtendRate(1.0);
     SetMouseDispFlag(Cursor);
-	SetGraphMode(Width, Height, BitDepth, TargetFPS);
+	SetGraphMode(Width, Height, BitDepth, MaxFPS);
     SetDrawScreen(DX_SCREEN_BACK);
     return 0;
 }
@@ -48,7 +49,7 @@ int ScreenControl::Update()
         ChangeWindowMode(WinMode);
         SetWindowSizeChangeEnableFlag(TRUE, TRUE);
         SetWindowSizeExtendRate(1.0);
-        SetGraphMode(Width, Height, BitDepth, TargetFPS);
+        SetGraphMode(Width, Height, BitDepth, MaxFPS);
         SetDrawScreen(DX_SCREEN_BACK);
         if(WinMode == FALSE) Cursor = FALSE;
         SetMouseDispFlag(Cursor);
@@ -59,30 +60,41 @@ int ScreenControl::Update()
     return 0;
 }
 
-void ScreenControl::CountFps()
+void ScreenControl::CountFPS()
 {
     if(frame_count == 0) start_time = GetNowCount();
 
-    if(frame_count == TargetFPS)
+    if(frame_count == MaxFPS)
     {
         end_time = GetNowCount();
-        average = 1000.0f/((end_time-start_time)/(float)TargetFPS);
+        average = 1000.0f/((end_time-start_time)/(float)MaxFPS);
         frame_count = 0;
         start_time = end_time;
     }
     frame_count++;
 }
 
-void ScreenControl::DrawFps(uint_fast8_t y)
+void ScreenControl::DrawFPS(uint_fast8_t y)
 {
     DrawFormatString(0,y,-1,"%.1f",average);
+}
+
+void ScreenControl::SetFPSLimit(uint_fast16_t a)
+{
+    limit = a;
+    if(limit > MaxFPS) limit = MaxFPS;
+}
+
+uint_fast16_t ScreenControl::GetFPSLimit()
+{
+    return limit;
 }
 
 void ScreenControl::Wait()
 {
     time_spent = GetNowCount() - start_time;
     //ie: 60fps(16.6ms) - time spent
-    wait_time = ((frame_count*1000)/TargetFPS) - time_spent;
+    wait_time = ((frame_count*1000)/limit) - time_spent;
     if(wait_time > 0) Sleep((DWORD)wait_time);
 }
 
