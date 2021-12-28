@@ -7,7 +7,6 @@
 #include "ScreenControl.h"
 
 bool debugflag = true;
-
 ScreenControl Screen(640,480);
 SceneControl Scene(PRACTICE_SCENE);
 MousePoll Mouse;
@@ -29,18 +28,18 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	    ClearDrawScreen();
 		{
 			{//Update
-				if(debugflag) Screen.CountFps();
+				if(debugflag) Screen.CountFPS();
 				Scene.Update();
 			}
 			
 			{//Draw
-				if(debugflag) Screen.DrawFps();
+				if(debugflag) Screen.DrawFPS();
 				Scene.Draw();
 			}
 		}
 		ScreenFlip();
 
-		if(Screen.Lock == TRUE) Screen.Wait();
+		if(Screen.LimitFPS == TRUE) Screen.Wait(); //Quickly adjustable limit
 		if(Key.Poll[KEY_INPUT_ESCAPE] == 1) break;
 	}
 
