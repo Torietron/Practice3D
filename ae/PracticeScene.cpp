@@ -175,7 +175,7 @@ void PracticeScene::Update()
             if(CameraLock == TRUE) CameraLock = FALSE;
             else CameraLock = TRUE, pRot.y = cRot.y;
         }
-        if(Mouse.Moved() && CameraLock == FALSE)
+        if(Mouse.Moved() && CameraLock == FALSE && Screen.Cursor == FALSE)
         {
             cRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
 
@@ -183,7 +183,7 @@ void PracticeScene::Update()
             if(vOffset > 0.81f) vOffset = 0.81f;
             if(vOffset < -0.41f) vOffset = -0.41f;
 
-            if(Screen.ShowCursor = FALSE)
+            if(Screen.Cursor == FALSE)
             {
                 if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
                 || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
@@ -192,7 +192,7 @@ void PracticeScene::Update()
                 }
             }
         }
-        else if(Mouse.Moved() && CameraLock == TRUE)
+        else if(Mouse.Moved() && CameraLock == TRUE && Screen.Cursor == FALSE)
         {
             pRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
             cRot.y = pRot.y;
@@ -201,7 +201,7 @@ void PracticeScene::Update()
             if(vOffset > 0.81f) vOffset = 0.81f;
             if(vOffset < -0.41f) vOffset = -0.41f;
             
-            if(Screen.ShowCursor == FALSE)
+            if(Screen.Cursor == FALSE)
             {
                 if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
                 || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))

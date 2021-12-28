@@ -1,33 +1,40 @@
 #include "DxLib.h"
 #include <cstdint>
 #include "ScreenControl.h"
+#include "KeyPoll.h"
+
+extern KeyPoll Key;
 
 ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h)
 :Width(w),Height(h)
 {
-    WinMode = FALSE, New = TRUE, Lock = FALSE, ShowCursor = FALSE;
-    TargetFPS = 60, BitDepth = 16;
+    WinMode = TRUE, New = TRUE, Lock = FALSE, Cursor = FALSE;
+    TargetFPS = 100, BitDepth = 16;
     frame_count = 0, wait_time = 0, start_time = 0;
     average = 0.0f; 
 }
 
 int ScreenControl::Init()
 {
-    //ChangeWindowMode(WinMode);
+    ChangeWindowMode(WinMode);
 	SetWindowSizeChangeEnableFlag(TRUE, TRUE);
 	SetWindowSizeExtendRate(1.0);
-	SetGraphMode(Width, Height, BitDepth, TargetFPS*2);
+    SetMouseDispFlag(Cursor);
+	SetGraphMode(Width, Height, BitDepth, TargetFPS);
+    SetDrawScreen(DX_SCREEN_BACK);
     return 0;
 }
 
+//Returns 1 on WinMode change
 int ScreenControl::Update()
 {
-    if(CheckHitKey(KEY_INPUT_LALT) == 1 && WinMode == FALSE)
+    if(Key.Poll[KEY_INPUT_Y] == 1 && WinMode == TRUE)
     {
-        if(ShowCursor == TRUE) ShowCursor = FALSE;
-        else ShowCursor = TRUE;
-        SetMouseDispFlag(ShowCursor);
+        if(Cursor == TRUE) Cursor = FALSE;
+        else Cursor = TRUE;
+        SetMouseDispFlag(Cursor);
     }
+
     if(CheckHitKey(KEY_INPUT_RALT) == 1 && CheckHitKey(KEY_INPUT_RETURN) == 1) 
     {
         if(WinMode == FALSE) WinMode = TRUE;
@@ -37,20 +44,15 @@ int ScreenControl::Update()
 
     if(New == TRUE)
     {
-        if(WinMode == TRUE)
-        {
-            ChangeWindowMode(WinMode);
-            //SetGraphMode(Width, Height, BitDepth, TargetFPS*2);
-            //SetMouseDispFlag(FALSE);
-            New = FALSE;
-        }
-        else if(WinMode == FALSE)
-        {
-            ChangeWindowMode(WinMode);
-            //SetGraphMode(Width, Height, BitDepth, TargetFPS*2);
-            //SetMouseDispFlag(FALSE);
-            New = FALSE;
-        }
+        ChangeWindowMode(WinMode);
+        SetWindowSizeChangeEnableFlag(TRUE, TRUE);
+        SetWindowSizeExtendRate(1.0);
+        SetGraphMode(Width, Height, BitDepth, TargetFPS);
+        SetDrawScreen(DX_SCREEN_BACK);
+        if(WinMode == FALSE) Cursor = FALSE;
+        SetMouseDispFlag(Cursor);
+        New = FALSE;
+        
         return 1;
     }
     return 0;
