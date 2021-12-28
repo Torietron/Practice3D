@@ -1,11 +1,11 @@
-# Practice3D
+# Practice3D <br />
 
-###Controls
--WASD to move, Mouse to rotate
--Q/E to rotate character independently
--Right Click to toggle camera rotation (around character)
--Space to jump
--Tab to cycle targets
--Shift to deactivate targeting
--Y to escape mouse cursor
+###Controls <br />
+-WASD to move, Mouse to rotate <br />
+-Q/E to rotate character independently <br />
+-Right Click to toggle camera rotation (around character) <br />
+-Space to jump <br />
+-Tab to cycle targets <br />
+-Shift to deactivate targeting <br />
+-Y to escape mouse cursor <br />
 
