@@ -8,5 +8,5 @@
 -Tab to cycle targets <br />
 -Shift to deactivate targeting <br />
 -Y to escape mouse cursor <br />
--Alt + Enter to switch window modes (fullscreen/window)
+-Alt + Enter to switch window modes (fullscreen/window) <br />
   *window is resizable in window mode
