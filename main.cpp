@@ -35,6 +35,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			
 			{//Draw
 				if(debugflag) Screen.DrawFPS();
+				Screen.DrawCursor(Screen.CursorH);
 				Scene.Draw();
 			}
 		}
