@@ -1,4 +1,3 @@
 -new abstractions: 3DControl
--possibly ability casting
--extend interface(messagebox) / math
-~//60
+-ability casting
+-extend interface(messagebox)

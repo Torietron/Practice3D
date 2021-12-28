@@ -8,6 +8,7 @@ ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uin
 :Width(w),Height(h),BitDepth(b),MaxFPS(f)
 {
     WinMode = TRUE, New = TRUE, LimitFPS = FALSE, Cursor = FALSE;
+    CursorH = 0;
     frame_count = 0, wait_time = 0, start_time = 0;
     limit = MaxFPS;
     average = 0.0f; 
@@ -30,13 +31,20 @@ int ScreenControl::Update()
     if(CheckHitKey(KEY_INPUT_Y) == 1) Key_Y++;
     else Key_Y = 0;
 
-    if(Key_Y == 1 && WinMode == TRUE)
+    //Cursor Escape
+    if(Key_Y == 1 && CursorH == 0)
     {
         if(Cursor == TRUE) Cursor = FALSE;
         else Cursor = TRUE;
         SetMouseDispFlag(Cursor);
     }
+    if(Key_Y == 1 && CursorH != 0) //if cursor image is loaded
+    {
+        if(Cursor == TRUE) Cursor = FALSE;
+        else Cursor = TRUE;
+    }
 
+    //Set Mode
     if(CheckHitKey(KEY_INPUT_RALT) == 1 && CheckHitKey(KEY_INPUT_RETURN) == 1) 
     {
         if(WinMode == FALSE) WinMode = TRUE;
@@ -44,6 +52,7 @@ int ScreenControl::Update()
         New = TRUE;
     }
 
+    //Handle New Screen
     if(New == TRUE)
     {
         ChangeWindowMode(WinMode);
@@ -52,7 +61,8 @@ int ScreenControl::Update()
         SetGraphMode(Width, Height, BitDepth, MaxFPS);
         SetDrawScreen(DX_SCREEN_BACK);
         if(WinMode == FALSE) Cursor = FALSE;
-        SetMouseDispFlag(Cursor);
+        if(CursorH != 0) SetMouseDispFlag(FALSE);
+        else SetMouseDispFlag(Cursor);
         New = FALSE;
         
         return 1;
@@ -77,6 +87,23 @@ void ScreenControl::CountFPS()
 void ScreenControl::DrawFPS(uint_fast8_t y)
 {
     DrawFormatString(0,y,-1,"%.1f",average);
+}
+
+//Image Cursor
+void ScreenControl::DrawCursor(int_fast32_t image, int_fast16_t padRight, int_fast16_t padLeft, int_fast16_t padBottom, int_fast16_t padTop)
+{
+    if(Cursor == TRUE && CursorH != 0) 
+    {
+        GetMousePoint(&x,&y);
+        if(WinMode == FALSE)
+        {
+            if(x > Width - padRight)    x = Width - padRight;  
+            if(x < 0 + padLeft)         x = padLeft;
+            if(y > Height - padBottom)  y = Height - padBottom;
+            if(y < 0 + padTop)          y = padTop;
+        }
+        DrawGraph(x,y,image,TRUE);
+    }
 }
 
 void ScreenControl::SetFPSLimit(uint_fast16_t a)
