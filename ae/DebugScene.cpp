@@ -11,6 +11,11 @@ void DebugScene::Init()
     //code
 }
 
+void DebugScene::Load()
+{
+    //code
+}
+
 void DebugScene::End()
 {
     //code

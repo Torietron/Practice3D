@@ -38,7 +38,6 @@ extern MousePoll Mouse;
 extern KeyPoll Key;
 extern SceneControl Scene;
 
-void Rotate(float &x, float &y, const float angle, const float tX, const float tY);
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
 float Dot3(const VECTOR &a, const VECTOR &b);
 float Dot2(const float &x, const float &z);
@@ -55,6 +54,27 @@ void PracticeScene::Init()
     sphere[1].v = VGet(-40.0f,10.0f,-60.0f), sphere[1].r = 6.0f, sphere[1].active = true;
 }
 
+void PracticeScene::Load()
+{
+    if(ModelH != 0) //if already set
+    {
+        MV1DetachAnim(ModelH,AttachIndex);
+        MV1DeleteModel(ModelH);
+    }
+    SetCameraNearFar(0.1f, 1000.0f);
+    SetUseZBuffer3D(TRUE);
+    SetWriteZBuffer3D(TRUE);
+    TargetH = LoadGraph(_T("core/ph3.png"));
+    Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
+    Screen.CursorH = LoadGraph(_T("core/ph7.png"));
+    SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
+    ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
+    AttachIndex = MV1AttachAnim(ModelH, 0, -1, FALSE);
+    TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
+    MV1SetupCollInfo(ModelH, -1, 1, 1, 1);
+    pPace = 0;
+}
+
 void PracticeScene::End()
 {
     //code
@@ -63,28 +83,7 @@ void PracticeScene::End()
 void PracticeScene::Update()
 {
     //On screen event
-    if(Screen.Update() == 1)
-    {
-        //PracticeScene::Load();
-        if(ModelH != 0) //if already set
-        {
-            MV1DetachAnim(ModelH,AttachIndex);
-            MV1DeleteModel(ModelH);
-        }
-        SetCameraNearFar(0.1f, 1000.0f);
-        SetUseZBuffer3D(TRUE);
-        SetWriteZBuffer3D(TRUE);
-        TargetH = LoadGraph(_T("core/ph3.png"));
-        Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
-        Screen.CursorH = LoadGraph(_T("core/ph7.png"));
-        SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
-        ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
-        AttachIndex = MV1AttachAnim(ModelH, 0, -1, FALSE);
-        TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
-        MV1SetupCollInfo(ModelH, -1, 1, 1, 1);
-        pPace = 0;
-    }
-    
+    if(Screen.Update() == 1) PracticeScene::Load();
 
     //Controls
     {
@@ -340,17 +339,6 @@ void PracticeScene::Draw()
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
         DrawFormatString(0,80,-1,"Target=%d",Selected);
     }   
-}
-
-
-void Rotate(float &x, float &y, const float angle, const float tX, const float tY)
-{
-	float ox = x-tX;
-	float oy = y-tY;
-	x = ox * cos(angle) + oy * sin(angle);
-	y = ox * sin(angle) + oy * cos(angle);
-	x += tX;
-	y += tY;
 }
 
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b)
