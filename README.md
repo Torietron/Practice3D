@@ -9,4 +9,4 @@
 -Shift to deactivate targeting <br />
 -Y to escape mouse cursor <br />
 -Alt + Enter to switch window modes (fullscreen/window)
-
+  *window is resizable in window mode
