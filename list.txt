@@ -1,4 +1,4 @@
--new abstractions: WindowManager, 3DControl
+-new abstractions: 3DControl
 -possibly ability casting
 -extend interface(messagebox) / math
 ~//60

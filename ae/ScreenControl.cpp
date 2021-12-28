@@ -1,15 +1,13 @@
 #include "DxLib.h"
 #include <cstdint>
 #include "ScreenControl.h"
-#include "KeyPoll.h"
 
-extern KeyPoll Key;
+static uint_fast16_t Key_Y = 0;
 
-ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h)
-:Width(w),Height(h)
+ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uint_fast16_t f)
+:Width(w),Height(h),BitDepth(b),TargetFPS(f)
 {
     WinMode = TRUE, New = TRUE, Lock = FALSE, Cursor = FALSE;
-    TargetFPS = 100, BitDepth = 16;
     frame_count = 0, wait_time = 0, start_time = 0;
     average = 0.0f; 
 }
@@ -28,7 +26,10 @@ int ScreenControl::Init()
 //Returns 1 on WinMode change
 int ScreenControl::Update()
 {
-    if(Key.Poll[KEY_INPUT_Y] == 1 && WinMode == TRUE)
+    if(CheckHitKey(KEY_INPUT_Y) == 1) Key_Y++;
+    else Key_Y = 0;
+
+    if(Key_Y == 1 && WinMode == TRUE)
     {
         if(Cursor == TRUE) Cursor = FALSE;
         else Cursor = TRUE;
