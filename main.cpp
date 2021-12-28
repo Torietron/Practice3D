@@ -29,6 +29,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		{
 			{//Update
 				if(debugflag) Screen.CountFPS();
+    			if(Screen.Update() == 1) Scene.Load();
 				Scene.Update();
 			}
 			

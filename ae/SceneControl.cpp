@@ -27,6 +27,12 @@ int SceneControl::Init()
     else return 0;
 }
 
+int SceneControl::Load()
+{
+    sPtr->Load();
+    return 0;
+}
+
 int SceneControl::End()
 {
     sPtr->End();

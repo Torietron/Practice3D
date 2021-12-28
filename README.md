@@ -1,6 +1,6 @@
 # Practice3D <br />
 
-###Controls <br />
+### Controls <br />
 -WASD to move, Mouse to rotate <br />
 -Q/E to rotate character independently <br />
 -Right Click to toggle camera rotation (around character) <br />
