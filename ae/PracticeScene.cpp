@@ -33,7 +33,6 @@ MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 Sphere_t sphere[SPHERES];
 
 extern bool debugflag;
-extern int_fast16_t Width, Height;
 extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
@@ -185,10 +184,10 @@ void PracticeScene::Update()
 
             if(Screen.Cursor == FALSE)
             {
-                if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
-                || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+                if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
+                || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
                 {
-                    Mouse.Reset(Width/2,Height/2);
+                    Mouse.Reset(Screen.Width/2,Screen.Height/2);
                 }
             }
         }
@@ -203,10 +202,10 @@ void PracticeScene::Update()
             
             if(Screen.Cursor == FALSE)
             {
-                if((Mouse.x > Width * 0.8f  || Mouse.x < 0 + Width * 0.2f)
-                || (Mouse.y > Height * 0.8f || Mouse.y < 0 + Height * 0.2f))
+                if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
+                || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
                 {
-                    Mouse.Reset(Width/2,Height/2);
+                    Mouse.Reset(Screen.Width/2,Screen.Height/2);
                 }
             }
         }

@@ -8,7 +8,7 @@ class ScreenControl {
         uint_fast8_t WinMode, New, Lock, BitDepth, Cursor;
         int_fast16_t Width, Height; 
         uint_fast16_t TargetFPS;
-        ScreenControl(int_fast16_t W, int_fast16_t H);
+        ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b = 16, uint_fast16_t f = 60);
         int Init();
         int Update();
         void CountFps();

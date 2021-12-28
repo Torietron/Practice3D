@@ -7,9 +7,8 @@
 #include "ScreenControl.h"
 
 bool debugflag = true;
-int_fast16_t Width = 640, Height = 480;
 
-ScreenControl Screen(Width,Height);
+ScreenControl Screen(640,480);
 SceneControl Scene(PRACTICE_SCENE);
 MousePoll Mouse;
 KeyPoll Key;
