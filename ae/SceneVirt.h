@@ -7,6 +7,7 @@ class SceneVirt {
         SceneVirt(){}
         virtual ~SceneVirt(){}
         virtual void Init(){}
+        virtual void Load(){}
         virtual void End(){}
         virtual void Update(){}
         virtual void Draw(){}

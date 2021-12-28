@@ -65,6 +65,7 @@ void PracticeScene::Update()
     //On screen event
     if(Screen.Update() == 1)
     {
+        //PracticeScene::Load();
         if(ModelH != 0) //if already set
         {
             MV1DetachAnim(ModelH,AttachIndex);

@@ -22,8 +22,8 @@ void SceneControl::Change(uint_fast8_t nextscene)
 
 int SceneControl::Init()
 {
-    if(SetDrawScreen(DX_SCREEN_BACK) != 0 || ScreenFlip() != 0 
-    || ProcessMessage() != 0 || ClearDrawScreen() != 0) return -1;
+    if(SetDrawScreen(DX_SCREEN_BACK) != 0 || ClearDrawScreen() != 0
+    || ProcessMessage() != 0 || ScreenFlip() != 0 ) return -1;
     else return 0;
 }
 
@@ -33,6 +33,7 @@ int SceneControl::End()
     return 0;
 }
 
+//Return 1 on scene change
 int SceneControl::Update()
 {
     if(this->lScene != this->nScene)
@@ -49,6 +50,9 @@ int SceneControl::Update()
         }
         this->lScene = this->nScene;
         sPtr->Init();
+        sPtr->Load();
+        sPtr->Update();
+        return 1;
     }
     sPtr->Update();
     return 0;

@@ -22,6 +22,6 @@ typedef enum {
     NO_SCENE,
     DEBUG_SCENE,
     PRACTICE_SCENE
-} scenes_t;
+} Scenes_t;
 
 #endif
