@@ -6,6 +6,7 @@
 class PracticeScene: public SceneVirt {
     public:
         void Init();
+        void Load();
         void End();
         void Update();
         void Draw();

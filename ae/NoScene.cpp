@@ -2,22 +2,8 @@
 #include "SceneControl.h"
 #include "NoScene.h"
 
-void NoScene::Init()
-{
-    //none
-}
-
-void NoScene::End()
-{
-    //none
-}
-
-void NoScene::Update()
-{
-    //none
-}
-
-void NoScene::Draw()
-{
-    //none
-}
+void NoScene::Init(){}
+void NoScene::Load(){}
+void NoScene::End(){}
+void NoScene::Update(){}
+void NoScene::Draw(){}
