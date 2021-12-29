@@ -30,7 +30,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		{
 			{//Update
 				if(Screen.ShowFPS) Screen.CountFPS();
-    			if(Screen.Update() == 1) Scene.Load();
+    			if(Screen.Update() == 1) Scene.Load(); //Reload on mode change
 				Scene.Update();
 			}
 			
