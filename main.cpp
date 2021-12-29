@@ -17,8 +17,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
 	//Window Init
 	SetMainWindowText(_T("Test"));
+	if(debugflag) Screen.ShowFPS = TRUE;
 	Screen.Init();
-
+	
 	//Systems Check and Load
 	if(DxLib_Init() == -1 || Scene.Init() == -1) return -1;
 
@@ -28,20 +29,20 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	    ClearDrawScreen();
 		{
 			{//Update
-				if(debugflag) Screen.CountFPS();
+				if(Screen.ShowFPS) Screen.CountFPS();
     			if(Screen.Update() == 1) Scene.Load();
 				Scene.Update();
 			}
 			
 			{//Draw
-				if(debugflag) Screen.DrawFPS();
-				Screen.DrawCursor(Screen.CursorH);
 				Scene.Draw();
+				if(Screen.ShowFPS) Screen.DrawFPS();
+				if(Screen.Cursor) Screen.DrawCursor();
 			}
 		}
 		ScreenFlip();
 
-		if(Screen.LimitFPS == TRUE) Screen.Wait(); //Quickly adjustable limit
+		if(Screen.LimitFPS) Screen.Wait(); //Quickly adjustable limit
 		if(Key.Poll[KEY_INPUT_ESCAPE] == 1) break;
 	}
 
