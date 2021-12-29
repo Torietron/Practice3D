@@ -7,8 +7,11 @@ static uint_fast16_t Key_Y = 0;
 ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uint_fast16_t f)
 :Width(w),Height(h),BitDepth(b),MaxFPS(f)
 {
-    WinMode = TRUE, New = TRUE, LimitFPS = FALSE, Cursor = FALSE;
-    CursorH = 0;
+    ShowFPS = FALSE, LimitFPS = FALSE;
+    WinMode = TRUE, New = TRUE, Cursor = FALSE;
+    CursorIndex = 0;
+    CursorH[0] = 0, CursorH[1] = 0; 
+    CursorH2[0] = 0, CursorH2[1] = 0;
     frame_count = 0, wait_time = 0, start_time = 0;
     limit = MaxFPS;
     average = 0.0f; 
@@ -32,13 +35,13 @@ int ScreenControl::Update()
     else Key_Y = 0;
 
     //Cursor Escape
-    if(Key_Y == 1 && CursorH == 0)
+    if(Key_Y == 1 && CursorH[0] == 0)
     {
         if(Cursor == TRUE) Cursor = FALSE;
         else Cursor = TRUE;
         SetMouseDispFlag(Cursor);
     }
-    if(Key_Y == 1 && CursorH != 0) //if cursor image is loaded
+    if(Key_Y == 1 && CursorH[0] != 0) //if cursor image is loaded
     {
         if(Cursor == TRUE) Cursor = FALSE;
         else Cursor = TRUE;
@@ -61,7 +64,7 @@ int ScreenControl::Update()
         SetGraphMode(Width, Height, BitDepth, MaxFPS);
         SetDrawScreen(DX_SCREEN_BACK);
         if(WinMode == FALSE) Cursor = FALSE;
-        if(CursorH != 0) SetMouseDispFlag(FALSE);
+        if(CursorH[0] != 0) SetMouseDispFlag(FALSE);
         else SetMouseDispFlag(Cursor);
         New = FALSE;
         
@@ -84,15 +87,15 @@ void ScreenControl::CountFPS()
     frame_count++;
 }
 
-void ScreenControl::DrawFPS(uint_fast8_t y)
+void ScreenControl::DrawFPS(uint_fast8_t x, uint_fast8_t y)
 {
-    DrawFormatString(0,y,-1,"%.1f",average);
+    DrawFormatString(x,y,-1,"%.1f",average);
 }
 
 //Image Cursor
-int ScreenControl::DrawCursor(int_fast32_t image, int_fast16_t padRight, int_fast16_t padLeft, int_fast16_t padBottom, int_fast16_t padTop)
+int ScreenControl::DrawCursor(int_fast16_t padRight, int_fast16_t padLeft, int_fast16_t padBottom, int_fast16_t padTop)
 {
-    if(Cursor == TRUE && CursorH != 0) 
+    if(Cursor == TRUE && CursorH[0] != 0) 
     {
         GetMousePoint(&cursor_x,&cursor_y);
         if(WinMode == FALSE)
@@ -102,7 +105,7 @@ int ScreenControl::DrawCursor(int_fast32_t image, int_fast16_t padRight, int_fas
             if(cursor_y > Height - padBottom)  cursor_y = Height - padBottom;
             if(cursor_y < 0 + padTop)          cursor_y = padTop;
         }
-        DrawGraph(cursor_x,cursor_y,image,TRUE);
+        DrawGraph(cursor_x,cursor_y,CursorH[CursorIndex],TRUE);
 
         return 1;
     }

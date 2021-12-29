@@ -66,7 +66,7 @@ void PracticeScene::Load()
     SetWriteZBuffer3D(TRUE);
     TargetH = LoadGraph(_T("core/ph3.png"));
     Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
-    Screen.CursorH = LoadGraph(_T("core/ph7.png"));
+    Screen.CursorH[0] = LoadGraph(_T("core/ph7.png"));
     SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
     ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
     AttachIndex = MV1AttachAnim(ModelH, 0, -1, FALSE);
