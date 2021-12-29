@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "ScreenControl.h"
 
-static uint_fast16_t Key_Y = 0;
+static uint_fast16_t KeyEscape = 0;
 
 ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uint_fast16_t f)
 :Width(w),Height(h),BitDepth(b),MaxFPS(f)
@@ -13,6 +13,7 @@ ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uin
     CursorH[0] = 0, CursorH[1] = 0; 
     CursorH2[0] = 0, CursorH2[1] = 0;
     frame_count = 0, wait_time = 0, start_time = 0;
+    fps_x = 0, fps_y = 0;
     limit = MaxFPS;
     average = 0.0f; 
 }
@@ -31,17 +32,17 @@ int ScreenControl::Init()
 //Returns 1 on WinMode change
 int ScreenControl::Update()
 {
-    if(CheckHitKey(KEY_INPUT_Y) == 1) Key_Y++;
-    else Key_Y = 0;
+    if(CheckHitKey(KEY_INPUT_Y) == 1) KeyEscape++;
+    else KeyEscape = 0;
 
     //Cursor Escape
-    if(Key_Y == 1 && CursorH[0] == 0)
+    if(KeyEscape == 1 && CursorH[0] == 0)
     {
         if(Cursor == TRUE) Cursor = FALSE;
         else Cursor = TRUE;
         SetMouseDispFlag(Cursor);
     }
-    if(Key_Y == 1 && CursorH[0] != 0) //if cursor image is loaded
+    if(KeyEscape == 1 && CursorH[0] != 0) //if cursor image is loaded
     {
         if(Cursor == TRUE) Cursor = FALSE;
         else Cursor = TRUE;
@@ -87,9 +88,9 @@ void ScreenControl::CountFPS()
     frame_count++;
 }
 
-void ScreenControl::DrawFPS(uint_fast8_t x, uint_fast8_t y)
+void ScreenControl::DrawFPS()
 {
-    DrawFormatString(x,y,-1,"%.1f",average);
+    DrawFormatString(fps_x,fps_y,-1,"%.1f",average);
 }
 
 //Image Cursor
@@ -110,6 +111,12 @@ int ScreenControl::DrawCursor(int_fast16_t padRight, int_fast16_t padLeft, int_f
         return 1;
     }
     return 0;
+}
+
+void ScreenControl::SetFPSLocation(int_fast16_t x, int_fast16_t y)
+{
+    fps_x = x;
+    fps_y = y;
 }
 
 void ScreenControl::SetFPSLimit(uint_fast16_t a)
