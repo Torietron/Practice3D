@@ -8,6 +8,7 @@
 typedef struct {
     int ModelH, AttachIndex;
     uint_fast8_t AnimSet, AnimIndex;
+    int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset;
     VECTOR Pos, Rot;
     bool Flag, Reverse;
