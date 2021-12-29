@@ -159,6 +159,7 @@
     <ClCompile Include="ae\SceneControl.cpp" />
     <ClCompile Include="ae\NoScene.cpp" />
     <ClCompile Include="ae\DebugScene.cpp" />
+    <ClCompile Include="ae\ModelData.cpp" />
     <ClCompile Include="ae\PracticeScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +171,7 @@
     <ClInclude Include="ae\SceneControl.h" />
     <ClInclude Include="ae\NoScene.h" />
     <ClInclude Include="ae\DebugScene.h" />
+    <ClInclude Include="ae\ModelData.h" />
     <ClInclude Include="ae\PracticeScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

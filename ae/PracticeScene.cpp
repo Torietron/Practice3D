@@ -5,6 +5,7 @@
 #include "PracticeScene.h"
 #include "KeyPoll.h"
 #include "MousePoll.h"
+#include "ModelData.h"
 
 #define SPHERES 2
 
@@ -28,6 +29,8 @@ static float TotalTime, PlayTime = 0.0f, vOffset = 0.46f, cZoom = 0.0f;
 static float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f, flux = 0.0f; 
 static float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f, markerSize = 0.0f;
 static VECTOR Camera, Player, pRot, pOffset, cRot, S;
+
+static ModelData Model;
 
 MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 Sphere_t sphere[SPHERES];
@@ -256,34 +259,8 @@ void PracticeScene::Update()
         pPace++, pRot.x = DX_PI_F*2;
         if(Player.y <= 0.3f && pPace > 4) pJump = FALSE, pGrounded = TRUE, Player.y = 0.0f;
     }
-
-    //3DAnimation Handler
-    {
-        //Check&Update
-        if(AnimSet != pIndex)
-        {
-            MV1DetachAnim(ModelH,AttachIndex);
-            AttachIndex = MV1AttachAnim(ModelH, pIndex, -1, FALSE);
-            TotalTime = MV1GetAttachAnimTotalTime(ModelH,AttachIndex);
-            PlayTime = 0.0f;
-            AnimSet = pIndex; 
-        }
-
-        //Advance frame time
-        if(pReverse == TRUE)
-        {
-            PlayTime -= 0.31f;
-            if(PlayTime <= 0) PlayTime = TotalTime;
-        }
-        else
-        {
-            PlayTime += 0.39f;
-            if(PlayTime >= TotalTime) PlayTime = 0.0f;
-        }
-
-        //Update active frame
-        MV1SetAttachAnimTime(ModelH,AttachIndex,PlayTime); 
-    }
+        
+    //Model.Update();
 
     //Update ModelH position/pRotation
     MV1SetPosition(ModelH,VGet(Player.x,Player.y,Player.z));
