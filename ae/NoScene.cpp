@@ -2,8 +2,5 @@
 #include "SceneControl.h"
 #include "NoScene.h"
 
-void NoScene::Init(){}
-void NoScene::Load(){}
-void NoScene::End(){}
-void NoScene::Update(){}
+void NoScene::Update(){DxLib_End();}
 void NoScene::Draw(){}

@@ -53,12 +53,27 @@ int SceneControl::Update()
             case PRACTICE_SCENE:
                 sPtr = &practicescene;
                 break;
+            default:
+                sPtr = &noscene;
+                break;
         }
         this->lScene = this->nScene;
         sPtr->Init();
         sPtr->Load();
         sPtr->Update();
-        return 1;
+
+        if(sPtr == &noscene)
+        {
+            MessageBox
+            (
+                NULL,
+                TEXT("Scene Error."),
+                TEXT("Error"),
+                MB_OK | MB_ICONERROR 
+            );
+            return -1;
+        }
+        else return 1;
     }
     sPtr->Update();
     return 0;

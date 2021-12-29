@@ -9,8 +9,8 @@ class SceneVirt {
         virtual void Init(){}
         virtual void Load(){}
         virtual void End(){}
-        virtual void Update(){}
-        virtual void Draw(){}
+        virtual void Update() = 0;
+        virtual void Draw() = 0;
 };
 
 #endif
