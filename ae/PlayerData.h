@@ -7,6 +7,7 @@ class PlayerData {
     public:
         MMD_t MMD;
         PlayerData();
+        void Load();
         void Update();
 };
 
