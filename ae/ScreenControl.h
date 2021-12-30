@@ -13,7 +13,7 @@ typedef struct {
 } Camera2D_t;
 
 typedef struct Camera3D_t {
-    float AngleH, AngleV, Roll;
+    float AngleH, AngleV, Roll, Zoom;
     float Anchor, OffsetH, OffsetV, OffsetR;
     VECTOR Pos;
     char Label;

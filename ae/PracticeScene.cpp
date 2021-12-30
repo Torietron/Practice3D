@@ -14,9 +14,8 @@
 static uint_fast8_t Destroyed = 0;
 static uint_fast8_t SDFlag[SPHERES] = {0};
 static int Light;
-static float cZoom = 0.0f;
 
-MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
+static MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 static Sphere_t sphere[SPHERES];
 
 extern bool debugflag;
