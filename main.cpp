@@ -6,6 +6,7 @@
 #include "SceneControl.h"
 #include "ScreenControl.h"
 #include "ModelData.h"
+#include "PhysicsData.h"
 #include "PlayerData.h"
 #include "EnemyData.h"
 
@@ -15,6 +16,7 @@ SceneControl Scene(PRACTICE_SCENE);
 MousePoll Mouse;
 KeyPoll Key;
 ModelData Model;
+PhysicsData Physics;
 PlayerData Player;
 EnemyData Enemy;
 
