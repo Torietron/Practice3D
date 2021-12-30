@@ -96,7 +96,7 @@ void PracticeScene::Draw()
 
     SetGlobalAmbientLight(GetColorF(0.0f,0.2f,0.0f,0.0f));
     DrawCone3D(VGet(-10.0f,-30.0f,10.0f),VGet(-10.0f,-40.0f,10.0f),1000.0f,32,GetColor(40,30,70),GetColor(90,150,120),TRUE);
-    MV1SetAttachAnimBlendRate(Player.MMD.ModelH,Player.MMD.AttachIndex,0.9f);
+    
     if(TargetLock == TRUE)
     {
         if(flux > 2.00f) fluxReverse = TRUE;
@@ -106,7 +106,9 @@ void PracticeScene::Draw()
         markerSize = ((Dot2(Player.MMD.Pos.x,Player.MMD.Pos.z)-Dot2(sphere[Selected].v.x,sphere[Selected].v.z))*.00005f)+1.6f;
         DrawBillboard3D(VGet(sphere[Selected].v.x,(sphere[Selected].v.y+16.0f+flux),sphere[Selected].v.z),1.0f,1.0f,markerSize,0.0f,TargetH,TRUE);
     }
-    MV1DrawModel(Player.MMD.ModelH);
+
+    Models.Draw(Player.MMD);
+    
     if(debugflag)
     {
         DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.MMD.Pos.x,Player.MMD.Pos.y,Player.MMD.Pos.z);

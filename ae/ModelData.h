@@ -59,6 +59,7 @@ class ModelData {
         void Update(MMD_t &m);
         void Update(X_t &m);
         void Update(MQO_t &m);
+        void Draw(MMD_t &m, float rate = 0.9f);
         void SetPlayRate(float a);
         float GetPlayRate();
     private:
