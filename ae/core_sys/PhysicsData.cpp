@@ -5,16 +5,15 @@
 #include <ctime>
 #include <cmath>
 #include "PhysicsData.h"
+#include "ScreenControl.h"
+#include "ModelData.h"
 
 static const double PI = M_PI;
 static const double nPI = M_PI * -1;
 static double cROT = 0.00;
-static int_fast16_t ix, iy, xD, yD;
 static int_fast32_t random1, random2;
-static uint_fast32_t vTime;
 
-extern int_fast16_t Width, Height;
-extern Delta_t Delta;
+extern ScreenControl Screen;
 
 PhysicsData::PhysicsData(float a)
 :Decay(a)
@@ -49,9 +48,16 @@ bool PhysicsData::RadialCollision(int_fast16_t a1, int_fast16_t a2, int_fast16_t
     return false;
 }
 
-bool PhysicsData::SphereCollision3D()
+//Refresh model collision info beforehand, once per frame
+bool PhysicsData::SphereCollision3D(const MMD_t &m, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd)
 {
-    //code
+    hpd = MV1CollCheck_Sphere(m.ModelH, -1, spherePos, radius);
+    if(hpd.HitNum >= 1)
+    {
+        MV1CollResultPolyDimTerminate(hpd);
+        return true;
+    }
+    else return false;
 }
 
 bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, uint_fast8_t direction, uint_fast16_t speed, float grav, float iMulti)
@@ -155,12 +161,12 @@ float& PhysicsData::ApproxAngle(float &objAngle, float &objMainAxisRotCoord, flo
     {
         if(objMainAxisRotCoord > focalPointCoord)
         {
-            objAngle += (cROT*2/(Width*totalRotPointMulti))/divisor;
+            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
             objMainAxisRotCoord -= turnRate;
         }
         if(objMainAxisRotCoord < focalPointCoord)
         {
-            objAngle -= (cROT*2/(Width*totalRotPointMulti))/divisor;
+            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
             objMainAxisRotCoord += turnRate;
         }
     }
@@ -180,12 +186,12 @@ double& PhysicsData::ApproxAngle(double &objAngle, float &objMainAxisRotCoord, f
     {
         if(objMainAxisRotCoord > focalPointCoord)
         {
-            objAngle += (cROT*2/(Width*totalRotPointMulti))/divisor;
+            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
             objMainAxisRotCoord -= turnRate;
         }
         if(objMainAxisRotCoord < focalPointCoord)
         {
-            objAngle -= (cROT*2/(Width*totalRotPointMulti))/divisor;
+            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
             objMainAxisRotCoord += turnRate;
         }
     }

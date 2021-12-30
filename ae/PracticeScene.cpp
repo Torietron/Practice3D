@@ -17,7 +17,7 @@ static uint_fast16_t SDFlag[SPHERES] = {0};
 static int Light;
 
 static MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
-static Sphere_t sphere[SPHERES];
+static Sphere_t Sphere[SPHERES];
 
 extern bool debugflag;
 extern ScreenControl Screen;
@@ -40,8 +40,8 @@ void PracticeScene::Init()
     Screen.C3D.Anchor = ((DX_PI_F/5) * -1);
 
     SDFlag[0] = 1, SDFlag[1] = 1;
-    sphere[0].v = VGet(-0.5f,10.0f,-46.0f), sphere[0].r = 6.0f, sphere[0].active = true;
-    sphere[1].v = VGet(-40.0f,10.0f,-60.0f), sphere[1].r = 6.0f, sphere[1].active = true;
+    Sphere[0].v = VGet(-0.5f,10.0f,-46.0f), Sphere[0].r = 6.0f, Sphere[0].active = true;
+    Sphere[1].v = VGet(-40.0f,10.0f,-60.0f), Sphere[1].r = 6.0f, Sphere[1].active = true;
 }
 
 void PracticeScene::Load()
@@ -64,34 +64,31 @@ void PracticeScene::Update()
 {
     Key.Update();
     Mouse.Update();
-    Player.Update(sphere,Destroyed,SPHERES);
+    Player.Update(Sphere,Destroyed,SPHERES);
     Model.Update(Player.MMD);
 
     //Update Camera
     Screen.C3D.Apply();
 
     //Collision
-    MV1RefreshCollInfo(Player.MMD.ModelH,-1);
     for(uint_fast8_t i = 0; i < SPHERES; i++)
     {
-        HitPolyDim[i] = MV1CollCheck_Sphere(Player.MMD.ModelH, -1, sphere[i].v, sphere[i].r);
-        if(HitPolyDim[i].HitNum >= 1)
+        if(Physics.SphereCollision3D(Player.MMD,Sphere[i].v,Sphere[i].r,HitPolyDim[i]))
         {
             SDFlag[i] = 0;
-            sphere[i].active = false;
+            Sphere[i].active = false;
         }
-        MV1CollResultPolyDimTerminate(HitPolyDim[i]);
     }
 }
 
 void PracticeScene::Draw()
 {
-    Enemy.Draw(sphere, SPHERES, SDFlag);
+    Enemy.Draw(Sphere, SPHERES, SDFlag);
 
     SetGlobalAmbientLight(GetColorF(0.0f,0.2f,0.0f,0.0f));
     DrawCone3D(VGet(-10.0f,-30.0f,10.0f),VGet(-10.0f,-40.0f,10.0f),1000.0f,32,GetColor(40,30,70),GetColor(90,150,120),TRUE);
 
-    Player.Draw(sphere);
+    Player.Draw(Sphere);
     
     if(debugflag)
     {

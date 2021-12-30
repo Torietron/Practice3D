@@ -5,14 +5,39 @@
 #include <cstdint>
 #include "PlayerData.h"
 #include "EnemyData.h"
-#include "Projectiles.h"
-class PhysicsData
-{
+
+typedef struct PhysicsDelta_t {
+    uint_fast8_t Event, Frames;
+    uint_fast16_t Ticks;
+    uint_fast32_t dTime, xTime;
+    char label;
+    bool Time(uint_fast32_t &LastTime, uint_fast32_t ElapsedGoal)
+    {
+        if(dTime - LastTime > ElapsedGoal) 
+        {
+            LastTime = GetNowCount();
+            return true;
+        }
+        else return false;
+    }
+    void Update()
+    {
+        dTime = GetNowCount();
+    }
+} PhysicsDelta_t; 
+
+typedef struct {
+    uint_fast32_t Time, dTime;
+    bool Flag;
+} PhysicsLastDelta_t;
+
+class PhysicsData {
     public:
+        PhysicsDelta_t Delta;
         PhysicsData(float a = 0.99);
         bool BoxCollision(int_fast16_t aX, int_fast16_t aY, int_fast16_t aWidth, int_fast16_t aHeight, int_fast16_t bX, int_fast16_t bY, int_fast16_t bWidth,int_fast16_t bHeight);
         bool RadialCollision(int_fast16_t a1, int_fast16_t a2, int_fast16_t a3r, int_fast16_t b1, int_fast16_t b2, int_fast16_t b3r);
-        bool SphereCollision3D();
+        bool SphereCollision3D(const MMD_t &m, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd);
         bool Fling(int_fast16_t &position, int_fast16_t destination, uint_fast8_t direction, uint_fast16_t speed = 1, float grav = 1.00, float iMulti = 1.00);
         void Propel(float &x, float &y, double angle, uint_fast16_t magnitude = 1);
         void Spin(double &rot, char L_or_R_Direction, uint_fast8_t totalRotPoints = 32);
@@ -36,37 +61,12 @@ class PhysicsData
         float gravity_y;
 };
 
-typedef struct Delta_t {
-    uint_fast8_t Event, Frames;
-    uint_fast16_t Ticks;
-    uint_fast32_t dTime, xTime;
-    char label;
-    bool Time(uint_fast32_t &LastTime, uint_fast32_t ElapsedGoal)
-    {
-        if(dTime - LastTime > ElapsedGoal) 
-        {
-            LastTime = GetNowCount();
-            return true;
-        }
-        else return false;
-    }
-    void Update()
-    {
-        dTime = GetNowCount();
-    }
-}; 
-
-typedef struct {
-    uint_fast32_t Time, dTime;
-    bool Flag;
-} LastDelta_t;
-
 typedef enum {
     FLING_DOWN,
     FLING_UP,
     FLING_RIGHT,
     FLING_LEFT
-} Direct_t;
+} PhysicsFlings_t;
 
 typedef enum{
     DECAY,
@@ -76,6 +76,6 @@ typedef enum{
     LAST_INERTIA_Y,
     LAST_GRAVITY_X,
     LAST_GRAVITY_Y
-} pData_t;
+} PhysicsDataGet_t;
 
 #endif
