@@ -161,6 +161,7 @@
     <ClCompile Include="ae\DebugScene.cpp" />
     <ClCompile Include="ae\ModelData.cpp" />
     <ClCompile Include="ae\PlayerData.cpp" />
+    <ClCompile Include="ae\EnemyData.cpp" />
     <ClCompile Include="ae\PracticeScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +175,7 @@
     <ClInclude Include="ae\DebugScene.h" />
     <ClInclude Include="ae\ModelData.h" />
     <ClInclude Include="ae\PlayerData.h" />
+    <ClInclude Include="ae\EnemyData.h" />
     <ClInclude Include="ae\PracticeScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,6 +3,7 @@
 #define DEF_ENEMYDATA_H
 
 #include "DxLib.h"
+#include <cstdint>
 
 typedef struct {
 	VECTOR v;
@@ -12,7 +13,7 @@ typedef struct {
 
 class EnemyData {
     public:
-        int temp;
+        void Draw(Sphere_t *sObj, const uint_fast16_t MAX, uint_fast8_t *DFlag);
 };
 
 #endif

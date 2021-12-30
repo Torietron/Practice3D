@@ -18,7 +18,7 @@ static float cZoom = 0.0f, flux = 0.0f;
 static float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f, markerSize = 0.0f;
 
 MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
-Sphere_t sphere[SPHERES];
+static Sphere_t sphere[SPHERES];
 
 extern bool debugflag;
 extern ScreenControl Screen;
@@ -92,13 +92,8 @@ void PracticeScene::Update()
 
 void PracticeScene::Draw()
 {
-    for(uint_fast8_t i = 0; i < SPHERES; i++)
-    {
-        if(SDFlag[i] == 1)
-        {
-            DrawSphere3D(sphere[i].v, sphere[i].r, 200, GetColor(200,0,120), GetColor(100,0,60), TRUE);
-        }
-    }
+    Enemy.Draw(sphere, SPHERES, SDFlag);
+
     SetGlobalAmbientLight(GetColorF(0.0f,0.2f,0.0f,0.0f));
     DrawCone3D(VGet(-10.0f,-30.0f,10.0f),VGet(-10.0f,-40.0f,10.0f),1000.0f,32,GetColor(40,30,70),GetColor(90,150,120),TRUE);
     MV1SetAttachAnimBlendRate(Player.MMD.ModelH,Player.MMD.AttachIndex,0.9f);
