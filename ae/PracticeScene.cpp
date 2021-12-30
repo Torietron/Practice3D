@@ -11,11 +11,10 @@
 
 #define SPHERES 2
 
-static uint_fast8_t Destroyed = 0, fluxReverse = FALSE; 
+static uint_fast8_t Destroyed = 0;
 static uint_fast8_t SDFlag[SPHERES] = {0};
-static int TargetH, Light;
-static float cZoom = 0.0f, flux = 0.0f; 
-static float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f, markerSize = 0.0f;
+static int Light;
+static float cZoom = 0.0f;
 
 MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 static Sphere_t sphere[SPHERES];
@@ -25,17 +24,12 @@ extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
 extern SceneControl Scene;
-extern ModelData Models;
+extern ModelData Model;
 extern PlayerData Player;
 extern EnemyData Enemy;
 
-//temp
-extern int_fast8_t Selected;
-extern uint_fast8_t TargetLock;
-
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
 float Dot3(const VECTOR &a, const VECTOR &b);
-float Dot2(const float &x, const float &z);
 
 void PracticeScene::Init()
 {
@@ -54,7 +48,6 @@ void PracticeScene::Load()
     Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
     SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
 
-    TargetH = LoadGraph(_T("core/ph3.png"));
     Screen.CursorH[0] = LoadGraph(_T("core/ph7.png"));
 
     Player.Load();
@@ -71,7 +64,7 @@ void PracticeScene::Update()
     Key.Update();
     Mouse.Update();
     Player.Update(sphere,Destroyed,SPHERES);
-    Models.Update(Player.MMD);
+    Model.Update(Player.MMD);
 
     //Update Camera
     Screen.C3D.Apply();
@@ -96,25 +89,15 @@ void PracticeScene::Draw()
 
     SetGlobalAmbientLight(GetColorF(0.0f,0.2f,0.0f,0.0f));
     DrawCone3D(VGet(-10.0f,-30.0f,10.0f),VGet(-10.0f,-40.0f,10.0f),1000.0f,32,GetColor(40,30,70),GetColor(90,150,120),TRUE);
-    
-    if(TargetLock == TRUE)
-    {
-        if(flux > 2.00f) fluxReverse = TRUE;
-        if(flux <= 0.00f) fluxReverse = FALSE;
-        if(fluxReverse == FALSE) flux += 0.03f;
-        else flux -= 0.03f;
-        markerSize = ((Dot2(Player.MMD.Pos.x,Player.MMD.Pos.z)-Dot2(sphere[Selected].v.x,sphere[Selected].v.z))*.00005f)+1.6f;
-        DrawBillboard3D(VGet(sphere[Selected].v.x,(sphere[Selected].v.y+16.0f+flux),sphere[Selected].v.z),1.0f,1.0f,markerSize,0.0f,TargetH,TRUE);
-    }
 
-    Models.Draw(Player.MMD);
+    Player.Draw(sphere);
     
     if(debugflag)
     {
         DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.MMD.Pos.x,Player.MMD.Pos.y,Player.MMD.Pos.z);
         DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",Screen.C3D.AngleV, Screen.C3D.AngleH);
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
-        DrawFormatString(0,80,-1,"Target=%d",Selected);
+        //DrawFormatString(0,80,-1,"Target=%d",Selected);
     }   
 }
 
@@ -131,12 +114,5 @@ float Dot3(const VECTOR &a, const VECTOR &b)
 {
 	float dot;
 	dot = (a.x * b.x + a.y * b.y + a.z * b.z);
-	return dot;
-}
-
-float Dot2(const float &x, const float &z)
-{
-	float dot;
-	dot = (x*x+z*z);
 	return dot;
 }
