@@ -30,6 +30,20 @@ PlayerData::PlayerData()
     MMD.Reverse = false, MMD.Event = false;
 }
 
+void PlayerData::Load()
+{
+    if(MMD.ModelH != 0) //if already set
+    {
+        MV1DetachAnim(MMD.ModelH,MMD.AttachIndex);
+        MV1DeleteModel(MMD.ModelH);
+    }
+    MMD.ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
+    MMD.AttachIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
+    MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
+    MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
+    MMD.Pace = 0;
+}
+
 void PlayerData::Update(Sphere_t *sObj, uint_fast8_t Destroyed, const int MAX)
 {
     if(Key.Poll[KEY_INPUT_Q] >= 1) MMD.Rot.y -= ROTATE_SPEED;

@@ -68,6 +68,13 @@ int ScreenControl::Update()
         if(WinMode == FALSE) Cursor = FALSE;
         if(CursorH[0] != 0) SetMouseDispFlag(FALSE);
         else SetMouseDispFlag(Cursor);
+        if(C3D.Enabled)
+        {
+            SetCameraNearFar(0.1f, 1000.0f);
+            SetUseZBuffer3D(TRUE);
+            SetWriteZBuffer3D(TRUE);
+            SetCameraPositionAndTarget_UpVecY(VGet(0.0f, 10.0f, -20.0f),VGet(0.0f, 10.0f, 0.0f));
+        }
         New = FALSE;
         
         return 1;
