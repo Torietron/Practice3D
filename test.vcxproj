@@ -160,6 +160,8 @@
     <ClCompile Include="ae\scene_sys\DebugScene.cpp" />
     <ClCompile Include="ae\core_sys\ScreenControl.cpp" />
     <ClCompile Include="ae\core_sys\ModelData.cpp" />
+    <ClCompile Include="ae\core_sys\Interface.cpp" />
+    <ClCompile Include="ae\core_sys\PhysicsData.cpp" />
     <ClCompile Include="ae\PlayerData.cpp" />
     <ClCompile Include="ae\EnemyData.cpp" />
     <ClCompile Include="ae\PracticeScene.cpp" />
@@ -174,6 +176,8 @@
     <ClInclude Include="ae\scene_sys\DebugScene.h" />
     <ClInclude Include="ae\core_sys\ScreenControl.h" />
     <ClInclude Include="ae\core_sys\ModelData.h" />
+    <ClInclude Include="ae\core_sys\Interface.h" />
+    <ClInclude Include="ae\core_sys\PhysicsData.h" />
     <ClInclude Include="ae\PlayerData.h" />
     <ClInclude Include="ae\EnemyData.h" />
     <ClInclude Include="ae\PracticeScene.h" />

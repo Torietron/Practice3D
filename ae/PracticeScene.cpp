@@ -6,6 +6,7 @@
 #include "KeyPoll.h"
 #include "MousePoll.h"
 #include "ModelData.h"
+#include "PhysicsData.h"
 #include "PlayerData.h"
 #include "EnemyData.h"
 
@@ -20,10 +21,11 @@ static Sphere_t sphere[SPHERES];
 
 extern bool debugflag;
 extern ScreenControl Screen;
+extern SceneControl Scene;
 extern MousePoll Mouse;
 extern KeyPoll Key;
-extern SceneControl Scene;
 extern ModelData Model;
+extern PhysicsData Physics;
 extern PlayerData Player;
 extern EnemyData Enemy;
 
