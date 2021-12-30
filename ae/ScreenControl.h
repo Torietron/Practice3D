@@ -9,7 +9,7 @@ typedef struct {
     int_fast16_t RootX, RootY;
     VECTOR Pos, Offset;
     char Label;
-    bool Event;
+    bool Event, Enabled;
 } Camera2D_t;
 
 typedef struct Camera3D_t {
@@ -17,7 +17,7 @@ typedef struct Camera3D_t {
     float Anchor, OffsetH, OffsetV, OffsetR;
     VECTOR Pos;
     char Label;
-    bool Event;
+    bool Event, Enabled;
     void Apply(){
         SetCameraPositionAndAngle(Pos,AngleV,AngleH,Roll);
     }

@@ -24,6 +24,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	//Window Init
 	SetMainWindowText(_T("Test"));
 	if(debugflag) Screen.ShowFPS = TRUE;
+	Screen.C3D.Enabled = TRUE;
 	Screen.Init();
 	
 	//Systems Check and Load

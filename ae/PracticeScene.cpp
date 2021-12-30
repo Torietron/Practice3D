@@ -51,23 +51,13 @@ void PracticeScene::Init()
 
 void PracticeScene::Load()
 {
-    if(Player.MMD.ModelH != 0) //if already set
-    {
-        MV1DetachAnim(Player.MMD.ModelH,Player.MMD.AttachIndex);
-        MV1DeleteModel(Player.MMD.ModelH);
-    }
-    SetCameraNearFar(0.1f, 1000.0f);
-    SetUseZBuffer3D(TRUE);
-    SetWriteZBuffer3D(TRUE);
-    TargetH = LoadGraph(_T("core/ph3.png"));
     Light = CreatePointLightHandle(VGet(0.0f,3000.0f,0.0f),3000.0f,0.2f,0.002f,0.0f);
-    Screen.CursorH[0] = LoadGraph(_T("core/ph7.png"));
     SetLightPositionHandle(Light,VGet(0.0f,500.0f,0.0f));
-    Player.MMD.ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
-    Player.MMD.AttachIndex = MV1AttachAnim(Player.MMD.ModelH, 0, -1, FALSE);
-    Player.MMD.TotalTime = MV1GetAttachAnimTotalTime(Player.MMD.ModelH,Player.MMD.AttachIndex);
-    MV1SetupCollInfo(Player.MMD.ModelH, -1, 1, 1, 1);
-    Player.MMD.Pace = 0;
+
+    TargetH = LoadGraph(_T("core/ph3.png"));
+    Screen.CursorH[0] = LoadGraph(_T("core/ph7.png"));
+
+    Player.Load();
 }
 
 void PracticeScene::End()
