@@ -14,7 +14,7 @@ ScreenControl Screen(640,480);
 SceneControl Scene(PRACTICE_SCENE);
 MousePoll Mouse;
 KeyPoll Key;
-ModelData Models;
+ModelData Model;
 PlayerData Player;
 EnemyData Enemy;
 

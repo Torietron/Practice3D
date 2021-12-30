@@ -4,6 +4,7 @@
 #include "ScreenControl.h"
 #include "MousePoll.h"
 #include "KeyPoll.h"
+#include "ModelData.h"
 #include "PlayerData.h"
 #include "EnemyData.h"
 
@@ -12,11 +13,16 @@ static const float MOVEMENT_SPEED = DX_PI_F/5;
 static VECTOR S;
 
 int_fast8_t Selected = -1; //-1 = no target
-uint_fast8_t CameraLock = TRUE, TargetLock = FALSE;
+uint_fast8_t CameraLock = TRUE, TargetLock = FALSE, fluxReverse = FALSE;
+int MarkerH;
+float flux = 0.0f, markerSize = 0.0f;
+
+float Dot2(const float &x, const float &z);
 
 extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
+extern ModelData Model;
 
 PlayerData::PlayerData()
 {
@@ -42,6 +48,8 @@ void PlayerData::Load()
     MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
     MMD.Pace = 0;
+
+    MarkerH = LoadGraph(_T("core/ph3.png"));
 }
 
 void PlayerData::Update(Sphere_t *sObj, uint_fast8_t Destroyed, const int MAX)
@@ -211,3 +219,24 @@ void PlayerData::Update(Sphere_t *sObj, uint_fast8_t Destroyed, const int MAX)
     }
 }
 
+void PlayerData::Draw(Sphere_t *sObj)
+{
+    if(TargetLock == TRUE)
+    {
+        if(flux > 2.00f) fluxReverse = TRUE;
+        if(flux <= 0.00f) fluxReverse = FALSE;
+        if(fluxReverse == FALSE) flux += 0.03f;
+        else flux -= 0.03f;
+        markerSize = ((Dot2(MMD.Pos.x,MMD.Pos.z)-Dot2(sObj[Selected].v.x,sObj[Selected].v.z))*.00005f)+1.6f;
+        DrawBillboard3D(VGet(sObj[Selected].v.x,(sObj[Selected].v.y+16.0f+flux),sObj[Selected].v.z),1.0f,1.0f,markerSize,0.0f,MarkerH,TRUE);
+    }
+
+    Model.Draw(MMD);
+}
+
+float Dot2(const float &x, const float &z)
+{
+	float dot;
+	dot = (x*x+z*z);
+	return dot;
+}

@@ -15,6 +15,7 @@ class PlayerData {
         PlayerData();
         void Load();
         void Update(Sphere_t *sObj, uint_fast8_t Destroyed, const int MAX);
+        void Draw(Sphere_t *sObj);
     private:
         float anchor_y;
 };
