@@ -34,7 +34,7 @@ void ModelData::Update(MMD_t &m)
 
     //Update the playback time point
     MV1SetAttachAnimTime(m.ModelH,m.AttachIndex,m.PlayTime); 
-    
+
     //Update spatial data
     MV1SetPosition(m.ModelH,VGet(m.Pos.x,m.Pos.y,m.Pos.z));
     MV1SetRotationXYZ(m.ModelH,VGet(m.Rot.x,(m.Rot.y+m.RotOffset.y),m.Rot.z));
@@ -56,6 +56,12 @@ void ModelData::Update(X_t &m)
 void ModelData::Update(MQO_t &m)
 {
     //code
+}
+
+void ModelData::Draw(MMD_t &m, float rate)
+{
+    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,rate);
+    MV1DrawModel(m.ModelH);
 }
 
 void ModelData::SetPlayRate(float a)
