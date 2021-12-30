@@ -7,7 +7,7 @@
 
 typedef struct {
     int ModelH, AttachIndex;
-    uint_fast8_t AnimSet, AnimIndex;
+    uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset;
     VECTOR Pos, Rot, RotOffset;
@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
     int ModelH, AttachIndex;
-    uint_fast8_t AnimSet, AnimIndex;
+    uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset;
     VECTOR Pos, Rot, RotOffset;
@@ -37,7 +37,7 @@ typedef struct {
 
 typedef struct {
     int SpriteH;
-    uint_fast8_t FluxReverse;
+    uint_least8_t FluxReverse;
     float Flux, FluxRate;
     VECTOR Pos, Rot;
     int_fast16_t x, y;

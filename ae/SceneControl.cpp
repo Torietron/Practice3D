@@ -8,14 +8,14 @@ NoScene noscene;
 DebugScene debugscene;
 PracticeScene practicescene;
 
-SceneControl::SceneControl(uint_fast8_t startup)
+SceneControl::SceneControl(uint_least8_t startup)
 :nScene(startup)
 {
     lScene = NO_SCENE;
     sPtr = &noscene;
 }
 
-void SceneControl::Change(uint_fast8_t nextscene)
+void SceneControl::Change(uint_least8_t nextscene)
 {
     nScene = nextscene;
 }

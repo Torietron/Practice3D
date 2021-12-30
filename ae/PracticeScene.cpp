@@ -11,8 +11,8 @@
 
 #define SPHERES 2
 
-static uint_fast8_t Destroyed = 0;
-static uint_fast8_t SDFlag[SPHERES] = {0};
+static uint_fast16_t Destroyed = 0;
+static uint_fast16_t SDFlag[SPHERES] = {0};
 static int Light;
 
 static MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];

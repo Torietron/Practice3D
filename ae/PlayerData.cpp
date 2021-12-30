@@ -13,7 +13,7 @@ static const float MOVEMENT_SPEED = DX_PI_F/5;
 static VECTOR S;
 
 int_fast8_t Selected = -1; //-1 = no target
-uint_fast8_t CameraLock = TRUE, TargetLock = FALSE, fluxReverse = FALSE;
+uint_least8_t CameraLock = TRUE, TargetLock = FALSE, fluxReverse = FALSE;
 int MarkerH;
 float flux = 0.0f, markerSize = 0.0f;
 
@@ -52,7 +52,7 @@ void PlayerData::Load()
     MarkerH = LoadGraph(_T("core/ph3.png"));
 }
 
-void PlayerData::Update(Sphere_t *sObj, uint_fast8_t Destroyed, const int MAX)
+void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
     if(Key.Poll[KEY_INPUT_Q] >= 1) MMD.Rot.y -= ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_E] >= 1) MMD.Rot.y += ROTATE_SPEED;
