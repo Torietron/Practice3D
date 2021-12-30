@@ -7,7 +7,7 @@
 #include "EnemyData.h"
 
 typedef struct PhysicsDelta_t {
-    uint_fast8_t Event, Frames;
+    uint_least8_t Event, Frames;
     uint_fast16_t Ticks;
     uint_fast32_t dTime, xTime;
     char label;
@@ -35,7 +35,7 @@ class PhysicsData {
     public:
         PhysicsDelta_t Delta;
         PhysicsData(float a = 0.99);
-        bool BoxCollision(int_fast16_t aX, int_fast16_t aY, int_fast16_t aWidth, int_fast16_t aHeight, int_fast16_t bX, int_fast16_t bY, int_fast16_t bWidth,int_fast16_t bHeight);
+        bool BoxCollision(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight);
         bool RadialCollision(int_fast16_t a1, int_fast16_t a2, int_fast16_t a3r, int_fast16_t b1, int_fast16_t b2, int_fast16_t b3r);
         bool SphereCollision3D(const MMD_t &m, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd);
         bool Fling(int_fast16_t &position, int_fast16_t destination, uint_fast8_t direction, uint_fast16_t speed = 1, float grav = 1.00, float iMulti = 1.00);

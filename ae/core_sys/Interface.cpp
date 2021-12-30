@@ -18,9 +18,8 @@ Interface::Interface(int_fast8_t a)
     FontSize = 16;
     FontThickness = 7;
     FontType = DX_FONTTYPE_ANTIALIASING_EDGE_4X4;
-    Options_t options;
-    options.x = Screen.Width/2-75;
-    options.y = Screen.Height/2+25;
+    Options.x = Screen.Width/2-75;
+    Options.y = Screen.Height/2+25;
 }
 
 void Interface::UpdateMenu(const uint_fast8_t MAX, const int KEY1, const int KEY2)
@@ -33,7 +32,7 @@ void Interface::UpdateMenu(const uint_fast8_t MAX, const int KEY1, const int KEY
     }
 }
 
-void Interface::DrawMenu(Options_t *option, const uint_fast8_t MAX, int_fast32_t selectedColor, int_fast32_t baseColor)
+void Interface::DrawMenu(InterfaceOptions_t *option, const uint_fast8_t MAX, int_fast32_t selectedColor, int_fast32_t baseColor)
 {
     for(uint_fast8_t i = 0; i < MAX; i++)
     {
@@ -55,7 +54,7 @@ void Interface::DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent,double n
 {
     //??? MY LAUGHABLE CEREAL TOY QUALITY FORMULA, no keyboard keys were harmed during the making of this 
     //simplified ratio = ((endP - startP) *val%) + startP
-    //scalable ratio = (((endP+(baseScreen.Width*objscale)) - (startP-(baseScreen.Width*objscale))) *(cast to double)val%) + startP-(baseScreen.Width*objscale) //pixel shift as needed
+    //scalable ratio = (((endP+(baseWidth*objscale)) - (startP-(baseWidth*objscale))) *(cast to double)val%) + startP-(baseWidth*objscale) //pixel shift as needed
     DrawBox(x-(w*scale) ,y-2+(0-h*scale) ,x+(w*scale),y+2+(0-h*scale),colorframe,FALSE);
     DrawBox(x+1-(w*scale) ,y-1+(0-h*scale) ,(((x-1+(w*scale)) - (x-(w*scale))) *((double)numCurrent/numMax)) + x-(w*scale), y+1+(0-h*scale),colorfill,TRUE); 
 }
