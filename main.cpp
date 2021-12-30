@@ -5,12 +5,18 @@
 #include "KeyPoll.h"
 #include "SceneControl.h"
 #include "ScreenControl.h"
+#include "ModelData.h"
+#include "PlayerData.h"
+#include "EnemyData.h"
 
 bool debugflag = true;
 ScreenControl Screen(640,480);
 SceneControl Scene(PRACTICE_SCENE);
 MousePoll Mouse;
 KeyPoll Key;
+ModelData Models;
+PlayerData Player;
+EnemyData Enemy;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				 LPSTR lpCmdLine, int nCmdShow )

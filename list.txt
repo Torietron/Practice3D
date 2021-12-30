@@ -1,2 +1,2 @@
--new abstractions: Player
 -ability casting
+-continue extending modeldata, overloads
