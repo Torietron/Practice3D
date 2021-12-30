@@ -89,13 +89,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -105,13 +105,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -123,14 +123,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalIncludeDirectories><RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalIncludeDirectories><RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalLibraryDirectories></Link>
+      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalLibraryDirectories></Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -141,7 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalIncludeDirectories><AdditionalIncludeDirectories>ae</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalIncludeDirectories><AdditionalIncludeDirectories>ae</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -149,12 +149,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae</AdditionalLibraryDirectories></Link>
+      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input</AdditionalLibraryDirectories></Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ae\MousePoll.cpp" />
-    <ClCompile Include="ae\KeyPoll.cpp" />
+    <ClCompile Include="ae\input\MousePoll.cpp" />
+    <ClCompile Include="ae\input\KeyPoll.cpp" />
     <ClCompile Include="ae\ScreenControl.cpp" />
     <ClCompile Include="ae\SceneControl.cpp" />
     <ClCompile Include="ae\NoScene.cpp" />
@@ -166,8 +166,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\プロジェクトに追加すべきファイル_VC用\DxLib.h" />
-    <ClInclude Include="ae\MousePoll.h" />
-    <ClInclude Include="ae\KeyPoll.h" />
+    <ClInclude Include="ae\input\MousePoll.h" />
+    <ClInclude Include="ae\input\KeyPoll.h" />
     <ClInclude Include="ae\ScreenControl.h" />
     <ClInclude Include="ae\SceneVirt.h" />
     <ClInclude Include="ae\SceneControl.h" />
