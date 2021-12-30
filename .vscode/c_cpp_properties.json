@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ae/**",
+                "${workspaceFolder}/ae/input/**",
                 "D:\\Grimoire\\DxLib ライブラリ\\プロジェクトに追加すべきファイル_VC用"
             ],
             "defines": [
