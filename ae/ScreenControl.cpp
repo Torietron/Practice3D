@@ -16,6 +16,7 @@ ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uin
     fps_x = 0, fps_y = 0;
     limit = MaxFPS;
     average = 0.0f; 
+    C3D.OffsetV = 0.46f;
 }
 
 int ScreenControl::Init()

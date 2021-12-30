@@ -2,7 +2,27 @@
 #ifndef DEF_SCREENCONTROL_H
 #define DEF_SCREENCONTROL_H
 
+#include "DxLib.h"
 #include <cstdint>
+
+typedef struct {
+    int_fast16_t RootX, RootY;
+    VECTOR Pos, Offset;
+    char Label;
+    bool Event;
+} Camera2D_t;
+
+typedef struct Camera3D_t {
+    float AngleH, AngleV, Roll;
+    float Anchor, OffsetH, OffsetV, OffsetR;
+    VECTOR Pos;
+    char Label;
+    bool Event;
+    void Apply(){
+        SetCameraPositionAndAngle(Pos,AngleV,AngleH,Roll);
+    }
+} Camera3D_t; 
+
 class ScreenControl {
     public:
         uint_fast8_t WinMode, New, Cursor, LimitFPS, ShowFPS;
@@ -10,6 +30,8 @@ class ScreenControl {
         int_fast16_t Width, Height;
         uint_fast16_t MaxFPS;
         int_fast32_t CursorH[2], CursorH2[2];
+        Camera2D_t C2D;
+        Camera3D_t C3D;
         ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b = 16, uint_fast16_t f = 60);
         int Init();
         int Update();

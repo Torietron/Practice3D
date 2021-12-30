@@ -7,30 +7,15 @@
 #include "MousePoll.h"
 #include "ModelData.h"
 #include "PlayerData.h"
+#include "EnemyData.h"
 
 #define SPHERES 2
 
-static const float ROTATE_SPEED = DX_PI_F/45;
-static const float MOVEMENT_SPEED = DX_PI_F/5;
-
-typedef struct {
-	VECTOR v;
-	float r;
-	bool active;
-} Sphere_t;
-
-static int_fast8_t Selected = -1; //-1 = no target
 static uint_fast8_t Destroyed = 0, fluxReverse = FALSE; 
-static uint_fast8_t pJump = FALSE, pGrounded = TRUE, CameraLock = TRUE, TargetLock = FALSE;
 static uint_fast8_t SDFlag[SPHERES] = {0};
 static int TargetH, Light;
-static float vOffset = 0.46f, cZoom = 0.0f;
-static float anchorY = 0.0f, angleV = 0.0f, angleH = 0.0f, flux = 0.0f; 
+static float cZoom = 0.0f, flux = 0.0f; 
 static float targetX = 0.0f, targetY = 10.0f, targetZ = 0.0f, markerSize = 0.0f;
-static VECTOR Camera, pOffset, cRot, S;
-
-static ModelData Model;
-static PlayerData Player;
 
 MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 Sphere_t sphere[SPHERES];
@@ -40,6 +25,13 @@ extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
 extern SceneControl Scene;
+extern ModelData Models;
+extern PlayerData Player;
+extern EnemyData Enemy;
+
+//temp
+extern int_fast8_t Selected;
+extern uint_fast8_t TargetLock;
 
 DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
 float Dot3(const VECTOR &a, const VECTOR &b);
@@ -47,10 +39,10 @@ float Dot2(const float &x, const float &z);
 
 void PracticeScene::Init()
 {
-    Camera = VGet(0.0f, 20.0f, -20.0f);
+    Screen.C3D.Pos = VGet(0.0f, 20.0f, -20.0f);
     Player.MMD.Pos = VGet(42.0f, 0.0f, 52.0f);
     Player.MMD.Rot = VGet(0.0f, (DX_PI_F/5) * -1, 0.0f);
-    cRot = VGet(0.0f, (DX_PI_F/5) * -1, 0.0f);
+    Screen.C3D.Anchor = ((DX_PI_F/5) * -1);
 
     SDFlag[0] = 1, SDFlag[1] = 1;
     sphere[0].v = VGet(-0.5f,10.0f,-46.0f), sphere[0].r = 6.0f, sphere[0].active = true;
@@ -86,188 +78,13 @@ void PracticeScene::End()
 
 void PracticeScene::Update()
 {
-    //Controls
-    {
-        Key.Update();
-        Mouse.Update();
-            
-        //Player
-        if(Key.Poll[KEY_INPUT_Q] >= 1) Player.MMD.Rot.y -= ROTATE_SPEED;
-        if(Key.Poll[KEY_INPUT_E] >= 1) Player.MMD.Rot.y += ROTATE_SPEED;
-        if(Key.Poll[KEY_INPUT_A] >= 1)
-        {
-            Player.MMD.Pos.z -= cos(Player.MMD.Rot.y-(DX_PI_F/2))*MOVEMENT_SPEED;
-            Player.MMD.Pos.x -= sin(Player.MMD.Rot.y-(DX_PI_F/2))*MOVEMENT_SPEED;
-            Player.MMD.Rot.x = DX_PI_F*2;
-            if(pGrounded == TRUE) Player.MMD.AnimIndex = 1;
-            else Player.MMD.AnimIndex = 2;
-            Player.MMD.Reverse = FALSE;
-            pOffset.y = (DX_PI_F/2) * -1;
-        }
-        if(Key.Poll[KEY_INPUT_D] >= 1)
-        {
-            Player.MMD.Pos.z -= cos(Player.MMD.Rot.y+(DX_PI_F/2))*MOVEMENT_SPEED;
-            Player.MMD.Pos.x -= sin(Player.MMD.Rot.y+(DX_PI_F/2))*MOVEMENT_SPEED;
-            Player.MMD.Rot.x = DX_PI_F*2;
-            if(pGrounded == TRUE) Player.MMD.AnimIndex = 1;
-            else Player.MMD.AnimIndex = 2;
-            Player.MMD.Reverse = FALSE;
-            pOffset.y = DX_PI_F/2;
-        }
-        if(Key.Poll[KEY_INPUT_W] >= 1) 
-        {
-            Player.MMD.Pos.z -= cos(Player.MMD.Rot.y)*MOVEMENT_SPEED;
-            Player.MMD.Pos.x -= sin(Player.MMD.Rot.y)*MOVEMENT_SPEED;
-            Player.MMD.Rot.x = DX_PI_F*2;
-            if(pGrounded == TRUE) Player.MMD.AnimIndex = 1;
-            else Player.MMD.AnimIndex = 2;
-            Player.MMD.Reverse = FALSE;
-            pOffset.y = 0;
-            if(Key.Poll[KEY_INPUT_A] >= 1) pOffset.y = (DX_PI_F/4) * -1;
-            if(Key.Poll[KEY_INPUT_D] >= 1) pOffset.y = DX_PI_F/4;
-        }
-        if(Key.Poll[KEY_INPUT_S] >= 1) 
-        {
-            Player.MMD.Pos.z += cos(Player.MMD.Rot.y)*(MOVEMENT_SPEED*0.75f);
-            Player.MMD.Pos.x += sin(Player.MMD.Rot.y)*(MOVEMENT_SPEED*0.75f);
-            Player.MMD.Rot.x = DX_PI_F/10; //Center of gravity would've been visually inconsistent
-            if(pGrounded == TRUE) Player.MMD.AnimIndex = 1;
-            else Player.MMD.AnimIndex = 2;
-            Player.MMD.Reverse = TRUE;
-            pOffset.y = 0;
-            if(Key.Poll[KEY_INPUT_A] >= 1) pOffset.y = DX_PI_F/7;
-            if(Key.Poll[KEY_INPUT_D] >= 1) pOffset.y = (DX_PI_F/7)* -1;
-        }
-        if(Key.Poll[KEY_INPUT_SPACE] == 1)
-        {
-            if(pGrounded == TRUE) 
-            {
-                anchorY = Player.MMD.Pos.y;
-                Player.MMD.Pace = 0;
-                pJump = TRUE;
-                pGrounded = FALSE;
-                Player.MMD.Rot.x = DX_PI_F*2;
-                Player.MMD.AnimIndex = 2;
-            }
-        }
-        if(Key.Poll[KEY_INPUT_W] == 0 && Key.Poll[KEY_INPUT_S] == 0
-        && Key.Poll[KEY_INPUT_A] == 0 && Key.Poll[KEY_INPUT_D] == 0)
-        {
-            if(pGrounded == TRUE) Player.MMD.AnimIndex = 0, Player.MMD.Rot.x = DX_PI_F*2, Player.MMD.Reverse = FALSE;
-            if(pGrounded == FALSE) Player.MMD.AnimIndex = 2, Player.MMD.Rot.x = DX_PI_F*2, Player.MMD.Reverse = FALSE;
-            pOffset.y = 0.0f;
-        }
-
-        //Camera
-        //keep the camera a set distance from player
-        //cam's circular anchored point around the player is controlled by cRot.y
-        if(Key.Poll[KEY_INPUT_J] >= 1)
-        {
-            Player.MMD.Rot.y -= ROTATE_SPEED;
-            cRot.y = Player.MMD.Rot.y;
-        }
-        if(Key.Poll[KEY_INPUT_K] >= 1)
-        {
-            Player.MMD.Rot.y += ROTATE_SPEED; 
-            cRot.y = Player.MMD.Rot.y;
-        }
-        if(Mouse.Poll[MOUSE_INPUT_RIGHT] == 1)
-        {
-            if(CameraLock == TRUE) CameraLock = FALSE;
-            else CameraLock = TRUE, Player.MMD.Rot.y = cRot.y;
-        }
-        if(Mouse.Moved() && CameraLock == FALSE && Screen.Cursor == FALSE)
-        {
-            cRot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
-
-            vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
-            if(vOffset > 0.81f) vOffset = 0.81f;
-            if(vOffset < -0.41f) vOffset = -0.41f;
-
-            if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
-            || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
-            {
-                Mouse.Reset(Screen.Width/2,Screen.Height/2);
-            }
-            
-        }
-        else if(Mouse.Moved() && CameraLock == TRUE && Screen.Cursor == FALSE)
-        {
-            Player.MMD.Rot.y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
-            cRot.y = Player.MMD.Rot.y;
-
-            vOffset += (ROTATE_SPEED*Mouse.GetDeltaY())/80;
-            if(vOffset > 0.81f) vOffset = 0.81f;
-            if(vOffset < -0.41f) vOffset = -0.41f;
-
-            if((Mouse.x > Screen.Width * 0.8f  || Mouse.x < 0 + Screen.Width * 0.2f)
-            || (Mouse.y > Screen.Height * 0.8f || Mouse.y < 0 + Screen.Height * 0.2f))
-            {
-                Mouse.Reset(Screen.Width/2,Screen.Height/2);
-            }
-            
-        }
-
-        //Pick Target
-        if(Key.Poll[KEY_INPUT_LSHIFT] == 1) Selected = -1; //deselect
-        if(Key.Poll[KEY_INPUT_TAB] == 1 && Destroyed != SPHERES)
-        {
-            for(uint_fast8_t i = 0; i < SPHERES; i++)
-            {
-                Selected = Selected + 1;
-                if(sphere[Selected].active) break;
-            }
-            TargetLock = TRUE;
-            if(Selected > (SPHERES - Destroyed) - 1) Selected = -1;
-        }
-        if(Selected == -1) TargetLock = FALSE;
-
-        //Handle TargetLock
-        if(TargetLock == TRUE)
-        {
-            if(sphere[Selected].active)
-            {
-                S.x = Player.MMD.Pos.x - sphere[Selected].v.x;
-                S.z = Player.MMD.Pos.z - sphere[Selected].v.z;
-                angleH = atan2f(S.x,S.z); 
-                Player.MMD.Rot.y = angleH;
-                cRot.y = Player.MMD.Rot.y - DX_PI_F/10;;
-            }
-            else Selected = -1, TargetLock = FALSE;
-        }
-
-        Camera.z = Player.MMD.Pos.z + cos(cRot.y)*40;
-        Camera.x = Player.MMD.Pos.x + sin(cRot.y)*40;
-        
-        //horizontal lock formula
-        S.x = Player.MMD.Pos.x - Camera.x;
-        S.y = Player.MMD.Pos.y - Camera.y; 
-        S.z = Player.MMD.Pos.z - Camera.z;
-        angleH = atan2f(S.x,S.z); 
-
-        //vertical lock formula
-        S.x = Camera.x - Player.MMD.Pos.x;
-        S.y = Camera.y - Player.MMD.Pos.y; 
-        S.z = Camera.z - Player.MMD.Pos.z;
-        angleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - vOffset);
-    }
-    
-    //Simple Jump
-    if(pJump == TRUE && pGrounded == FALSE)
-    {
-        Player.MMD.Pos.y = anchorY + sin(DX_PI_F*2/90*Player.MMD.Pace)*17;
-        Player.MMD.Pace++, Player.MMD.Rot.x = DX_PI_F*2;
-        if(Player.MMD.Pos.y <= 0.3f && Player.MMD.Pace > 4) pJump = FALSE, pGrounded = TRUE, Player.MMD.Pos.y = 0.0f;
-    }
-        
-    Model.Update(Player.MMD);
-
-    //Update Player.MMD.ModelH position/Player.MMD.Rotation
-    MV1SetPosition(Player.MMD.ModelH,VGet(Player.MMD.Pos.x,Player.MMD.Pos.y,Player.MMD.Pos.z));
-    MV1SetRotationXYZ(Player.MMD.ModelH,VGet(Player.MMD.Rot.x,(Player.MMD.Rot.y+pOffset.y),Player.MMD.Rot.z));
+    Key.Update();
+    Mouse.Update();
+    Player.Update(sphere,Destroyed,SPHERES);
+    Models.Update(Player.MMD);
 
     //Update Camera
-    SetCameraPositionAndAngle(Camera,angleV,angleH,0.0f);
+    Screen.C3D.Apply();
 
     //Collision
     MV1RefreshCollInfo(Player.MMD.ModelH,-1);
@@ -281,7 +98,6 @@ void PracticeScene::Update()
         }
         MV1CollResultPolyDimTerminate(HitPolyDim[i]);
     }
-    
 }
 
 void PracticeScene::Draw()
@@ -309,7 +125,7 @@ void PracticeScene::Draw()
     if(debugflag)
     {
         DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.MMD.Pos.x,Player.MMD.Pos.y,Player.MMD.Pos.z);
-        DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",angleV, angleH);
+        DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",Screen.C3D.AngleV, Screen.C3D.AngleH);
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
         DrawFormatString(0,80,-1,"Target=%d",Selected);
     }   
