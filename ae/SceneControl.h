@@ -6,8 +6,8 @@
 #include "SceneVirt.h"
 class SceneControl {
     public:
-        SceneControl(uint_fast8_t startup = 1);
-        void Change(uint_fast8_t nextscene);
+        SceneControl(uint_least8_t startup = 1);
+        void Change(uint_least8_t nextscene);
         int Init();
         int Load();
         int End();
@@ -15,8 +15,8 @@ class SceneControl {
         int Draw();
     private:  
         SceneVirt *sPtr;
-        uint_fast8_t lScene;
-        uint_fast8_t nScene;
+        uint_least8_t lScene;
+        uint_least8_t nScene;
 };
 
 typedef enum {
