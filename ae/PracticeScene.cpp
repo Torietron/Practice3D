@@ -37,8 +37,8 @@ void PracticeScene::Init()
     Screen.C3D.Anchor = ((DX_PI_F/5) * -1);
 
     SDFlag[0] = 1, SDFlag[1] = 1;
-    Sphere[0].v = VGet(-0.5f,10.0f,-46.0f), Sphere[0].r = 6.0f, Sphere[0].active = true;
-    Sphere[1].v = VGet(-40.0f,10.0f,-60.0f), Sphere[1].r = 6.0f, Sphere[1].active = true;
+    Sphere[0].Pos = VGet(-0.5f,10.0f,-46.0f), Sphere[0].Radius = 6.0f, Sphere[0].Active = true;
+    Sphere[1].Pos = VGet(-40.0f,10.0f,-60.0f), Sphere[1].Radius = 6.0f, Sphere[1].Active = true;
 }
 
 void PracticeScene::Load()
@@ -69,10 +69,10 @@ void PracticeScene::Update()
     //Collision
     for(uint_fast8_t i = 0; i < SPHERES; i++)
     {
-        if(Physics.SphereCollision3D(Player.MMD.ModelH,Sphere[i].v,Sphere[i].r,HitPolyDim[i]))
+        if(Physics.SphereCollision3D(Player.MMD.ModelH,Sphere[i].Pos,Sphere[i].Radius,HitPolyDim[i]))
         {
             SDFlag[i] = 0;
-            Sphere[i].active = false;
+            Sphere[i].Active = false;
         }
     }
 }

@@ -6,9 +6,9 @@
 #include <cstdint>
 
 typedef struct {
-	VECTOR v;
-	float r;
-	bool active;
+	VECTOR Pos;
+	float Radius;
+	bool Active;
 } Sphere_t;
 
 class EnemyData {
