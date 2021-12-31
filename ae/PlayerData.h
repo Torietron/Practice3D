@@ -12,6 +12,7 @@ class PlayerData {
         uint_least8_t Jump, Grounded;
         VECTOR Last;
         MMD_t MMD;
+        SPRITE3D_t Marker;
         PlayerData();
         void Load();
         void Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX);

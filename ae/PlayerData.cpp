@@ -16,8 +16,6 @@ static VECTOR S;
 
 int_fast8_t Selected = -1; //-1 = no target
 uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
-int MarkerH;
-float markerSize = 0.0f;
 
 extern ScreenControl Screen;
 extern MousePoll Mouse;
@@ -36,6 +34,7 @@ PlayerData::PlayerData()
     MMD.PlayTime = 0.0f;
     MMD.PlayOffset = 0.0f;
     MMD.Reverse = false, MMD.Event = false;
+    Marker.Size = 0.0f;
 }
 
 void PlayerData::Load()
@@ -51,7 +50,7 @@ void PlayerData::Load()
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
     MMD.Pace = 0;
 
-    MarkerH = LoadGraph(_T("core/ph3.png"));
+    Marker.SpriteH = LoadGraph(_T("core/ph3.png"));
 }
 
 void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
@@ -227,8 +226,8 @@ void PlayerData::Draw(Sphere_t *sObj)
 {
     if(TargetLock == TRUE)
     {
-        markerSize = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].Pos.x,sObj[Selected].Pos.z))*.00005f)+1.6f;
-        Ui.DrawMarker3D(sObj[Selected].Pos,markerSize,MarkerH);
+        Marker.Size = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].Pos.x,sObj[Selected].Pos.z))*.00005f)+1.6f;
+        Ui.DrawMarker3D(sObj[Selected].Pos,Marker.Pos,Marker.Size,Marker.SpriteH);
     }
 
     Model.Draw(MMD);

@@ -34,7 +34,7 @@ class Interface {
         void DrawMenu(InterfaceOptions_t *option, const uint_fast8_t MAX, int_fast32_t selectedColor = GetColor(255,255,0), int_fast32_t baseColor = GetColor(255,255,255));
         void DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent = 100.00,double numMax = 100.00,double scale = 1.00,int_fast16_t w = 60,int_fast16_t h = 80,uint_fast32_t colorframe = GetColor(255,255,255),uint_fast32_t colorfill = GetColor(255,0,0));
         //void DrawImgBar();
-        void DrawMarker3D(DxLib::VECTOR targetPos, float markerSize,int MarkerH);
+        void DrawMarker3D(const DxLib::VECTOR &targetPos, DxLib::VECTOR &markerPos, const float &markerSize, const int &markerH, const float &heightOffset = 16.0f , const float &markerRot = 0.0f, const float &cx = 1.0f, const float &cy = 1.0f);
         void Fade(const uint_fast8_t TYPE, const uint_fast8_t SPEED);
         void EndBlend();
         void DrawValue(int_fast16_t x, int_fast16_t y, int a, int_fast32_t color = GetColor(255,255,255));

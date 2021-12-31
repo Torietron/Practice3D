@@ -38,7 +38,7 @@ typedef struct {
 typedef struct {
     int SpriteH;
     uint_least8_t FluxReverse;
-    float Flux, FluxRate;
+    float Flux, FluxRate, Size;
     VECTOR Pos, Rot;
     int_fast16_t x, y;
     uint_fast16_t w, h;
