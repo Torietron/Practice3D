@@ -29,9 +29,6 @@ extern PhysicsData Physics;
 extern PlayerData Player;
 extern EnemyData Enemy;
 
-DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
-float Dot3(const VECTOR &a, const VECTOR &b);
-
 void PracticeScene::Init()
 {
     Screen.C3D.Pos = VGet(0.0f, 20.0f, -20.0f);
@@ -97,20 +94,4 @@ void PracticeScene::Draw()
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
         //DrawFormatString(0,80,-1,"Target=%d",Selected);
     }   
-}
-
-DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b)
-{
-	VECTOR c;
-	c.x = (a.y * b.z - a.z * b.y);
-	c.y = (a.z * b.x - a.x * b.z);
-	c.z = (a.x * b.y - a.y * b.x);
-	return c;
-}
-
-float Dot3(const VECTOR &a, const VECTOR &b)
-{
-	float dot;
-	dot = (a.x * b.x + a.y * b.y + a.z * b.z);
-	return dot;
 }

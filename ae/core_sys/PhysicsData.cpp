@@ -19,9 +19,108 @@ PhysicsData::PhysicsData(float a)
 :Decay(a)
 {
     //to check or use with Get()
-    velocity_x = 0.00, velocity_y = 0.00;
-    inertia_x = 0.00, inertia_y = 0.00;
-    gravity_x = 0.00, gravity_y = 0.00;
+    velocity_x = 0.00f, velocity_y = 0.00f;
+    inertia_x = 0.00f, inertia_y = 0.00f;
+    gravity_x = 0.00f, gravity_y = 0.00f;
+}
+
+void PhysicsData::PhysicsFormula::Standardize(float &a, float min, float max)
+{
+    if(a < min) a = min;
+    if(a > max) a = max;
+}
+
+void PhysicsData::PhysicsFormula::Humanize(float &a, float variation)
+{
+    float hTemp = 0.00f;
+    srand(static_cast<int_fast32_t>(time(0)));
+    random1 = rand();
+    random2 = rand();
+    SRand(random1 * random2);
+    random1 = GetRand((int)variation/2);
+    random2 = rand() % (int)variation / 2;
+
+    hTemp = random1 + random2;
+    a = hTemp;
+}
+
+float& PhysicsData::PhysicsFormula::ApproxAngle(float &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
+{
+    if(focalPointInverseCoord <= objInverseAxisAnchor)
+    {
+        cROT = nPI;
+        objAngle = PI*2;
+    }
+    else cROT = PI;
+
+    while(objMainAxisRotCoord != focalPointCoord)
+    {
+        if(objMainAxisRotCoord > focalPointCoord)
+        {
+            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objMainAxisRotCoord -= turnRate;
+        }
+        if(objMainAxisRotCoord < focalPointCoord)
+        {
+            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objMainAxisRotCoord += turnRate;
+        }
+    }
+    return objAngle;
+}
+
+double& PhysicsData::PhysicsFormula::ApproxAngle(double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
+{
+    if(focalPointInverseCoord <= objInverseAxisAnchor)
+    {
+        cROT = nPI;
+        objAngle = PI*2;
+    }
+    else cROT = PI;
+
+    while(objMainAxisRotCoord != focalPointCoord)
+    {
+        if(objMainAxisRotCoord > focalPointCoord)
+        {
+            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objMainAxisRotCoord -= turnRate;
+        }
+        if(objMainAxisRotCoord < focalPointCoord)
+        {
+            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objMainAxisRotCoord += turnRate;
+        }
+    }
+    return objAngle;
+}
+
+void PhysicsData::PhysicsFormula::AnchoredAngle(float anchorX, float anchorY, double anchorAngle, float &targetX, float &targetY, double &targetAngle, uint_fast16_t distance)
+{
+    targetX = anchorX, targetY = anchorY, targetAngle = anchorAngle;
+    parent->Propel(targetX,targetY,targetAngle,distance);
+}
+
+DxLib::VECTOR PhysicsData::PhysicsFormula::SetCross(const VECTOR &a, const VECTOR &b)
+{
+	VECTOR c;
+	c.x = (a.y * b.z - a.z * b.y);
+	c.y = (a.z * b.x - a.x * b.z);
+	c.z = (a.x * b.y - a.y * b.x);
+	return c;
+}
+
+float PhysicsData::PhysicsFormula::Dot3(const VECTOR &a, const VECTOR &b)
+{
+	float dot;
+	dot = (a.x * b.x + a.y * b.y + a.z * b.z);
+	return dot;
+}
+
+float PhysicsData::PhysicsFormula::Dot2(const float &x, const float &z)
+{
+	float dot;
+	dot = (x*x+z*z);
+	return dot;
 }
 
 //center the axis coord first, Rota is center by default
@@ -60,14 +159,14 @@ bool PhysicsData::SphereCollision3D(const int &modelH, const VECTOR &spherePos, 
     else return false;
 }
 
-bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, uint_fast8_t direction, uint_fast16_t speed, float grav, float iMulti)
+bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed, float grav, float iMulti)
 {
     gravity_x = grav;
     gravity_y = grav;
     inertia_x = (speed*gravity_x)*iMulti;
     inertia_y = (speed*gravity_y)*iMulti;
 
-    switch(direction)
+    switch(ENUM_FLING_DIRECTION)
     {
         case FLING_DOWN:
             if(position <= destination-1)
@@ -128,82 +227,6 @@ void PhysicsData::Spin(double &rot, char L_or_R_Direction, uint_fast8_t totalRot
     if(L_or_R_Direction == 'L') rot -= PI/totalRotPoints;
 }
 
-void PhysicsData::Standardize(float &a, float min, float max)
-{
-    if(a < min) a = min;
-    if(a > max) a = max;
-}
-
-void PhysicsData::Humanize(float &a, float variation)
-{
-    float hTemp = 0.00;
-    srand(static_cast<int_fast32_t>(time(0)));
-    random1 = rand();
-    random2 = rand();
-    SRand(random1 * random2);
-    random1 = GetRand(variation/2);
-    random2 = rand() % (int)variation / 2;
-
-    hTemp = random1 + random2;
-    a = hTemp;
-}
-
-float& PhysicsData::ApproxAngle(float &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
-{
-    if(focalPointInverseCoord <= objInverseAxisAnchor)
-    {
-        cROT = nPI;
-        objAngle = PI*2;
-    }
-    else cROT = PI;
-
-    while(objMainAxisRotCoord != focalPointCoord)
-    {
-        if(objMainAxisRotCoord > focalPointCoord)
-        {
-            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord -= turnRate;
-        }
-        if(objMainAxisRotCoord < focalPointCoord)
-        {
-            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord += turnRate;
-        }
-    }
-    return objAngle;
-}
-
-double& PhysicsData::ApproxAngle(double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
-{
-    if(focalPointInverseCoord <= objInverseAxisAnchor)
-    {
-        cROT = nPI;
-        objAngle = PI*2;
-    }
-    else cROT = PI;
-
-    while(objMainAxisRotCoord != focalPointCoord)
-    {
-        if(objMainAxisRotCoord > focalPointCoord)
-        {
-            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord -= turnRate;
-        }
-        if(objMainAxisRotCoord < focalPointCoord)
-        {
-            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord += turnRate;
-        }
-    }
-    return objAngle;
-}
-
-void PhysicsData::AnchoredAngle(float anchorX, float anchorY, double anchorAngle, float &targetX, float &targetY, double &targetAngle, uint_fast16_t distance)
-{
-    targetX = anchorX, targetY = anchorY, targetAngle = anchorAngle;
-    Propel(targetX,targetY,targetAngle,distance);
-}
-
 void PhysicsData::Accelerate(float &vel, uint_fast8_t velBase, uint_fast8_t velMax, float accel, float grav)
 {
     inertia_x = accel;
@@ -243,10 +266,10 @@ void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, flo
     
 }
 
-float PhysicsData::Get(const uint_fast8_t enumFLAG)
+float PhysicsData::Get(const uint_fast8_t ENUM_GET)
 {
     //welcome to the leaning tower of switchizza
-    switch(enumFLAG)
+    switch(ENUM_GET)
     {
         case DECAY:
             return Decay;
