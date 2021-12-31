@@ -1,3 +1,16 @@
--update interface/physics
+Any set of rules that depend on the physical world around it is directly a study of physics
+
+-Dot func, Phys.Formula
+-Move update call (mmd) to player
+-Sphere_t nomenclature
+-Remove extern from core sys
+
+-abstraction: Drawmarker - ui
+-abstraction: Select option/marker targ - ui
+
+-Fix conversion warnings
+-t nomenclature 2nd pass
+-List planned core feats
+
 -ability casting
 -continue extending modeldata, overloads
