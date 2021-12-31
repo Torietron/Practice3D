@@ -7,12 +7,12 @@
 #include "EnemyData.h"
 
 typedef struct PhysicsDelta_t {
-    uint_least8_t Event, Frames;
+    uint_least8_t Frames;
     uint_fast16_t Ticks;
     uint_fast32_t dTime, xTime;
     char label;
-    bool Time(uint_fast32_t &LastTime, uint_fast32_t ElapsedGoal)
-    {
+    bool Event;
+    bool Time(uint_fast32_t &LastTime, uint_fast32_t ElapsedGoal) {
         if(dTime - LastTime > ElapsedGoal) 
         {
             LastTime = GetNowCount();
@@ -20,15 +20,14 @@ typedef struct PhysicsDelta_t {
         }
         else return false;
     }
-    void Update()
-    {
+    void Update() {
         dTime = GetNowCount();
     }
 } PhysicsDelta_t; 
 
 typedef struct {
     uint_fast32_t Time, dTime;
-    bool Flag;
+    bool Event;
 } PhysicsLastDelta_t;
 
 class PhysicsData {
@@ -68,7 +67,7 @@ typedef enum {
     FLING_LEFT
 } PhysicsFlings_t;
 
-typedef enum{
+typedef enum {
     DECAY,
     LAST_VELOCITY_X,
     LAST_VELOCITY_Y,
