@@ -42,7 +42,7 @@ bool PhysicsData::BoxCollisionTL(int_fast16_t aX, int_fast16_t aY, int_fast16_t 
 }
 */
 
-bool PhysicsData::RadialCollision(int_fast16_t a1, int_fast16_t a2, int_fast16_t a3r, int_fast16_t b1, int_fast16_t b2, int_fast16_t b3r)
+bool PhysicsData::RadialCollision(const int_fast16_t &a1, const int_fast16_t &a2, const int_fast16_t &a3r, const int_fast16_t &b1, const int_fast16_t &b2, const int_fast16_t &b3r)
 {
     //apply theorem
     return false;
@@ -243,7 +243,7 @@ void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, flo
     
 }
 
-float PhysicsData::Get(uint_fast8_t enumFLAG)
+float PhysicsData::Get(const uint_fast8_t enumFLAG)
 {
     //welcome to the leaning tower of switchizza
     switch(enumFLAG)
@@ -266,7 +266,7 @@ float PhysicsData::Get(uint_fast8_t enumFLAG)
 }
 
 //center axis coord first, Rota is center by default
-void PhysicsData::DrawHitBox(int_fast16_t x, int_fast16_t y, int_fast16_t w, int_fast16_t h, int_fast32_t Color, uint_fast8_t FillFlag)
+void PhysicsData::DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &w, const int_fast16_t &h, int_fast32_t Color, uint_fast8_t FillFlag)
 {
     DrawBox(x - w, y - h, x + w, y + h, Color, FillFlag);
 }
