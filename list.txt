@@ -1,6 +1,5 @@
 Any set of rules that depend on the physical world around it is directly a study of physics
 
--Dot func, Phys.Formula
 -Move update call (mmd) to player
 -Sphere_t nomenclature
 -Remove extern from core sys
