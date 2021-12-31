@@ -10,10 +10,9 @@ typedef struct {
     int_fast16_t x, y;
     char name[50];
     uint_fast32_t color;
-}   InterfaceOptions_t;
+} InterfaceOptions_t;
 
-class Interface
-{
+class Interface {
     public:
         int_fast8_t selected;
         uint_fast8_t brightness;
@@ -40,12 +39,12 @@ class Interface
         //void DrawImgSlider();
 };  
 
-typedef enum{
+typedef enum {
     FADE_IN,
     FADE_OUT
 } InterfaceFadeType_t;
 
-typedef enum{
+typedef enum {
     SPEED1 = 1,
     SPEED2 = 5,
     SPEED3 = 15
