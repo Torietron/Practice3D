@@ -217,6 +217,8 @@ void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16
         MMD.Pace++, MMD.Rot.x = DX_PI_F*2;
         if(MMD.Pos.y <= 0.3f && MMD.Pace > 4) Jump = FALSE, Grounded = TRUE, MMD.Pos.y = 0.0f;
     }
+    
+    Model.Update(MMD);
 }
 
 void PlayerData::Draw(Sphere_t *sObj)
