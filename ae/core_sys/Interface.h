@@ -15,6 +15,7 @@ typedef struct {
 
 class Interface {
     public:
+        uint_least8_t FluxReverse;
         int_fast8_t Selected;
         uint_fast8_t Brightness;
         int_fast32_t White;     //-1 (raw values)
@@ -26,12 +27,14 @@ class Interface {
         int_fast32_t Turquoise; //-12525360
         int_fast32_t Amber;     //-33280
         uint_fast8_t FontSize, FontThickness, FontType;
+        float Flux;
         InterfaceOptions_t Options;
         Interface(int_fast8_t a = 0);
         void UpdateMenu(const uint_fast8_t MAX, const int KEY1 = KEY_INPUT_UP, const int KEY2 = KEY_INPUT_DOWN);
         void DrawMenu(InterfaceOptions_t *option, const uint_fast8_t MAX, int_fast32_t selectedColor = GetColor(255,255,0), int_fast32_t baseColor = GetColor(255,255,255));
         void DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent = 100.00,double numMax = 100.00,double scale = 1.00,int_fast16_t w = 60,int_fast16_t h = 80,uint_fast32_t colorframe = GetColor(255,255,255),uint_fast32_t colorfill = GetColor(255,0,0));
         //void DrawImgBar();
+        void DrawMarker3D(DxLib::VECTOR targetPos, float markerSize,int MarkerH);
         void Fade(const uint_fast8_t TYPE, const uint_fast8_t SPEED);
         void EndBlend();
         void DrawValue(int_fast16_t x, int_fast16_t y, int a, int_fast32_t color = GetColor(255,255,255));

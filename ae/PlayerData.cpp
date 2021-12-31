@@ -5,6 +5,7 @@
 #include "MousePoll.h"
 #include "KeyPoll.h"
 #include "ModelData.h"
+#include "Interface.h"
 #include "PhysicsData.h"
 #include "PlayerData.h"
 #include "EnemyData.h"
@@ -14,15 +15,16 @@ static const float MOVEMENT_SPEED = DX_PI_F/5;
 static VECTOR S;
 
 int_fast8_t Selected = -1; //-1 = no target
-uint_least8_t CameraLock = TRUE, TargetLock = FALSE, fluxReverse = FALSE;
+uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 int MarkerH;
-float flux = 0.0f, markerSize = 0.0f;
+float markerSize = 0.0f;
 
 extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
 extern ModelData Model;
 extern PhysicsData Physics;
+extern Interface Ui;
 
 PlayerData::PlayerData()
 {
@@ -225,12 +227,8 @@ void PlayerData::Draw(Sphere_t *sObj)
 {
     if(TargetLock == TRUE)
     {
-        if(flux > 2.00f) fluxReverse = TRUE;
-        if(flux <= 0.00f) fluxReverse = FALSE;
-        if(fluxReverse == FALSE) flux += 0.03f;
-        else flux -= 0.03f;
         markerSize = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].Pos.x,sObj[Selected].Pos.z))*.00005f)+1.6f;
-        DrawBillboard3D(VGet(sObj[Selected].Pos.x,(sObj[Selected].Pos.y+16.0f+flux),sObj[Selected].Pos.z),1.0f,1.0f,markerSize,0.0f,MarkerH,TRUE);
+        Ui.DrawMarker3D(sObj[Selected].Pos,markerSize,MarkerH);
     }
 
     Model.Draw(MMD);
