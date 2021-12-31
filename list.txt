@@ -1,10 +1,9 @@
 Any set of rules that depend on the physical world around it is directly a study of physics
 
--abstraction: Select option/marker targ - ui
-
 -Fix conversion warnings
 -t nomenclature 2nd pass
--List planned core feats
+-secure pass
+-planned core feats
 
 -ability casting
 -continue extending modeldata, overloads
