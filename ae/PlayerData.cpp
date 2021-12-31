@@ -12,10 +12,8 @@
 
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
-static VECTOR S;
-
-int_fast8_t Selected = -1; //-1 = no target
-uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
+static int_fast8_t Selected = -1; //-1 = no target
+static uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 
 extern ScreenControl Screen;
 extern MousePoll Mouse;
@@ -188,11 +186,9 @@ void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16
     {
         if(sObj[Selected].Active)
         {
-            S.x = MMD.Pos.x - sObj[Selected].Pos.x;
-            S.z = MMD.Pos.z - sObj[Selected].Pos.z;
-            Screen.C3D.AngleH = atan2f(S.x,S.z); 
+            Screen.C3D.AngleH = Physics.Formula.RelAngle2(MMD.Pos, sObj[Selected].Pos);
             MMD.Rot.y = Screen.C3D.AngleH;
-            Screen.C3D.Anchor = MMD.Rot.y - DX_PI_F/10;;
+            Screen.C3D.Anchor = MMD.Rot.y - DX_PI_F/10;
         }
         else Selected = -1, TargetLock = FALSE;
     }
@@ -201,15 +197,10 @@ void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16
     Screen.C3D.Pos.x = MMD.Pos.x + sin(Screen.C3D.Anchor)*40;
     
     //horizontal lock formula
-    S.x = MMD.Pos.x - Screen.C3D.Pos.x;
-    S.z = MMD.Pos.z - Screen.C3D.Pos.z;
-    Screen.C3D.AngleH = atan2f(S.x,S.z); 
+    Screen.C3D.AngleH = Physics.Formula.RelAngle2(MMD.Pos, Screen.C3D.Pos);
 
     //vertical lock formula
-    S.x = Screen.C3D.Pos.x - MMD.Pos.x;
-    S.y = Screen.C3D.Pos.y - MMD.Pos.y; 
-    S.z = Screen.C3D.Pos.z - MMD.Pos.z;
-    Screen.C3D.AngleV = (atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z)) - Screen.C3D.OffsetV);
+    Screen.C3D.AngleV = Physics.Formula.RelAngle3(Screen.C3D.Pos, MMD.Pos) - Screen.C3D.OffsetV;
     
     //Simple Jump
     if(Jump == TRUE && Grounded == FALSE)

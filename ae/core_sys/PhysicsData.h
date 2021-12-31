@@ -31,6 +31,8 @@ class PhysicsData {
                 float& ApproxAngle(const int_fast16_t screenWidth, float &objAngle, float &objMainAxisCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate = 1.00, int_fast16_t totalRotPointMulti = 1, uint_fast8_t divisor = 4);   
                 double& ApproxAngle(const int_fast16_t screenWidth, double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate = 1.00, int_fast16_t totalRotPointMulti = 1, uint_fast8_t divisor = 4);
                 void AnchoredAngle(float anchorX, float anchorY, double anchorAngle, float &targetX, float &targetY, double &targetAngle, uint_fast16_t distance);
+                float RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
+                float RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
                 DxLib::VECTOR Cross3(const VECTOR &a, const VECTOR &b);
                 float Dot3(const VECTOR &a, const VECTOR &b);
                 float Dot2(const float &x, const float &z);

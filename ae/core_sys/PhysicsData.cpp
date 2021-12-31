@@ -9,7 +9,9 @@
 static const double PI = M_PI;
 static const double nPI = M_PI * -1;
 static double cROT = 0.00;
+static float Angle;
 static int_fast32_t random1, random2;
+static VECTOR S;
 
 PhysicsData::PhysicsData(float a)
 :Decay(a)
@@ -94,6 +96,23 @@ void PhysicsData::PhysicsFormula::AnchoredAngle(float anchorX, float anchorY, do
 {
     targetX = anchorX, targetY = anchorY, targetAngle = anchorAngle;
     parent->Propel(targetX,targetY,targetAngle,distance);
+}
+
+float PhysicsData::PhysicsFormula::RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+{
+    S.x = a.x - b.x;
+    S.y = a.y - b.y; 
+    S.z = a.z - b.z;
+    Angle = atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z));
+    return Angle;
+}
+
+float PhysicsData::PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+{
+    S.x = a.x - b.x;
+    S.z = a.z - b.z;
+    Angle = atan2f(S.x,S.z); 
+    return Angle;
 }
 
 DxLib::VECTOR PhysicsData::PhysicsFormula::Cross3(const VECTOR &a, const VECTOR &b)
