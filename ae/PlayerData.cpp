@@ -5,6 +5,7 @@
 #include "MousePoll.h"
 #include "KeyPoll.h"
 #include "ModelData.h"
+#include "PhysicsData.h"
 #include "PlayerData.h"
 #include "EnemyData.h"
 
@@ -17,12 +18,11 @@ uint_least8_t CameraLock = TRUE, TargetLock = FALSE, fluxReverse = FALSE;
 int MarkerH;
 float flux = 0.0f, markerSize = 0.0f;
 
-float Dot2(const float &x, const float &z);
-
 extern ScreenControl Screen;
 extern MousePoll Mouse;
 extern KeyPoll Key;
 extern ModelData Model;
+extern PhysicsData Physics;
 
 PlayerData::PlayerData()
 {
@@ -227,16 +227,9 @@ void PlayerData::Draw(Sphere_t *sObj)
         if(flux <= 0.00f) fluxReverse = FALSE;
         if(fluxReverse == FALSE) flux += 0.03f;
         else flux -= 0.03f;
-        markerSize = ((Dot2(MMD.Pos.x,MMD.Pos.z)-Dot2(sObj[Selected].v.x,sObj[Selected].v.z))*.00005f)+1.6f;
+        markerSize = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].v.x,sObj[Selected].v.z))*.00005f)+1.6f;
         DrawBillboard3D(VGet(sObj[Selected].v.x,(sObj[Selected].v.y+16.0f+flux),sObj[Selected].v.z),1.0f,1.0f,markerSize,0.0f,MarkerH,TRUE);
     }
 
     Model.Draw(MMD);
-}
-
-float Dot2(const float &x, const float &z)
-{
-	float dot;
-	dot = (x*x+z*z);
-	return dot;
 }
