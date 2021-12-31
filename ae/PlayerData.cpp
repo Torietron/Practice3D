@@ -175,7 +175,7 @@ void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16
         for(uint_fast8_t i = 0; i < MAX; i++)
         {
             Selected = Selected + 1;
-            if(sObj[Selected].active) break;
+            if(sObj[Selected].Active) break;
         }
         TargetLock = TRUE;
         if(Selected > (MAX - Destroyed) - 1) Selected = -1;
@@ -185,10 +185,10 @@ void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16
     //Handle TargetLock
     if(TargetLock == TRUE)
     {
-        if(sObj[Selected].active)
+        if(sObj[Selected].Active)
         {
-            S.x = MMD.Pos.x - sObj[Selected].v.x;
-            S.z = MMD.Pos.z - sObj[Selected].v.z;
+            S.x = MMD.Pos.x - sObj[Selected].Pos.x;
+            S.z = MMD.Pos.z - sObj[Selected].Pos.z;
             Screen.C3D.AngleH = atan2f(S.x,S.z); 
             MMD.Rot.y = Screen.C3D.AngleH;
             Screen.C3D.Anchor = MMD.Rot.y - DX_PI_F/10;;
@@ -229,8 +229,8 @@ void PlayerData::Draw(Sphere_t *sObj)
         if(flux <= 0.00f) fluxReverse = FALSE;
         if(fluxReverse == FALSE) flux += 0.03f;
         else flux -= 0.03f;
-        markerSize = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].v.x,sObj[Selected].v.z))*.00005f)+1.6f;
-        DrawBillboard3D(VGet(sObj[Selected].v.x,(sObj[Selected].v.y+16.0f+flux),sObj[Selected].v.z),1.0f,1.0f,markerSize,0.0f,MarkerH,TRUE);
+        markerSize = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].Pos.x,sObj[Selected].Pos.z))*.00005f)+1.6f;
+        DrawBillboard3D(VGet(sObj[Selected].Pos.x,(sObj[Selected].Pos.y+16.0f+flux),sObj[Selected].Pos.z),1.0f,1.0f,markerSize,0.0f,MarkerH,TRUE);
     }
 
     Model.Draw(MMD);
