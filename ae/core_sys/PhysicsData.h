@@ -3,8 +3,12 @@
 #define DEF_PHYSICSDATA_H
 
 #include <cstdint>
-#include "PlayerData.h"
-#include "EnemyData.h"
+#include "ModelData.h"
+
+typedef struct {
+    uint_fast32_t Time, dTime;
+    bool Event;
+} PhysicsLastDelta_t;
 
 typedef struct PhysicsDelta_t {
     uint_least8_t Frames;
@@ -24,11 +28,6 @@ typedef struct PhysicsDelta_t {
         dTime = GetNowCount();
     }
 } PhysicsDelta_t; 
-
-typedef struct {
-    uint_fast32_t Time, dTime;
-    bool Event;
-} PhysicsLastDelta_t;
 
 class PhysicsData {
     public:
