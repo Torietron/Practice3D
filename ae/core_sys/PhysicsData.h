@@ -3,7 +3,6 @@
 #define DEF_PHYSICSDATA_H
 
 #include <cstdint>
-#include "ModelData.h"
 
 typedef struct {
     uint_fast32_t Time, dTime;
@@ -35,7 +34,7 @@ class PhysicsData {
         PhysicsData(float a = 0.99);
         bool BoxCollision(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight);
         bool RadialCollision(const int_fast16_t &a1, const int_fast16_t &a2, const int_fast16_t &a3r, const int_fast16_t &b1, const int_fast16_t &b2, const int_fast16_t &b3r);
-        bool SphereCollision3D(const MMD_t &m, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd);
+        bool SphereCollision3D(const int &modelH, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd);
         bool Fling(int_fast16_t &position, int_fast16_t destination, uint_fast8_t direction, uint_fast16_t speed = 1, float grav = 1.00, float iMulti = 1.00);
         void Propel(float &x, float &y, double angle, uint_fast16_t magnitude = 1);
         void Spin(double &rot, char L_or_R_Direction, uint_fast8_t totalRotPoints = 32);

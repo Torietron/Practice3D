@@ -73,7 +73,7 @@ void PracticeScene::Update()
     //Collision
     for(uint_fast8_t i = 0; i < SPHERES; i++)
     {
-        if(Physics.SphereCollision3D(Player.MMD,Sphere[i].v,Sphere[i].r,HitPolyDim[i]))
+        if(Physics.SphereCollision3D(Player.MMD.ModelH,Sphere[i].v,Sphere[i].r,HitPolyDim[i]))
         {
             SDFlag[i] = 0;
             Sphere[i].active = false;

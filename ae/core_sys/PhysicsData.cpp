@@ -49,9 +49,9 @@ bool PhysicsData::RadialCollision(const int_fast16_t &a1, const int_fast16_t &a2
 }
 
 //Refresh model collision info beforehand, once per frame
-bool PhysicsData::SphereCollision3D(const MMD_t &m, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd)
+bool PhysicsData::SphereCollision3D(const int &modelH, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd)
 {
-    hpd = MV1CollCheck_Sphere(m.ModelH, -1, spherePos, radius);
+    hpd = MV1CollCheck_Sphere(modelH, -1, spherePos, radius);
     if(hpd.HitNum >= 1)
     {
         MV1CollResultPolyDimTerminate(hpd);
