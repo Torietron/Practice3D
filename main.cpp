@@ -6,6 +6,7 @@
 #include "SceneControl.h"
 #include "ScreenControl.h"
 #include "ModelData.h"
+#include "Interface.h"
 #include "PhysicsData.h"
 #include "PlayerData.h"
 #include "EnemyData.h"
@@ -17,6 +18,7 @@ MousePoll Mouse;
 KeyPoll Key;
 ModelData Model;
 PhysicsData Physics;
+Interface Ui;
 PlayerData Player;
 EnemyData Enemy;
 

@@ -4,15 +4,15 @@
 #include "KeyPoll.h"
 #include "Interface.h"
 
-Interface Ui;
 InterfaceOptions_t Options[3] = {
-    {50,50,"button1",Ui.Yellow},
-    {50,70,"button2",Ui.Yellow},
-    {50,90,"button3",Ui.Yellow},
+    {50,50,"button1",-256},
+    {50,70,"button2",-256},
+    {50,90,"button3",-256},
 };
 
 extern SceneControl Scene;
 extern KeyPoll Key;
+extern Interface Ui;
 
 void DebugScene::Init()
 {

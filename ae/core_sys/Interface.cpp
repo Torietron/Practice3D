@@ -21,6 +21,8 @@ Interface::Interface(int_fast8_t a)
     FontSize = 16;
     FontThickness = 7;
     FontType = DX_FONTTYPE_ANTIALIASING_EDGE_4X4;
+    FluxReverse = FALSE;
+    Flux = 0.0f;
 }
 
 void Interface::UpdateMenu(const uint_fast8_t MAX, const int KEY1, const int KEY2)
@@ -64,6 +66,16 @@ void Interface::DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent,double n
     //scalable ratio = (((endP+(baseWidth*objscale)) - (startP-(baseWidth*objscale))) *(cast to double)val%) + startP-(baseWidth*objscale) //pixel shift as needed
     DrawBox(x-(w*scale) ,y-2+(0-h*scale) ,x+(w*scale),y+2+(0-h*scale),colorframe,FALSE);
     DrawBox(x+1-(w*scale) ,y-1+(0-h*scale) ,(((x-1+(w*scale)) - (x-(w*scale))) *((double)numCurrent/numMax)) + x-(w*scale), y+1+(0-h*scale),colorfill,TRUE); 
+}
+
+void Interface::DrawMarker3D(DxLib::VECTOR targetPos, float markerSize,int MarkerH)
+{
+    if(Flux > 2.00f) FluxReverse = TRUE;
+    if(Flux <= 0.00f) FluxReverse = FALSE;
+    if(FluxReverse == FALSE) Flux += 0.03f;
+    else Flux -= 0.03f;
+    VECTOR markerPos = VGet(targetPos.x,(targetPos.y+16.0f+Flux),targetPos.z);
+    DrawBillboard3D(markerPos,1.0f,1.0f,markerSize,0.0f,MarkerH,TRUE);
 }
 
 void Interface::Fade(const uint_fast8_t TYPE, const uint_fast8_t SPEED)
