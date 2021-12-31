@@ -1,6 +1,5 @@
 Any set of rules that depend on the physical world around it is directly a study of physics
 
--abstraction: Drawmarker - ui
 -abstraction: Select option/marker targ - ui
 
 -Fix conversion warnings
