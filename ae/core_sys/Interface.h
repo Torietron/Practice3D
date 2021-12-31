@@ -51,13 +51,12 @@ class Interface {
 typedef enum {
     FADE_IN,
     FADE_OUT
-} InterfaceFadeType_t;
+} _InterfaceFadeType_t;
 
 typedef enum {
     SPEED1 = 1,
     SPEED2 = 5,
     SPEED3 = 15
-} InterfaceFadeSpeed_t; //clean divisions of 255
-
+} _InterfaceFadeSpeed_t; //clean divisions of 255
 
 #endif

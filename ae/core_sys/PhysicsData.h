@@ -74,7 +74,7 @@ typedef enum {
     FLING_UP,
     FLING_RIGHT,
     FLING_LEFT
-} PhysicsFlingDirection_t;
+} _PhysicsFlingDirection_t;
 
 typedef enum {
     DECAY,
@@ -84,6 +84,6 @@ typedef enum {
     LAST_INERTIA_Y,
     LAST_GRAVITY_X,
     LAST_GRAVITY_Y
-} PhysicsGet_t;
+} _PhysicsGet_t;
 
 #endif

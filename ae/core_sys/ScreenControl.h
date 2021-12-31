@@ -10,9 +10,9 @@ typedef struct {
     VECTOR Pos, Offset;
     char Label;
     bool Event, Enabled;
-} Camera2D_t;
+} _Camera2D_t;
 
-typedef struct Camera3D_t {
+typedef struct _Camera3D_t {
     float AngleH, AngleV, Roll, Zoom;
     float Anchor, OffsetH, OffsetV, OffsetR;
     VECTOR Pos;
@@ -21,7 +21,7 @@ typedef struct Camera3D_t {
     void Apply(){
         SetCameraPositionAndAngle(Pos,AngleV,AngleH,Roll);
     }
-} Camera3D_t; 
+} _Camera3D_t; 
 
 class ScreenControl {
     public:
@@ -30,8 +30,8 @@ class ScreenControl {
         int_fast16_t Width, Height;
         uint_fast16_t MaxFPS;
         int_fast32_t CursorH[2], CursorH2[2];
-        Camera2D_t C2D;
-        Camera3D_t C3D;
+        _Camera2D_t C2D;
+        _Camera3D_t C3D;
         ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b = 16, uint_fast16_t f = 60);
         int Init();
         int Update();
