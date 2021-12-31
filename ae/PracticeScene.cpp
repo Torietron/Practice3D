@@ -62,7 +62,6 @@ void PracticeScene::Update()
     Key.Update();
     Mouse.Update();
     Player.Update(Sphere,Destroyed,SPHERES);
-    Model.Update(Player.MMD);
 
     //Update Camera
     Screen.C3D.Apply();
