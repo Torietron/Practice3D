@@ -1,7 +1,6 @@
 Any set of rules that depend on the physical world around it is directly a study of physics
 
 -Fix conversion warnings
--t nomenclature 2nd pass
 -secure pass
 -planned core feats
 
