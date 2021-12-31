@@ -5,15 +5,11 @@
 #include <ctime>
 #include <cmath>
 #include "PhysicsData.h"
-#include "ScreenControl.h"
-#include "ModelData.h"
 
 static const double PI = M_PI;
 static const double nPI = M_PI * -1;
 static double cROT = 0.00;
 static int_fast32_t random1, random2;
-
-extern ScreenControl Screen;
 
 PhysicsData::PhysicsData(float a)
 :Decay(a)
@@ -44,7 +40,7 @@ void PhysicsData::PhysicsFormula::Humanize(float &a, float variation)
     a = hTemp;
 }
 
-float& PhysicsData::PhysicsFormula::ApproxAngle(float &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
+float& PhysicsData::PhysicsFormula::ApproxAngle(const int_fast16_t screenWidth, float &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
 {
     if(focalPointInverseCoord <= objInverseAxisAnchor)
     {
@@ -57,19 +53,19 @@ float& PhysicsData::PhysicsFormula::ApproxAngle(float &objAngle, float &objMainA
     {
         if(objMainAxisRotCoord > focalPointCoord)
         {
-            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objAngle += (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
             objMainAxisRotCoord -= turnRate;
         }
         if(objMainAxisRotCoord < focalPointCoord)
         {
-            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objAngle -= (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
             objMainAxisRotCoord += turnRate;
         }
     }
     return objAngle;
 }
 
-double& PhysicsData::PhysicsFormula::ApproxAngle(double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
+double& PhysicsData::PhysicsFormula::ApproxAngle(const int_fast16_t screenWidth, double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
 {
     if(focalPointInverseCoord <= objInverseAxisAnchor)
     {
@@ -82,12 +78,12 @@ double& PhysicsData::PhysicsFormula::ApproxAngle(double &objAngle, float &objMai
     {
         if(objMainAxisRotCoord > focalPointCoord)
         {
-            objAngle += (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objAngle += (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
             objMainAxisRotCoord -= turnRate;
         }
         if(objMainAxisRotCoord < focalPointCoord)
         {
-            objAngle -= (cROT*2/(Screen.Width*totalRotPointMulti))/divisor;
+            objAngle -= (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
             objMainAxisRotCoord += turnRate;
         }
     }
@@ -100,7 +96,7 @@ void PhysicsData::PhysicsFormula::AnchoredAngle(float anchorX, float anchorY, do
     parent->Propel(targetX,targetY,targetAngle,distance);
 }
 
-DxLib::VECTOR PhysicsData::PhysicsFormula::SetCross(const VECTOR &a, const VECTOR &b)
+DxLib::VECTOR PhysicsData::PhysicsFormula::Cross3(const VECTOR &a, const VECTOR &b)
 {
 	VECTOR c;
 	c.x = (a.y * b.z - a.z * b.y);

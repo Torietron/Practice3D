@@ -1,8 +1,5 @@
 Any set of rules that depend on the physical world around it is directly a study of physics
 
--Sphere_t nomenclature
--Remove extern from core sys
-
 -abstraction: Drawmarker - ui
 -abstraction: Select option/marker targ - ui
 
