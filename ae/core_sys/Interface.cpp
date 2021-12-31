@@ -2,49 +2,56 @@
 #include <iostream>
 #include <cstdint>
 #include "Interface.h"
-#include "ScreenControl.h"
-#include "KeyPoll.h"
 
-extern ScreenControl Screen;
-extern KeyPoll Key;
+static char Keys[256];
+static uint_fast16_t KeyPress[256];
 
 Interface::Interface(int_fast8_t a)
-:selected(a)
+:Selected(a)
 {
-    brightness = 0;
+    Brightness = 0;
     White = GetColor(255,255,255);
+    Black = GetColor(0,0,0);
     Red = GetColor(255,0,0);
     Yellow = GetColor(255,255,0);
+    Green = GetColor(0,255,0);
+    Cyan = GetColor(0,255,255);
+    Turquoise = GetColor(64,224,208);
+    Amber = GetColor(255,126,0);
     FontSize = 16;
     FontThickness = 7;
     FontType = DX_FONTTYPE_ANTIALIASING_EDGE_4X4;
-    Options.x = Screen.Width/2-75;
-    Options.y = Screen.Height/2+25;
 }
 
 void Interface::UpdateMenu(const uint_fast8_t MAX, const int KEY1, const int KEY2)
 {
-    if(Key.Poll[KEY1] == 1 || Key.Poll[KEY2] == 1) 
+    GetHitKeyStateAll(Keys);
+    if(Keys[KEY1] != 0) KeyPress[KEY1]++;
+    else KeyPress[KEY1] = 0;
+    if(Keys[KEY2] != 0) KeyPress[KEY2]++;
+    else KeyPress[KEY2] = 0;
+
+    if(KeyPress[KEY1] == 1 || KeyPress[KEY2] == 1) 
     {
-        if(Key.Poll[KEY2] == 1) selected = (selected + 1) % MAX;
-        if(Key.Poll[KEY1] == 1) selected = (selected - 1) % MAX;
-        if(Key.Poll[KEY1] == 1 && selected < 0) selected = MAX - 1;
+        if(KeyPress[KEY2] == 1) Selected = (Selected + 1) % MAX;
+        if(KeyPress[KEY1] == 1) Selected = (Selected - 1) % MAX;
+        if(KeyPress[KEY1] == 1 && Selected < 0) Selected = MAX - 1;
     }
 }
 
-void Interface::DrawMenu(InterfaceOptions_t *option, const uint_fast8_t MAX, int_fast32_t selectedColor, int_fast32_t baseColor)
+void Interface::DrawMenu(InterfaceOptions_t *option, const uint_fast8_t MAX, int_fast32_t SelectedColor, int_fast32_t baseColor)
 {
     for(uint_fast8_t i = 0; i < MAX; i++)
     {
-        if(i == selected) 
+        if(i == Selected) 
         {
-            option[i].color = selectedColor;
+            option[i].Color = SelectedColor;
         }
         else
         {
-            option[i].color = baseColor;
+            option[i].Color = baseColor;
         }
-        DrawString(option[i].x,option[i].y,option[i].name,option[i].color);
+        DrawString(option[i].x,option[i].y,option[i].Text,option[i].Color);
         //DrawStringToHandle(100,100,"Text Here",GetColor(255,255,255),font00);
         //DrawStringToHandle(option[i].x,option[i].y,option[i].name,option[i].color,font00);
     }
@@ -64,12 +71,12 @@ void Interface::Fade(const uint_fast8_t TYPE, const uint_fast8_t SPEED)
     switch(TYPE)
     {
         case 0:
-            if(brightness <= 254) brightness = brightness + SPEED;
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, brightness);  
+            if(Brightness <= 254) Brightness = Brightness + SPEED;
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness);  
             break;
         case 1:
-            if(brightness >= 1) brightness = brightness - SPEED; 
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, brightness); 
+            if(Brightness >= 1) Brightness = Brightness - SPEED; 
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness); 
             break;
     }
 }

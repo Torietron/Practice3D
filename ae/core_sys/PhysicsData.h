@@ -28,10 +28,10 @@ class PhysicsData {
             public:
                 void Standardize(float &a, float min, float max);
                 void Humanize(float &a, float variation);
-                float& ApproxAngle(float &objAngle, float &objMainAxisCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate = 1.00, int_fast16_t totalRotPointMulti = 1, uint_fast8_t divisor = 4);   
-                double& ApproxAngle(double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate = 1.00, int_fast16_t totalRotPointMulti = 1, uint_fast8_t divisor = 4);
+                float& ApproxAngle(const int_fast16_t screenWidth, float &objAngle, float &objMainAxisCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate = 1.00, int_fast16_t totalRotPointMulti = 1, uint_fast8_t divisor = 4);   
+                double& ApproxAngle(const int_fast16_t screenWidth, double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate = 1.00, int_fast16_t totalRotPointMulti = 1, uint_fast8_t divisor = 4);
                 void AnchoredAngle(float anchorX, float anchorY, double anchorAngle, float &targetX, float &targetY, double &targetAngle, uint_fast16_t distance);
-                DxLib::VECTOR SetCross(const VECTOR &a, const VECTOR &b);
+                DxLib::VECTOR Cross3(const VECTOR &a, const VECTOR &b);
                 float Dot3(const VECTOR &a, const VECTOR &b);
                 float Dot2(const float &x, const float &z);
             private:

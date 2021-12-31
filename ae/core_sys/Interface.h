@@ -6,19 +6,25 @@
 #include <cstdint>
 #include <iostream>
 
+//assign char at declaration
 typedef struct {
     int_fast16_t x, y;
-    char name[50];
-    uint_fast32_t color;
+    char Text[50];
+    int_fast32_t Color;
 } InterfaceOptions_t;
 
 class Interface {
     public:
-        int_fast8_t selected;
-        uint_fast8_t brightness;
-        int_fast32_t White;  //-1
-        int_fast32_t Red;    //-65536
-        int_fast32_t Yellow; //-256
+        int_fast8_t Selected;
+        uint_fast8_t Brightness;
+        int_fast32_t White;     //-1 (raw values)
+        int_fast32_t Black;     //-16777216
+        int_fast32_t Red;       //-65536
+        int_fast32_t Yellow;    //-256
+        int_fast32_t Green;     //-16711936
+        int_fast32_t Cyan;      //-16711681
+        int_fast32_t Turquoise; //-12525360
+        int_fast32_t Amber;     //-33280
         uint_fast8_t FontSize, FontThickness, FontType;
         InterfaceOptions_t Options;
         Interface(int_fast8_t a = 0);
