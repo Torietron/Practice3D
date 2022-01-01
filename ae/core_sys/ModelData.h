@@ -21,7 +21,7 @@ typedef struct {
     float PlayTime, TotalTime, PlayOffset;
     VECTOR Pos, Rot, RotOffset;
     bool Event, Reverse;
-} X_t;
+} DX_t;
 
 typedef struct {
     int ModelH;
@@ -33,7 +33,7 @@ typedef struct {
     int ModelH, Anim;
     VECTOR Pos, Rot;
     bool Event;
-} LIVE2D_t;
+} Live2D_t;
 
 typedef struct {
     int SpriteH;
@@ -43,7 +43,7 @@ typedef struct {
     int_fast16_t x, y;
     uint_fast16_t w, h;
     bool Event;
-} SPRITE3D_t;
+} Sprite3D_t;
 
 typedef struct {
     int SpriteH;
@@ -51,15 +51,15 @@ typedef struct {
     int_fast16_t x, y;
     uint_fast16_t w, h;
     bool Event;
-} SPRITE2D_t;
+} Sprite2D_t;
 
 class ModelData {
     public:
         ModelData(float rate = 0.39f);
         void Update(MMD_t &m);
-        void Update(X_t &m);
         void Update(MQO_t &m);
         void Draw(MMD_t &m, float rate = 0.9f);
+        void Draw(MQO_t &m);
         void SetPlayRate(float a);
         float GetPlayRate();
     private:

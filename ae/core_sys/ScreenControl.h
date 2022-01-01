@@ -1,4 +1,4 @@
-/***** WindowControl.h *****/
+/***** ScreenControl.h *****/
 #ifndef DEF_SCREENCONTROL_H
 #define DEF_SCREENCONTROL_H
 

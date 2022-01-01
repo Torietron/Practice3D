@@ -1,8 +1,6 @@
 Any set of rules that depend on the physical world around it is directly a study of physics
 
--Fix conversion warnings
 -secure pass
--planned core feats
 
 -ability casting
 -continue extending modeldata, overloads
