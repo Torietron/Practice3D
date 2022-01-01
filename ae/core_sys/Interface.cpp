@@ -1,6 +1,7 @@
 #include "DxLib.h"
 #include <iostream>
 #include <cstdint>
+#include <cmath>
 #include "Interface.h"
 
 static char Keys[256];
@@ -64,8 +65,8 @@ void Interface::DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent,double n
     //??? MY LAUGHABLE CEREAL TOY QUALITY FORMULA, no keyboard keys were harmed during the making of this 
     //simplified ratio = ((endP - startP) *val%) + startP
     //scalable ratio = (((endP+(baseWidth*objscale)) - (startP-(baseWidth*objscale))) *(cast to double)val%) + startP-(baseWidth*objscale) //pixel shift as needed
-    DrawBox(x-(w*scale) ,y-2+(0-h*scale) ,x+(w*scale),y+2+(0-h*scale),colorframe,FALSE);
-    DrawBox(x+1-(w*scale) ,y-1+(0-h*scale) ,(((x-1+(w*scale)) - (x-(w*scale))) *((double)numCurrent/numMax)) + x-(w*scale), y+1+(0-h*scale),colorfill,TRUE); 
+    DrawBox(x-(w*(int)round(scale)) ,y-2+(0-h*(int)round(scale)) ,x+(w*(int)round(scale)),y+2+(0-h*(int)round(scale)),colorframe,FALSE);
+    DrawBox(x+1-(w*(int)round(scale)) ,y-1+(0-h*(int)round(scale)) ,(((x-1+(w*(int)round(scale))) - (x-(w*(int)round(scale)))) *(int)round((numCurrent/numMax))) + x-(w*(int)round(scale)), y+1+(0-h*(int)round(scale)),colorfill,TRUE); 
 }
 
 void Interface::DrawMarker3D(const DxLib::VECTOR &targetPos, DxLib::VECTOR &markerPos, const float &markerSize, const int &markerH, const float &heightOffset, const float &markerRot, const float &cx, const float &cy)
