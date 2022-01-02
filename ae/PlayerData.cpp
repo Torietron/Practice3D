@@ -44,9 +44,10 @@ void PlayerData::Load()
         MV1DeleteModel(MMD.ModelH);
     }
     MMD.ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
+    MMD.IdleIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.AttachIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
-    MMD.BlendIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
+    MMD.LastDecay = 0.0f;
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
     MMD.Pace = 0;
 
