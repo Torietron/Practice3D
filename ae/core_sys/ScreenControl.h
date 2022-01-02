@@ -23,23 +23,22 @@ typedef struct _Camera3D_t {
     }
 } _Camera3D_t; 
 
-class ScreenControl {
+class ScreenControl { /* Manage screen modifications */
     public:
         uint_fast8_t WinMode, New, Cursor, LimitFPS, ShowFPS;
         uint_fast8_t BitDepth, CursorIndex;
-        int_fast16_t Width, Height;
-        uint_fast16_t MaxFPS;
+        uint_fast16_t Width, Height, MaxFPS;
         int_fast32_t CursorH[2], CursorH2[2];
         _Camera2D_t C2D;
         _Camera3D_t C3D;
-        ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b = 16, uint_fast16_t f = 60);
+        ScreenControl(const uint_fast16_t w, const uint_fast16_t h, const uint_fast8_t b = 16, const uint_fast16_t f = 60);
         int Init();
         int Update();
         void CountFPS();
         void DrawFPS();
-        int DrawCursor(int_fast16_t padRight = 20, int_fast16_t padLeft = 2, int_fast16_t padBottom = 20, int_fast16_t padTop = 2);
-        void SetFPSLocation(int_fast16_t x, int_fast16_t y);
-        void SetFPSLimit(uint_fast16_t a);
+        int DrawCursor(const int_fast16_t &padRight = 20, const int_fast16_t &padLeft = 2, const int_fast16_t &padBottom = 20, const int_fast16_t &padTop = 2);
+        void SetFPSLocation(const int_fast16_t &x, const int_fast16_t &y);
+        void SetFPSLimit(const uint_fast16_t &a);
         uint_fast16_t GetFPSLimit();
         void Wait();
         void End();
