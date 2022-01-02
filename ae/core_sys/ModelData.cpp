@@ -12,7 +12,12 @@ void ModelData::Update(MMD_t &m)
     //Check and Update
     if(m.AnimSet != m.AnimIndex)
     {
+
+        m.LastDecay = 0.20f;
+        MV1DetachAnim(m.ModelH,m.LastIndex);
         MV1DetachAnim(m.ModelH,m.AttachIndex);
+        m.LastIndex = MV1AttachAnim(m.ModelH, m.AnimSet, -1, FALSE);
+        m.LastPlayTime = m.PlayTime;
         m.AttachIndex = MV1AttachAnim(m.ModelH, m.AnimIndex, -1, FALSE);
         m.TotalTime = MV1GetAttachAnimTotalTime(m.ModelH,m.AttachIndex);
         m.PlayTime = 0.0f;
@@ -33,6 +38,7 @@ void ModelData::Update(MMD_t &m)
 
     //Update the playback time point
     MV1SetAttachAnimTime(m.ModelH,m.AttachIndex,m.PlayTime); 
+    MV1SetAttachAnimTime(m.ModelH,m.LastIndex,m.LastPlayTime); 
 
     //Update spatial data
     MV1SetPosition(m.ModelH,m.Pos);
@@ -47,11 +53,22 @@ void ModelData::Update(MQO_t &m)
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 
-//Blend two animations for smoother transitions
-void ModelData::Draw(MMD_t &m, const float blendRate1, const float blendRate2)
+//Blend two animations
+void ModelData::Blend(MMD_t &m, const float &blendRate)
 {
-    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1);
-    MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex,blendRate2);
+    MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex,blendRate);
+}
+
+//Blend for smoother transitions
+void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
+{
+    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.LastDecay/2);
+    if(m.LastDecay > 0.00f) 
+    {
+        MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.LastDecay/2)+blendRate2));
+        m.LastDecay -= 0.02f;
+    }
+    else MV1SetAttachAnimBlendRate(m.ModelH,m.IdleIndex,blendRate2);
     MV1DrawModel(m.ModelH);
 }
 

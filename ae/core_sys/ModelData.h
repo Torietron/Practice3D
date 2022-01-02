@@ -6,15 +6,15 @@
 #include <cstdint>
 
 typedef struct { /* MMD character model */
-    int ModelH, AttachIndex, IdleIndex, BlendIndex;
+    int ModelH, AttachIndex, IdleIndex, LastIndex, BlendIndex;
     uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
-    float PlayTime, TotalTime, PlayOffset;
+    float PlayTime, TotalTime, PlayOffset, LastDecay, LastPlayTime;
     VECTOR Pos, Rot, RotOffset;
     bool Event, Reverse;
 } MMD_t;
 
-typedef struct { /* DX accessory/prop */
+typedef struct { /* DX accessory/prop/character/environment */
     int ModelH, AttachIndex;
     uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
@@ -59,7 +59,8 @@ class ModelData { /* Manage models */
         ModelData(float rate = 0.39f);
         void Update(MMD_t &m);
         void Update(MQO_t &m);
-        void Draw(MMD_t &m, const float blendRate1 = 1.0f, const float blendRate2 = 0.0f);
+        void Blend(MMD_t &m, const float &blendRate);
+        void Draw(MMD_t &m, const float &blendRate1 = 1.0f, const float &blendRate2 = 0.0f);
         void Draw(const MQO_t &m);
         void SetPlayRate(float a);
         float GetPlayRate();
