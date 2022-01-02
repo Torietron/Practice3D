@@ -5,8 +5,8 @@
 #include "DxLib.h"
 #include <cstdint>
 
-typedef struct {
-    int ModelH, AttachIndex;
+typedef struct { /* MMD character model */
+    int ModelH, AttachIndex, IdleIndex, BlendIndex;
     uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset;
@@ -14,7 +14,7 @@ typedef struct {
     bool Event, Reverse;
 } MMD_t;
 
-typedef struct {
+typedef struct { /* DX accessory/prop */
     int ModelH, AttachIndex;
     uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
@@ -23,43 +23,44 @@ typedef struct {
     bool Event, Reverse;
 } DX_t;
 
-typedef struct {
+typedef struct { /* MQO environment */
     int ModelH;
     VECTOR Pos, Rot;
     bool Event;
 } MQO_t;
 
-typedef struct {
+typedef struct { /* 2D Warp Model */
     int ModelH, Anim;
     VECTOR Pos, Rot;
     bool Event;
 } Live2D_t;
 
-typedef struct {
+typedef struct { /* 2D Sprite in a 3D position */
     int SpriteH;
     uint_least8_t FluxReverse;
-    float Flux, FluxRate, Size;
+    float Flux, FluxRate, Size, Angle;
     VECTOR Pos, Rot;
     int_fast16_t x, y;
     uint_fast16_t w, h;
     bool Event;
 } Sprite3D_t;
 
-typedef struct {
+typedef struct { /* 2D Sprite */
     int SpriteH;
-    VECTOR Pos, Rot;
+    float Angle;
+    VECTOR Pos;
     int_fast16_t x, y;
     uint_fast16_t w, h;
     bool Event;
 } Sprite2D_t;
 
-class ModelData {
+class ModelData { /* Manage models */
     public:
         ModelData(float rate = 0.39f);
         void Update(MMD_t &m);
         void Update(MQO_t &m);
-        void Draw(MMD_t &m, float rate = 0.9f);
-        void Draw(MQO_t &m);
+        void Draw(MMD_t &m, const float blendRate1 = 1.0f, const float blendRate2 = 0.0f);
+        void Draw(const MQO_t &m);
         void SetPlayRate(float a);
         float GetPlayRate();
     private:

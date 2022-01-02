@@ -4,7 +4,7 @@
 
 static uint_fast16_t KeyEscape = 0;
 
-ScreenControl::ScreenControl(int_fast16_t w, int_fast16_t h, uint_fast8_t b, uint_fast16_t f)
+ScreenControl::ScreenControl(const uint_fast16_t w, const uint_fast16_t h, const uint_fast8_t b, const uint_fast16_t f)
 :Width(w),Height(h),BitDepth(b),MaxFPS(f)
 {
     ShowFPS = FALSE, LimitFPS = FALSE;
@@ -68,6 +68,7 @@ int ScreenControl::Update()
         if(WinMode == FALSE) Cursor = FALSE;
         if(CursorH[0] != 0) SetMouseDispFlag(FALSE);
         else SetMouseDispFlag(Cursor);
+
         if(C3D.Enabled)
         {
             SetCameraNearFar(0.1f, 1000.0f);
@@ -75,6 +76,7 @@ int ScreenControl::Update()
             SetWriteZBuffer3D(TRUE);
             SetCameraPositionAndTarget_UpVecY(VGet(0.0f, 10.0f, -20.0f),VGet(0.0f, 10.0f, 0.0f));
         }
+
         New = FALSE;
         
         return 1;
@@ -101,17 +103,19 @@ void ScreenControl::DrawFPS()
     DrawFormatString(fps_x,fps_y,-1,"%.1f",average);
 }
 
-//Image Cursor
-int ScreenControl::DrawCursor(int_fast16_t padRight, int_fast16_t padLeft, int_fast16_t padBottom, int_fast16_t padTop)
+/*Image Cursor
+  Draws if Cursor is TRUE and an image is loaded in CursorH
+*/
+int ScreenControl::DrawCursor(const int_fast16_t &padRight, const int_fast16_t &padLeft, const int_fast16_t &padBottom, const int_fast16_t &padTop)
 {
     if(Cursor == TRUE && CursorH[0] != 0) 
     {
         GetMousePoint(&cursor_x,&cursor_y);
         if(WinMode == FALSE)
         {
-            if(cursor_x > Width - padRight)    cursor_x = Width - padRight;  
+            if(cursor_x > (int_fast16_t)Width - padRight)    cursor_x = Width - padRight;  
             if(cursor_x < 0 + padLeft)         cursor_x = padLeft;
-            if(cursor_y > Height - padBottom)  cursor_y = Height - padBottom;
+            if(cursor_y > (int_fast16_t)Height - padBottom)  cursor_y = Height - padBottom;
             if(cursor_y < 0 + padTop)          cursor_y = padTop;
         }
         DrawGraph(cursor_x,cursor_y,CursorH[CursorIndex],TRUE);
@@ -121,13 +125,13 @@ int ScreenControl::DrawCursor(int_fast16_t padRight, int_fast16_t padLeft, int_f
     return 0;
 }
 
-void ScreenControl::SetFPSLocation(int_fast16_t x, int_fast16_t y)
+void ScreenControl::SetFPSLocation(const int_fast16_t &x, const int_fast16_t &y)
 {
     fps_x = x;
     fps_y = y;
 }
 
-void ScreenControl::SetFPSLimit(uint_fast16_t a)
+void ScreenControl::SetFPSLimit(const uint_fast16_t &a)
 {
     limit = a;
     if(limit > MaxFPS) limit = MaxFPS;

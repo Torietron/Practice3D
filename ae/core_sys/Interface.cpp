@@ -3,12 +3,13 @@
 #include <cstdint>
 #include <cmath>
 #include "Interface.h"
+#include "ModelData.h"
 
 static char Keys[256];
 static uint_fast16_t KeyPress[256];
 
-Interface::Interface(int_fast8_t a)
-:Selected(a)
+Interface::Interface(const int_fast16_t select)
+:Selected(select)
 {
     Brightness = 0;
     White = GetColor(255,255,255);
@@ -26,7 +27,17 @@ Interface::Interface(int_fast8_t a)
     Flux = 0.0f;
 }
 
-void Interface::UpdateMenu(const uint_fast8_t MAX, const int KEY1, const int KEY2)
+//For use with fluctuating positions and elements
+void Interface::UpdateFlux(const float &fluxMax, const float &fluxMin, const float &fluxIncrement)
+{
+    if(Flux > fluxMax) FluxReverse = TRUE;
+    if(Flux <= fluxMin) FluxReverse = FALSE;
+    if(FluxReverse == FALSE) Flux += fluxIncrement;
+    else Flux -= fluxIncrement;
+}
+
+//DX keys /ie: KEY_INPUT_UP, KEY_INPUT_DOWN
+void Interface::UpdateMenu(const uint_fast8_t &MAX_OPTIONS_TO_CYCLE, const int &KEY1, const int &KEY2)
 {
     GetHitKeyStateAll(Keys);
     if(Keys[KEY1] != 0) KeyPress[KEY1]++;
@@ -36,31 +47,32 @@ void Interface::UpdateMenu(const uint_fast8_t MAX, const int KEY1, const int KEY
 
     if(KeyPress[KEY1] == 1 || KeyPress[KEY2] == 1) 
     {
-        if(KeyPress[KEY2] == 1) Selected = (Selected + 1) % MAX;
-        if(KeyPress[KEY1] == 1) Selected = (Selected - 1) % MAX;
-        if(KeyPress[KEY1] == 1 && Selected < 0) Selected = MAX - 1;
+        if(KeyPress[KEY2] == 1) Selected = (Selected + 1) % MAX_OPTIONS_TO_CYCLE;
+        if(KeyPress[KEY1] == 1) Selected = (Selected - 1) % MAX_OPTIONS_TO_CYCLE;
+        if(KeyPress[KEY1] == 1 && Selected < 0) Selected = MAX_OPTIONS_TO_CYCLE - 1;
     }
 }
 
-void Interface::DrawMenu(InterfaceOptions_t *option, const uint_fast8_t MAX, int_fast32_t SelectedColor, int_fast32_t baseColor)
+void Interface::DrawMenu(InterfaceOptions_t *options, const uint_fast8_t &MAX_OPTIONS_TO_DRAW, const int_fast32_t &SelectedColor, const int_fast32_t &baseColor)
 {
-    for(uint_fast8_t i = 0; i < MAX; i++)
+    for(uint_fast8_t i = 0; i < MAX_OPTIONS_TO_DRAW; i++)
     {
         if(i == Selected) 
         {
-            option[i].Color = SelectedColor;
+            options[i].Color = SelectedColor;
         }
         else
         {
-            option[i].Color = baseColor;
+            options[i].Color = baseColor;
         }
-        DrawString(option[i].x,option[i].y,option[i].Text,option[i].Color);
+        DrawString(options[i].x,options[i].y,options[i].Text,options[i].Color);
         //DrawStringToHandle(100,100,"Text Here",GetColor(255,255,255),font00);
         //DrawStringToHandle(option[i].x,option[i].y,option[i].name,option[i].color,font00);
     }
 }
 
-void Interface::DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent,double numMax,double scale,int_fast16_t w,int_fast16_t h,uint_fast32_t colorframe,uint_fast32_t colorfill)
+//Center axis coords first, Rota is center by default
+void Interface::DrawBar(const int_fast16_t &x, const int_fast16_t &y, const double &numCurrent, const double &numMax, const double &scale, const int_fast16_t &w, const int_fast16_t &h, const uint_fast32_t &colorframe, const uint_fast32_t &colorfill)
 {
     //??? MY LAUGHABLE CEREAL TOY QUALITY FORMULA, no keyboard keys were harmed during the making of this 
     //simplified ratio = ((endP - startP) *val%) + startP
@@ -69,57 +81,59 @@ void Interface::DrawBar(int_fast16_t x,int_fast16_t y,double numCurrent,double n
     DrawBox(x+1-(w*(int)round(scale)) ,y-1+(0-h*(int)round(scale)) ,(((x-1+(w*(int)round(scale))) - (x-(w*(int)round(scale)))) *(int)round((numCurrent/numMax))) + x-(w*(int)round(scale)), y+1+(0-h*(int)round(scale)),colorfill,TRUE); 
 }
 
-void Interface::DrawMarker3D(const DxLib::VECTOR &targetPos, DxLib::VECTOR &markerPos, const float &markerSize, const int &markerH, const float &heightOffset, const float &markerRot, const float &cx, const float &cy)
+//A flat value added to Flux is an easy xyz offset
+void Interface::DrawMarker3D(Sprite3D_t &markerObj, const DxLib::VECTOR &targetPos, const float &yOffset, const float &xOffset, const float &zOffset, const float &centerX, const float &centerY)
 {
-    if(Flux > 2.00f) FluxReverse = TRUE;
-    if(Flux <= 0.00f) FluxReverse = FALSE;
-    if(FluxReverse == FALSE) Flux += 0.03f;
-    else Flux -= 0.03f;
-    markerPos = VGet(targetPos.x, (targetPos.y + heightOffset + Flux), targetPos.z);
-    DrawBillboard3D(markerPos, cx, cy, markerSize, markerRot, markerH, TRUE);
+    markerObj.Pos = VGet((targetPos.x + xOffset), (targetPos.y + yOffset), (targetPos.z + zOffset));
+    DrawBillboard3D(markerObj.Pos, centerX, centerY, markerObj.Size, markerObj.Angle, markerObj.SpriteH, TRUE);
 }
 
-void Interface::Fade(const uint_fast8_t TYPE, const uint_fast8_t SPEED)
+/*  Fade Types: FADE_IN, FADE_OUT  
+    Fade Speeds: SPEED1, SPEED2, SPEED3 
+    -- BlendEffect, turn-off/finish effect with EndBlend()
+*/
+void Interface::Fade(const uint_fast8_t &ENUM_FADETYPE, const uint_fast8_t &ENUM_FADESPEED)
 {
-    switch(TYPE)
+    switch(ENUM_FADETYPE)
     {
         case 0:
-            if(Brightness <= 254) Brightness = Brightness + SPEED;
+            if(Brightness <= 254) Brightness = Brightness + ENUM_FADESPEED;
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness);  
             break;
         case 1:
-            if(Brightness >= 1) Brightness = Brightness - SPEED; 
+            if(Brightness >= 1) Brightness = Brightness - ENUM_FADESPEED; 
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness); 
             break;
     }
 }
 
+//Call after using any BlendEffects to turn-off/finish blend for subsequent draw calls
 void Interface::EndBlend()
 {
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
-void Interface::DrawValue(int_fast16_t x, int_fast16_t y, int a, int_fast32_t color)
+void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const int &a, const int_fast32_t &color)
 {
     DrawFormatString(x,y,color,"%d",a);
 }
 
-void Interface::DrawValue(int_fast16_t x, int_fast16_t y, char a, int_fast32_t color)
+void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const char &a, const int_fast32_t &color)
 {
     DrawFormatString(x,y,color,"%c",a);
 }
 
-void Interface::DrawValue(int_fast16_t x, int_fast16_t y, float a, int_fast32_t color)
+void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const float &a, const int_fast32_t &color)
 {
     DrawFormatString(x,y,color,"%f",a);
 }
 
-void Interface::DrawValue(int_fast16_t x, int_fast16_t y, double a, int_fast32_t color)
+void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const double &a, const int_fast32_t &color)
 {
     DrawFormatString(x,y,color,"%lf",a);
 }
 
-void Interface::DrawValue(int_fast16_t x, int_fast16_t y, std::string a, int_fast32_t color)
+void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const std::string &a, const int_fast32_t &color)
 {
-    DrawFormatString(x,y,color,"%s",a.c_str()); //actual strings had an issue, cstyle strings work fine. also converts vector strings
+    DrawFormatString(x,y,color,"%s",a.c_str()); //actual strings had an issue, cstyle strings work fine. also converts STL vector strings
 }

@@ -9,7 +9,7 @@ InterfaceOptions_t Options[3] = {
     {50,70,"button2",-256},
     {50,90,"button3",-256},
 };
-
+_InterfaceFadeSpeed_t x;
 extern SceneControl Scene;
 extern KeyPoll Key;
 extern Interface Ui;

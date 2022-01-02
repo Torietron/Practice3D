@@ -33,6 +33,7 @@ PlayerData::PlayerData()
     MMD.PlayOffset = 0.0f;
     MMD.Reverse = false, MMD.Event = false;
     Marker.Size = 0.0f;
+    Marker.Angle = 0.0f;
 }
 
 void PlayerData::Load()
@@ -44,6 +45,7 @@ void PlayerData::Load()
     }
     MMD.ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
     MMD.AttachIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
+    MMD.BlendIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
     MMD.Pace = 0;
@@ -189,6 +191,7 @@ void PlayerData::Update(Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16
             Screen.C3D.AngleH = Physics.Formula.RelAngle2(MMD.Pos, sObj[Selected].Pos);
             MMD.Rot.y = Screen.C3D.AngleH;
             Screen.C3D.Anchor = MMD.Rot.y - DX_PI_F/10;
+            Ui.UpdateFlux();
         }
         else Selected = -1, TargetLock = FALSE;
     }
@@ -217,8 +220,8 @@ void PlayerData::Draw(Sphere_t *sObj)
 {
     if(TargetLock == TRUE)
     {
-        Marker.Size = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].Pos.x,sObj[Selected].Pos.z))*.00005f)+1.6f;
-        Ui.DrawMarker3D(sObj[Selected].Pos,Marker.Pos,Marker.Size,Marker.SpriteH);
+        Marker.Size = ((Physics.Formula.Dot2(MMD.Pos.x,MMD.Pos.z)-Physics.Formula.Dot2(sObj[Selected].Pos.x, sObj[Selected].Pos.z))*.00005f)+1.6f;
+        Ui.DrawMarker3D(Marker, sObj[Selected].Pos, (16.0f + Ui.Flux));
     }
 
     Model.Draw(MMD);

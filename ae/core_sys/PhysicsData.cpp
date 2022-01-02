@@ -5,13 +5,12 @@
 #include <cmath>
 #include "PhysicsData.h"
 
-static const float PI = DX_PI_F;
-static const float nPI = DX_PI_F * -1;
-static float cROT = 0.00;
 static uint_fast8_t random;
 static int_fast16_t temp, dice1, dice2;
 static float tempf, dice1f, dice2f, hTemp1, hTemp2;
+static double tempd;
 static VECTOR S;
+static VECTOR_D S_d, vec_d1, vec_d2;
 
 PhysicsData::PhysicsData(float a)
 :Decay(a)
@@ -65,7 +64,7 @@ bool PhysicsData::_PhysicsFormula::RadialColl2D(const float &aX, const float &aY
 }
 
 //Refresh model collision info beforehand, once per frame
-bool PhysicsData::_PhysicsFormula::SphereColl3D(const int &modelH, const VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd)
+bool PhysicsData::_PhysicsFormula::SphereColl3D(const int &modelH, const DxLib::VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd)
 {
     hpd = MV1CollCheck_Sphere(modelH, -1, spherePos, radius);
     if(hpd.HitNum >= 1)
@@ -117,60 +116,76 @@ float PhysicsData::_PhysicsFormula::Humanize(float &value, const float &variatio
     return tempf;
 }
 
-float& PhysicsData::_PhysicsFormula::ApproxAngle(const int_fast16_t screenWidth, float &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
+float& PhysicsData::_PhysicsFormula::ApproxAngle(float &objAngle, float &objMainAxisRotCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate, const int_fast16_t &totalRotPointMulti, const uint_fast8_t &divisor)
 {
+    tempd = objAngle;
+
     if(focalPointInverseCoord <= objInverseAxisAnchor)
     {
-        cROT = nPI;
-        objAngle = PI*2;
+        temp = -1;
+        tempd = DX_PI_F*2;
     }
-    else cROT = PI;
+    else temp = 1;
 
     while(objMainAxisRotCoord != focalPointCoord)
     {
         if(objMainAxisRotCoord > focalPointCoord)
         {
-            objAngle += (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
+            tempd += ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
             objMainAxisRotCoord -= turnRate;
         }
         if(objMainAxisRotCoord < focalPointCoord)
         {
-            objAngle -= (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
+            tempd -= ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
+            objMainAxisRotCoord += turnRate;
+        }
+    }
+
+    tempd = round(tempd * 10000000)/10000000;
+    objAngle = (float)tempd;
+
+    return objAngle;
+}
+
+double& PhysicsData::_PhysicsFormula::ApproxAngle(double &objAngle, float &objMainAxisRotCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate, const int_fast16_t &totalRotPointMulti, const uint_fast8_t &divisor)
+{
+    if(focalPointInverseCoord <= objInverseAxisAnchor)
+    {
+        temp = -1;
+        objAngle = DX_PI_F*2;
+    }
+    else tempf = 1;
+
+    while(objMainAxisRotCoord != focalPointCoord)
+    {
+        if(objMainAxisRotCoord > focalPointCoord)
+        {
+            objAngle += ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
+            objMainAxisRotCoord -= turnRate;
+        }
+        if(objMainAxisRotCoord < focalPointCoord)
+        {
+            objAngle -= ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
             objMainAxisRotCoord += turnRate;
         }
     }
     return objAngle;
 }
 
-double& PhysicsData::_PhysicsFormula::ApproxAngle(const int_fast16_t screenWidth, double &objAngle, float &objMainAxisRotCoord, float objInverseAxisAnchor, int_fast16_t focalPointCoord, int_fast16_t focalPointInverseCoord, float turnRate, int_fast16_t totalRotPointMulti, uint_fast8_t divisor)
+void PhysicsData::_PhysicsFormula::AnchoredAngle(float &x, float &y, double &angle, const float &anchorX, const float &anchorY, const double &anchorAngle, const uint_fast16_t &distance)
 {
-    if(focalPointInverseCoord <= objInverseAxisAnchor)
-    {
-        cROT = nPI;
-        objAngle = PI*2;
-    }
-    else cROT = PI;
-
-    while(objMainAxisRotCoord != focalPointCoord)
-    {
-        if(objMainAxisRotCoord > focalPointCoord)
-        {
-            objAngle += (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord -= turnRate;
-        }
-        if(objMainAxisRotCoord < focalPointCoord)
-        {
-            objAngle -= (cROT*2/(screenWidth*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord += turnRate;
-        }
-    }
-    return objAngle;
+    x = anchorX, y = anchorY, angle = anchorAngle;
+    parent->Propel(x,y,angle,distance);
 }
 
-void PhysicsData::_PhysicsFormula::AnchoredAngle(float anchorX, float anchorY, double anchorAngle, float &targetX, float &targetY, double &targetAngle, uint_fast16_t distance)
+double PhysicsData::_PhysicsFormula::RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
 {
-    targetX = anchorX, targetY = anchorY, targetAngle = anchorAngle;
-    parent->Propel(targetX,targetY,targetAngle,distance);
+    S_d.x = a.x - b.x;
+    S_d.y = a.y - b.y; 
+    S_d.z = a.z - b.z;
+    tempd = atan2(S_d.y, sqrt(S_d.x*S_d.x + S_d.z*S_d.z));
+
+    return tempd;
 }
 
 float PhysicsData::_PhysicsFormula::RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
@@ -178,41 +193,201 @@ float PhysicsData::_PhysicsFormula::RelAngle3(const DxLib::VECTOR &a, const DxLi
     S.x = a.x - b.x;
     S.y = a.y - b.y; 
     S.z = a.z - b.z;
-    tempf = atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z));
+    tempd = atan2((double)S.y, sqrt((double)S.x*S.x + (double)S.z*S.z));
+
+    tempd = round(tempd * 10000000)/10000000;
+    tempf = (float)tempd;
+
     return tempf;
+}
+
+float PhysicsData::_PhysicsFormula::RelAngle3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+{
+    S.x = a.x - b.x;
+    S.y = a.y - b.y; 
+    S.z = a.z - b.z;
+    tempf = atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z));
+
+    return tempf;
+}
+
+double PhysicsData::_PhysicsFormula::RelAngle2Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
+{
+    S_d.x = a.x - b.x;
+    S_d.z = a.z - b.z;
+    tempd = atan2(S_d.x,S_d.z); 
+
+    return tempd;
 }
 
 float PhysicsData::_PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
     S.x = a.x - b.x;
     S.z = a.z - b.z;
-    tempf = atan2f(S.x,S.z); 
+    tempd = atan2((double)S.x,(double)S.z); 
+
+    tempd = round(tempd * 10000000)/10000000;
+    tempf = (float)tempd;
+
     return tempf;
 }
 
-DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3(const VECTOR &a, const VECTOR &b)
+float PhysicsData::_PhysicsFormula::RelAngle2Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
-	VECTOR c;
-	c.x = (a.y * b.z - a.z * b.y);
-	c.y = (a.z * b.x - a.x * b.z);
-	c.z = (a.x * b.y - a.y * b.x);
-	return c;
+    S.x = a.x - b.x;
+    S.z = a.z - b.z;
+    tempf = atan2f(S.x,S.z); 
+
+    return tempf;
 }
 
-float PhysicsData::_PhysicsFormula::Dot3(const VECTOR &a, const VECTOR &b)
+DxLib::VECTOR_D PhysicsData::_PhysicsFormula::Cross3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
 {
-	float dot;
-	dot = (a.x * b.x + a.y * b.y + a.z * b.z);
-	return dot;
+	S_d.x = (a.y * b.z - a.z * b.y);
+	S_d.y = (a.z * b.x - a.x * b.z);
+	S_d.z = (a.x * b.y - a.y * b.x);
+
+	return S_d;
 }
 
-float PhysicsData::_PhysicsFormula::Dot2(const float &x, const float &z)
+DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
-	float dot;
-	dot = (x*x+z*z);
-	return dot;
+	vec_d1.x = a.x;
+    vec_d1.y = a.y;
+    vec_d1.z = a.z;
+
+    vec_d2.x = b.x;
+    vec_d2.y = b.y;
+    vec_d2.z = b.z;
+    
+	S_d.x = (vec_d1.y * vec_d2.z - vec_d1.z * vec_d2.y);
+	S_d.y = (vec_d1.z * vec_d2.x - vec_d1.x * vec_d2.z);
+	S_d.z = (vec_d1.x * vec_d2.y - vec_d1.y * vec_d2.x);
+
+    S_d.x = round(S_d.x * 10000000)/10000000;
+    S_d.y = round(S_d.y * 10000000)/10000000;
+    S_d.z = round(S_d.z * 10000000)/10000000;
+
+    S.x = (float)S_d.x;
+    S.y = (float)S_d.y;
+    S.z = (float)S_d.z;
+
+	return S;
 }
 
+DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+{
+	S.x = (a.y * b.z - a.z * b.y);
+	S.y = (a.z * b.x - a.x * b.z);
+	S.z = (a.x * b.y - a.y * b.x);
+
+	return S;
+}
+
+double PhysicsData::_PhysicsFormula::Dot3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
+{
+    vec_d1.x = a.x;
+    vec_d1.y = a.y;
+    vec_d1.z = a.z;
+
+    vec_d2.x = b.x;
+    vec_d2.y = b.y;
+    vec_d2.z = b.z;
+
+	tempd = (vec_d1.x * vec_d2.x + vec_d1.y * vec_d2.y + vec_d1.z * vec_d2.z);
+
+	return tempd;
+}
+
+float PhysicsData::_PhysicsFormula::Dot3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+{
+    vec_d1.x = a.x;
+    vec_d1.y = a.y;
+    vec_d1.z = a.z;
+
+    vec_d2.x = b.x;
+    vec_d2.y = b.y;
+    vec_d2.z = b.z;
+
+	tempd = (vec_d1.x * vec_d2.x + vec_d1.y * vec_d2.y + vec_d1.z * vec_d2.z);
+
+    tempd = round(tempd * 10000000)/10000000;
+    tempf = (float)tempd;
+
+	return tempf;
+}
+
+float PhysicsData::_PhysicsFormula::Dot3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+{
+	tempf = (a.x * b.x + a.y * b.y + a.z * b.z);
+
+	return tempf;
+}
+
+double PhysicsData::_PhysicsFormula::Dot2Precise(const double &x, const double &z)
+{
+	tempd = (x*x+z*z);
+
+	return tempd;
+}
+
+float PhysicsData::_PhysicsFormula::Dot2(const double &x, const double &z)
+{
+	tempd = (x*x+z*z);
+
+    tempd = round(tempd * 10000000)/10000000;
+    tempf = (float)tempd;
+
+	return tempf;
+}
+
+float PhysicsData::_PhysicsFormula::Dot2Fast(const float &x, const float &z)
+{
+	tempf = (x*x+z*z);
+	return tempf;
+}
+
+DxLib::VECTOR_D PhysicsData::_PhysicsFormula::ConvertVector(const DxLib::VECTOR &a)
+{
+    S_d.x = a.x;
+    S_d.y = a.y;
+    S_d.z = a.z;
+
+    return S_d;
+}
+
+DxLib::VECTOR PhysicsData::_PhysicsFormula::ConvertVector(const DxLib::VECTOR_D &a)
+{
+    S_d.x = a.x;
+    S_d.y = a.y;
+    S_d.z = a.z;
+
+    S_d.x = round(S_d.x * 10000000)/10000000;
+    S_d.y = round(S_d.y * 10000000)/10000000;
+    S_d.z = round(S_d.z * 10000000)/10000000;
+    
+    S.x = (float)S_d.x;
+    S.y = (float)S_d.y;
+    S.z = (float)S_d.z;
+
+    return S;
+}
+
+//'L' / 'R'
+void PhysicsData::Spin(float &angle, const char &L_or_R_Direction, const uint_fast8_t &totalRotPoints)
+{
+    if(L_or_R_Direction == 'R') angle += DX_PI_F/totalRotPoints;
+    if(L_or_R_Direction == 'L') angle -= DX_PI_F/totalRotPoints;
+}
+
+//'L' / 'R'
+void PhysicsData::Spin(double &angle, const char &L_or_R_Direction, const uint_fast8_t &totalRotPoints)
+{
+    if(L_or_R_Direction == 'R') angle += DX_PI_F/totalRotPoints;
+    if(L_or_R_Direction == 'L') angle -= DX_PI_F/totalRotPoints;
+}
+
+//Fling Directions: FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
 bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed, float grav, float iMulti)
 {
     gravity_x = grav;
@@ -267,42 +442,33 @@ bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const 
     else return false;
 }
 
-void PhysicsData::Propel(float &x, float &y, double angle, uint_fast16_t magnitude)
+void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude)
 {
-    velocity_x = (float)sin(angle)*magnitude;
-    velocity_y = (float)cos(angle)*magnitude;
+    tempd = round(angle * 10000000)/10000000;
+    velocity_x = sin((float)tempd)*magnitude;
+    velocity_y = cos((float)tempd)*magnitude;
     x += velocity_x;
     y -= velocity_y;
 }       
 
-void PhysicsData::Spin(float &rot, char L_or_R_Direction, uint_fast8_t totalRotPoints)
-{
-    if(L_or_R_Direction == 'R') rot += PI/totalRotPoints;
-    if(L_or_R_Direction == 'L') rot -= PI/totalRotPoints;
-}
-
-void PhysicsData::Spin(double &rot, char L_or_R_Direction, uint_fast8_t totalRotPoints)
-{
-    if(L_or_R_Direction == 'R') rot += PI/totalRotPoints;
-    if(L_or_R_Direction == 'L') rot -= PI/totalRotPoints;
-}
-
-void PhysicsData::Accelerate(float &vel, uint_fast8_t velBase, uint_fast8_t velMax, float accel, float grav)
+void PhysicsData::Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav)
 {
     inertia_x = accel;
     inertia_y = accel;
     gravity_x = grav;
     gravity_y = grav;
 
-    vel = velBase;
-    vel = vel + (accel * grav);
-    if(vel > velMax) vel = velMax;
+    tempd = velBase;
+    tempd = tempd + (accel * grav);
+    if(tempd > velMax) tempd = velMax;
 
-    velocity_x = vel;
-    velocity_y = vel;
+    tempd = round(tempd*10000000)/10000000;
+    velocity_x = (float)tempd;
+    velocity_y = (float)tempd;
+    vel = (float)tempd;
 }
 
-void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, uint_fast32_t &LastDeltaTime, uint_fast32_t decayInterval, float grav_x, float grav_y)
+void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval, const float &grav_x, const float &grav_y)
 {
     velocity_x = vel_x;
     velocity_y = vel_y;
@@ -311,20 +477,19 @@ void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, flo
     inertia_x = (velocity_x*Decay)*gravity_x;
     inertia_y = (velocity_y*Decay)*gravity_y;
 
-    if(Delta.Time(LastDeltaTime, decayInterval))
+    if(Delta.Time(Last, decayInterval))
     {
         if(vel_x > 0) vel_x = floor(inertia_x);
         if(vel_x < 0) vel_x = ceil(inertia_x);
         if(vel_y > 0) vel_y = floor(inertia_y);
         if(vel_y < 0) vel_y = ceil(inertia_y);
-        LastDeltaTime = GetNowCount();
     }
 
     x += (int)vel_x;
     y += (int)vel_y;
 }
 
-void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, uint_fast32_t &LastDeltaTime, uint_fast32_t decayInterval, float grav_x, float grav_y)
+void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval, const float &grav_x, const float &grav_y)
 {
     velocity_x = vel_x;
     velocity_y = vel_y;
@@ -333,22 +498,23 @@ void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, uin
     inertia_x = (velocity_x*Decay)*gravity_x;
     inertia_y = (velocity_y*Decay)*gravity_y;
 
-    if(Delta.Time(LastDeltaTime, decayInterval))
+    if(Delta.Time(Last, decayInterval))
     {
         if(vel_x > 0) vel_x = floor(inertia_x);
         if(vel_x < 0) vel_x = ceil(inertia_x);
         if(vel_y > 0) vel_y = floor(inertia_y);
         if(vel_y < 0) vel_y = ceil(inertia_y);
-        LastDeltaTime = GetNowCount();
     }
 
     x += vel_x;
     y += vel_y;
 }       
 
-float PhysicsData::Get(const uint_fast8_t ENUM_GET)
+/* Get Values: DECAY, LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_INERTIA_X, 
+LAST_INERTIA_Y, LAST_GRAVITY_X, LAST_GRAVITY_Y */
+float PhysicsData::Get(const uint_fast8_t &ENUM_GET)
 {
-    //welcome to the leaning tower of switchizza
+    //welcome to the leaning tower of switchisa
     switch(ENUM_GET)
     {
         case DECAY:
@@ -371,13 +537,13 @@ float PhysicsData::Get(const uint_fast8_t ENUM_GET)
 }
 
 //center axis coords first, Rota is center by default
-void PhysicsData::DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &w, const int_fast16_t &h, int_fast32_t Color, uint_fast8_t FillFlag)
+void PhysicsData::DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &w, const int_fast16_t &h, const int_fast32_t &color, const uint_fast8_t &fillFlag)
 {
-    DrawBox(x - w, y - h, x + w, y + h, Color, FillFlag);
+    DrawBox(x - w, y - h, x + w, y + h, color, fillFlag);
 }
 
 //center axis coords first, Rota is center by default
-void PhysicsData::DrawHitCircle(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &collRadius)
+void PhysicsData::DrawHitCircle(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &collRadius, const int_fast32_t &color, const uint_fast8_t &fillFlag)
 {
-    DrawCircle(x, y, collRadius, -256, TRUE);
+    DrawCircle(x, y, collRadius, color, fillFlag);
 }

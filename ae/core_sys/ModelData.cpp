@@ -5,7 +5,6 @@
 ModelData::ModelData(float rate)
 :play_rate(rate)
 {
-    //code
 }
 
 void ModelData::Update(MMD_t &m)
@@ -48,13 +47,15 @@ void ModelData::Update(MQO_t &m)
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 
-void ModelData::Draw(MMD_t &m, float rate)
+//Blend two animations for smoother transitions
+void ModelData::Draw(MMD_t &m, const float blendRate1, const float blendRate2)
 {
-    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,rate);
+    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1);
+    MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex,blendRate2);
     MV1DrawModel(m.ModelH);
 }
 
-void ModelData::Draw(MQO_t &m)
+void ModelData::Draw(const MQO_t &m)
 {
     MV1DrawModel(m.ModelH);
 }
