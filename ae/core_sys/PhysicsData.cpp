@@ -500,10 +500,10 @@ void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, Phy
 
     if(Delta.Time(Last, decayInterval))
     {
-        if(vel_x > 0) vel_x = floor(inertia_x);
-        if(vel_x < 0) vel_x = ceil(inertia_x);
-        if(vel_y > 0) vel_y = floor(inertia_y);
-        if(vel_y < 0) vel_y = ceil(inertia_y);
+        if(vel_x > 0) vel_x = floor(inertia_x * 10)/10;
+        if(vel_x < 0) vel_x = ceil(inertia_x * 10)/10;
+        if(vel_y > 0) vel_y = floor(inertia_y * 10)/10;
+        if(vel_y < 0) vel_y = ceil(inertia_y * 10)/10;
     }
 
     x += vel_x;
