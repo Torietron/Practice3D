@@ -62,13 +62,16 @@ void ModelData::Blend(MMD_t &m, const float &blendRate)
 //Blend for smoother transitions
 void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
 {
-    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.BlendDecay/2);
-    if(m.BlendDecay > 0.00f) 
+    if(m.AutoBlend == TRUE)
     {
-        MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+blendRate2));
-        m.BlendDecay -= 0.02f;
+        MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.BlendDecay/2);
+        if(m.BlendDecay > 0.00f)
+        {
+            MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+blendRate2));
+            m.BlendDecay -= 0.02f;
+        }
+        else MV1SetAttachAnimBlendRate(m.ModelH,m.IdleIndex,blendRate2);
     }
-    else MV1SetAttachAnimBlendRate(m.ModelH,m.IdleIndex,blendRate2);
     MV1DrawModel(m.ModelH);
 }
 
