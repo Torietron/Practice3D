@@ -42,12 +42,12 @@ class PhysicsData { /* Manipulate time and space */
                 float& ApproxAngle(float &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);   
                 double& ApproxAngle(double &objAngle, float &objMainAxisRotCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);
                 void AnchoredAngle(float &x, float &y, double &angle, const float &anchorX, const float &anchorY, const double &anchorAngle, const uint_fast16_t &distance);
-                double RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b);
-                float RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
-                float RelAngle3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
-                double RelAngle2Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b);
-                float RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
-                float RelAngle2Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
+                double RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder = 0);
+                float RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
+                float RelAngle3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
+                double RelAngle2Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder = 0);
+                float RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
+                float RelAngle2Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
                 DxLib::VECTOR_D Cross3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b);
                 DxLib::VECTOR Cross3(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
                 DxLib::VECTOR Cross3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
