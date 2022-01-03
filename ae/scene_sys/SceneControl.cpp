@@ -4,6 +4,7 @@
 #include "DebugScene.h"
 #include "PracticeScene.h"
 
+static bool DisplayErrorSceneUpdate = TRUE;
 NoScene noscene;
 DebugScene debugscene;
 PracticeScene practicescene;
@@ -64,13 +65,17 @@ int SceneControl::Update()
 
         if(sPtr == &noscene)
         {
-            MessageBox
-            (
-                NULL,
-                TEXT("Scene Error."),
-                TEXT("Error"),
-                MB_OK | MB_ICONERROR 
-            );
+            if(DisplayErrorSceneUpdate)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Scene Error: SceneControl Update() \nmemory address of scene may not exist."),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorSceneUpdate = FALSE;
+            }
             return -1;
         }
         else return 1;
