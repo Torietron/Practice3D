@@ -47,7 +47,7 @@ void PlayerData::Load()
     MMD.IdleIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.AttachIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
-    MMD.LastDecay = 0.0f;
+    MMD.BlendDecay = 0.0f;
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
     MMD.Pace = 0;
 
