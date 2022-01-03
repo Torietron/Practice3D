@@ -48,6 +48,7 @@ void PlayerData::Load()
     MMD.AttachIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
     MMD.BlendDecay = 0.0f;
+    MMD.AutoBlend = TRUE;
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
     MMD.Pace = 0;
 

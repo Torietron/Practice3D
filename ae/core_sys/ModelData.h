@@ -11,7 +11,7 @@ typedef struct { /* MMD character model */
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
     VECTOR Pos, Rot, RotOffset;
-    bool Event, Reverse;
+    bool Event, Reverse, AutoBlend;
 } MMD_t;
 
 typedef struct { /* DX accessory/prop/character/environment */
