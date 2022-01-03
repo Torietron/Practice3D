@@ -46,7 +46,7 @@ class PhysicsData { /* Manipulate time and space */
                 float Standardize(float &a, const float &min, const float &max);
                 float Humanize(float &a, const float &variation);
                 float& ApproxAngle(float &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);   
-                double& ApproxAngle(double &objAngle, float &objMainAxisRotCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);
+                double& ApproxAngle(double &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);
                 void AnchoredAngle(float &x, float &y, double &angle, const float &anchorX, const float &anchorY, const double &anchorAngle, const uint_fast16_t &distance);
                 double RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder = 0);
                 float RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
