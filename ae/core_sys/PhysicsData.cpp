@@ -6,6 +6,9 @@
 #include "PhysicsData.h"
 
 static bool DisplayErrorGetEnum = TRUE;
+static bool DisplayErrorRelAngle3 = TRUE, DisplayErrorRelAngle3Precise = TRUE, DisplayErrorRelAngle3Fast = TRUE;
+static bool DisplayErrorRelAngle2 = TRUE, DisplayErrorRelAngle2Precise = TRUE, DisplayErrorRelAngle2Fast = TRUE;
+
 static uint_fast8_t random;
 static int_fast16_t temp, dice1, dice2;
 static float tempf, dice1f, dice2f, hTemp1, hTemp2;
@@ -179,22 +182,82 @@ void PhysicsData::_PhysicsFormula::AnchoredAngle(float &x, float &y, double &ang
     parent->Propel(x,y,angle,distance);
 }
 
-double PhysicsData::_PhysicsFormula::RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
+/*  * 3rd Arg Default is 0
+    0 = arctan2(y1-y2, squarert(x1-x2*x1-x2 + z1-z2*z1-z2))
+    1 = arctan2(z1-z2, squarert(y1-y2*y1-y2 + x1-x2*x1-x2))
+    2 = arctan2(x1-x2, squarert(z1-z2*z1-z2 + y1-y2*y1-y2)) */
+double PhysicsData::_PhysicsFormula::RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder)
 {
     S_d.x = a.x - b.x;
     S_d.y = a.y - b.y; 
     S_d.z = a.z - b.z;
-    tempd = atan2(S_d.y, sqrt(S_d.x*S_d.x + S_d.z*S_d.z));
+
+    switch(formulaOrder)
+    {
+        case 0:
+            tempd = atan2(S_d.y, sqrt(S_d.x*S_d.x + S_d.z*S_d.z));
+            break;
+        case 1:
+            tempd = atan2(S_d.z, sqrt(S_d.y*S_d.y + S_d.x*S_d.x));
+            break;
+        case 2:
+            tempd = atan2(S_d.x, sqrt(S_d.z*S_d.z + S_d.y*S_d.y));
+            break;
+        default:
+            if(DisplayErrorRelAngle3Precise)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Switch Error: PhysicsData RelAngle3Precise() \n switch defaulted"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+            }
+            DisplayErrorRelAngle3Precise = FALSE;
+            tempd = 0.0f;
+            break;
+    }
 
     return tempd;
 }
 
-float PhysicsData::_PhysicsFormula::RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+/*  * 3rd Arg Default is 0
+    0 = arctan2(y1-y2, squarert(x1-x2*x1-x2 + z1-z2*z1-z2))
+    1 = arctan2(z1-z2, squarert(y1-y2*y1-y2 + x1-x2*x1-x2))
+    2 = arctan2(x1-x2, squarert(z1-z2*z1-z2 + y1-y2*y1-y2)) */
+float PhysicsData::_PhysicsFormula::RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder)
 {
     S.x = a.x - b.x;
     S.y = a.y - b.y; 
     S.z = a.z - b.z;
-    tempd = atan2((double)S.y, sqrt((double)S.x*S.x + (double)S.z*S.z));
+
+    switch(formulaOrder)
+    {
+        case 0:
+            tempd = atan2((double)S.y, sqrt((double)S.x*S.x + (double)S.z*S.z));
+            break;
+        case 1:
+            tempd = atan2((double)S.z, sqrt((double)S.y*S.y + (double)S.x*S.x));
+            break;
+        case 2:
+            tempd = atan2((double)S.x, sqrt((double)S.z*S.z + (double)S.y*S.y));
+            break;
+        default:
+            if(DisplayErrorRelAngle3)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Switch Error: PhysicsData RelAngle3() \n switch defaulted"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+            }
+            DisplayErrorRelAngle3 = FALSE;
+            tempd = 0.0f;
+            break;
+    }
 
     tempd = round(tempd * 10000000)/10000000;
     tempf = (float)tempd;
@@ -202,30 +265,146 @@ float PhysicsData::_PhysicsFormula::RelAngle3(const DxLib::VECTOR &a, const DxLi
     return tempf;
 }
 
-float PhysicsData::_PhysicsFormula::RelAngle3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+/*  * 3rd Arg Default is 0
+    0 = arctan2(y1-y2, squarert(x1-x2*x1-x2 + z1-z2*z1-z2))
+    1 = arctan2(z1-z2, squarert(y1-y2*y1-y2 + x1-x2*x1-x2))
+    2 = arctan2(x1-x2, squarert(z1-z2*z1-z2 + y1-y2*y1-y2)) */
+float PhysicsData::_PhysicsFormula::RelAngle3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder)
 {
     S.x = a.x - b.x;
     S.y = a.y - b.y; 
     S.z = a.z - b.z;
-    tempf = atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z));
+    
+    switch(formulaOrder)
+    {
+        case 0:
+            tempf = atan2f(S.y, sqrtf(S.x*S.x + S.z*S.z));
+            break;
+        case 1:
+            tempf = atan2f(S.z, sqrtf(S.y*S.y + S.x*S.x));
+            break;
+        case 2:
+            tempf = atan2f(S.x, sqrtf(S.z*S.z + S.y*S.y));
+            break;
+        default:
+            if(DisplayErrorRelAngle3Fast)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Switch Error: PhysicsData RelAngle3Fast() \n switch defaulted"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+            }
+            DisplayErrorRelAngle3Fast = FALSE;
+            tempf = 0.0f;
+            break;
+    }
 
     return tempf;
 }
 
-double PhysicsData::_PhysicsFormula::RelAngle2Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
+/*  * 3rd Arg Default is 0
+    0 = arctan2(x1-x2, z1-z2))
+    1 = arctan2(x1-x2, y1-y2))
+    2 = arctan2(y1-y2, z1-z2))
+    3 = arctan2(y1-y2, x1-x2))
+    4 = arctan2(z1-z2, x1-x2))
+    5 = arctan2(z1-z2, y1-y2)) */
+double PhysicsData::_PhysicsFormula::RelAngle2Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder)
 {
     S_d.x = a.x - b.x;
+    S_d.y = a.y - b.y;
     S_d.z = a.z - b.z;
-    tempd = atan2(S_d.x,S_d.z); 
+
+    switch(formulaOrder)
+    {
+        case 0:
+            tempd = atan2(S_d.x,S_d.z);
+            break;
+        case 1:
+            tempd = atan2(S_d.x,S_d.y);
+            break;
+        case 2:
+            tempd = atan2(S_d.y,S_d.z);
+            break;
+        case 3:
+            tempd = atan2(S_d.y,S_d.x);
+            break;
+        case 4:
+            tempd = atan2(S_d.z,S_d.x);
+            break;
+        case 5:
+            tempd = atan2(S_d.z,S_d.y);
+            break;
+        default:
+            if(DisplayErrorRelAngle2Precise)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Switch Error: PhysicsData RelAngle2Precise() \n switch defaulted"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+            }
+            DisplayErrorRelAngle2Precise = FALSE;
+            tempd = 0.0f;
+            break;
+    }
 
     return tempd;
 }
 
-float PhysicsData::_PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+/*  * 3rd Arg Default is 0
+    0 = arctan2(x1-x2, z1-z2))
+    1 = arctan2(x1-x2, y1-y2))
+    2 = arctan2(y1-y2, z1-z2))
+    3 = arctan2(y1-y2, x1-x2))
+    4 = arctan2(z1-z2, x1-x2))
+    5 = arctan2(z1-z2, y1-y2)) */
+float PhysicsData::_PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder)
 {
     S.x = a.x - b.x;
+    S.y = a.y - b.y;
     S.z = a.z - b.z;
-    tempd = atan2((double)S.x,(double)S.z); 
+
+    switch(formulaOrder)
+    {
+        case 0:
+            tempd = atan2((double)S.x,(double)S.z); 
+            break;
+        case 1:
+            tempd = atan2((double)S.x,(double)S.y); 
+            break;
+        case 2:
+            tempd = atan2((double)S.y,(double)S.z); 
+            break;
+        case 3:
+            tempd = atan2((double)S.y,(double)S.x); 
+            break;
+        case 4:
+            tempd = atan2((double)S.z,(double)S.x); 
+            break;
+        case 5:
+            tempd = atan2((double)S.z,(double)S.y); 
+            break;
+        default:
+            if(DisplayErrorRelAngle2)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Switch Error: PhysicsData RelAngle2() \n switch defaulted"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+            }
+            DisplayErrorRelAngle2 = FALSE;
+            tempd = 0.0f;
+            break;
+    }
 
     tempd = round(tempd * 10000000)/10000000;
     tempf = (float)tempd;
@@ -233,11 +412,54 @@ float PhysicsData::_PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLi
     return tempf;
 }
 
-float PhysicsData::_PhysicsFormula::RelAngle2Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
+/*  * 3rd Arg Default is 0
+    0 = arctan2(x1-x2, z1-z2))
+    1 = arctan2(x1-x2, y1-y2))
+    2 = arctan2(y1-y2, z1-z2))
+    3 = arctan2(y1-y2, x1-x2))
+    4 = arctan2(z1-z2, x1-x2))
+    5 = arctan2(z1-z2, y1-y2)) */
+float PhysicsData::_PhysicsFormula::RelAngle2Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder)
 {
     S.x = a.x - b.x;
+    S.y = a.y - b.y; 
     S.z = a.z - b.z;
-    tempf = atan2f(S.x,S.z); 
+
+    switch(formulaOrder)
+    {
+        case 0:
+            tempf = atan2f(S.x,S.z);
+            break;
+        case 1:
+            tempf = atan2f(S.x,S.y); 
+            break;
+        case 2:
+            tempf = atan2f(S.y,S.z);
+            break;
+        case 3:
+            tempf = atan2f(S.y,S.x);
+            break;
+        case 4:
+            tempf = atan2f(S.z,S.x);
+            break;
+        case 5:
+            tempf = atan2f(S.z,S.y);
+            break;
+        default:
+            if(DisplayErrorRelAngle2Fast)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Switch Error: PhysicsData RelAngle2Fast() \n switch defaulted"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+            }
+            DisplayErrorRelAngle2Fast = FALSE;
+            tempf = 0.0f;
+            break;
+    }
 
     return tempf;
 }
