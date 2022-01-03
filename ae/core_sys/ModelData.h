@@ -3,6 +3,7 @@
 #define DEF_MODELDATA_H
 
 #include "DxLib.h"
+#include "PhysicsData.h"
 #include <cstdint>
 
 typedef struct { /* MMD character model */
@@ -11,6 +12,7 @@ typedef struct { /* MMD character model */
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
     VECTOR Pos, Rot, RotOffset;
+    PhysicsBody_t Body;
     bool Event, Reverse, AutoBlend;
 } MMD_t;
 

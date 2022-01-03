@@ -306,12 +306,12 @@ float PhysicsData::_PhysicsFormula::RelAngle3Fast(const DxLib::VECTOR &a, const 
 }
 
 /*  * 3rd Arg Default is 0
-    0 = arctan2(x1-x2, z1-z2))
-    1 = arctan2(x1-x2, y1-y2))
-    2 = arctan2(y1-y2, z1-z2))
-    3 = arctan2(y1-y2, x1-x2))
-    4 = arctan2(z1-z2, x1-x2))
-    5 = arctan2(z1-z2, y1-y2)) */
+    0 = arctan2(x1-x2, z1-z2)
+    1 = arctan2(x1-x2, y1-y2)
+    2 = arctan2(y1-y2, z1-z2)
+    3 = arctan2(y1-y2, x1-x2)
+    4 = arctan2(z1-z2, x1-x2)
+    5 = arctan2(z1-z2, y1-y2) */
 double PhysicsData::_PhysicsFormula::RelAngle2Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder)
 {
     S_d.x = a.x - b.x;
@@ -358,12 +358,12 @@ double PhysicsData::_PhysicsFormula::RelAngle2Precise(const DxLib::VECTOR_D &a, 
 }
 
 /*  * 3rd Arg Default is 0
-    0 = arctan2(x1-x2, z1-z2))
-    1 = arctan2(x1-x2, y1-y2))
-    2 = arctan2(y1-y2, z1-z2))
-    3 = arctan2(y1-y2, x1-x2))
-    4 = arctan2(z1-z2, x1-x2))
-    5 = arctan2(z1-z2, y1-y2)) */
+    0 = arctan2(x1-x2, z1-z2)
+    1 = arctan2(x1-x2, y1-y2)
+    2 = arctan2(y1-y2, z1-z2)
+    3 = arctan2(y1-y2, x1-x2)
+    4 = arctan2(z1-z2, x1-x2)
+    5 = arctan2(z1-z2, y1-y2) */
 float PhysicsData::_PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder)
 {
     S.x = a.x - b.x;
@@ -413,12 +413,12 @@ float PhysicsData::_PhysicsFormula::RelAngle2(const DxLib::VECTOR &a, const DxLi
 }
 
 /*  * 3rd Arg Default is 0
-    0 = arctan2(x1-x2, z1-z2))
-    1 = arctan2(x1-x2, y1-y2))
-    2 = arctan2(y1-y2, z1-z2))
-    3 = arctan2(y1-y2, x1-x2))
-    4 = arctan2(z1-z2, x1-x2))
-    5 = arctan2(z1-z2, y1-y2)) */
+    0 = arctan2(x1-x2, z1-z2)
+    1 = arctan2(x1-x2, y1-y2)
+    2 = arctan2(y1-y2, z1-z2)
+    3 = arctan2(y1-y2, x1-x2)
+    4 = arctan2(z1-z2, x1-x2)
+    5 = arctan2(z1-z2, y1-y2) */
 float PhysicsData::_PhysicsFormula::RelAngle2Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder)
 {
     S.x = a.x - b.x;

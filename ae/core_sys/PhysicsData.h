@@ -10,6 +10,12 @@ typedef struct { /* Track individual times and events */
     bool Event;
 } PhysicsLastTime_t;
 
+typedef struct { /* For individual data */
+    float Accel, VelBase, VelMax;
+    VECTOR Pos, Vel, Rot;
+    PhysicsLastTime_t Last;
+} PhysicsBody_t;
+
 typedef struct _PhysicsTimeDelta_t {
     uint_least8_t Frames;
     uint_fast16_t Ticks;
