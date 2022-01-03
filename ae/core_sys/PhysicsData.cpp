@@ -5,6 +5,7 @@
 #include <cmath>
 #include "PhysicsData.h"
 
+static bool DisplayErrorGetEnum = TRUE;
 static uint_fast8_t random;
 static int_fast16_t temp, dice1, dice2;
 static float tempf, dice1f, dice2f, hTemp1, hTemp2;
@@ -532,6 +533,17 @@ float PhysicsData::Get(const uint_fast8_t &ENUM_GET)
         case LAST_GRAVITY_Y:
             return gravity_y;
         default:
+            if(DisplayErrorGetEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData Get()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorGetEnum = FALSE;
+            }
             return 0.0f;
     }
 }
