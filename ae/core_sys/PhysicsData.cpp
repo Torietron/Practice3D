@@ -120,7 +120,7 @@ float PhysicsData::_PhysicsFormula::Humanize(float &value, const float &variatio
     return tempf;
 }
 
-float& PhysicsData::_PhysicsFormula::ApproxAngle(float &objAngle, float &objMainAxisRotCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate, const int_fast16_t &totalRotPointMulti, const uint_fast8_t &divisor)
+float& PhysicsData::_PhysicsFormula::ApproxAngle(float &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate, const int_fast16_t &totalRotPointMulti, const uint_fast8_t &divisor)
 {
     tempd = objAngle;
 
@@ -131,17 +131,17 @@ float& PhysicsData::_PhysicsFormula::ApproxAngle(float &objAngle, float &objMain
     }
     else temp = 1;
 
-    while(objMainAxisRotCoord != focalPointCoord)
+    while(objMainAxisCoord != focalPointCoord)
     {
-        if(objMainAxisRotCoord > focalPointCoord)
+        if(objMainAxisCoord > focalPointCoord)
         {
             tempd += ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord -= turnRate;
+            objMainAxisCoord -= turnRate;
         }
-        if(objMainAxisRotCoord < focalPointCoord)
+        if(objMainAxisCoord < focalPointCoord)
         {
             tempd -= ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord += turnRate;
+            objMainAxisCoord += turnRate;
         }
     }
 
@@ -151,26 +151,26 @@ float& PhysicsData::_PhysicsFormula::ApproxAngle(float &objAngle, float &objMain
     return objAngle;
 }
 
-double& PhysicsData::_PhysicsFormula::ApproxAngle(double &objAngle, float &objMainAxisRotCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate, const int_fast16_t &totalRotPointMulti, const uint_fast8_t &divisor)
+double& PhysicsData::_PhysicsFormula::ApproxAngle(double &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate, const int_fast16_t &totalRotPointMulti, const uint_fast8_t &divisor)
 {
     if(focalPointInverseCoord <= objInverseAxisAnchor)
     {
         temp = -1;
         objAngle = DX_PI_F*2;
     }
-    else tempf = 1;
+    else temp = 1;
 
-    while(objMainAxisRotCoord != focalPointCoord)
+    while(objMainAxisCoord != focalPointCoord)
     {
-        if(objMainAxisRotCoord > focalPointCoord)
+        if(objMainAxisCoord > focalPointCoord)
         {
             objAngle += ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord -= turnRate;
+            objMainAxisCoord -= turnRate;
         }
-        if(objMainAxisRotCoord < focalPointCoord)
+        if(objMainAxisCoord < focalPointCoord)
         {
             objAngle -= ((DX_PI_F*temp)*2/(screenWidth*totalRotPointMulti))/divisor;
-            objMainAxisRotCoord += turnRate;
+            objMainAxisCoord += turnRate;
         }
     }
     return objAngle;
