@@ -668,9 +668,14 @@ bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const 
 
 void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude)
 {
-    tempd = round(angle * 10000000)/10000000;
-    velocity_x = sin((float)tempd)*magnitude;
-    velocity_y = cos((float)tempd)*magnitude;
+    tempd = sin(angle)*magnitude;
+    tempd = round(tempd * 10000000)/10000000;
+    velocity_x = (float)tempd;
+
+    tempd = cos(angle)*magnitude;
+    tempd = round(tempd * 10000000)/10000000;
+    velocity_y = (float)tempd;
+    
     x += velocity_x;
     y -= velocity_y;
 }       
