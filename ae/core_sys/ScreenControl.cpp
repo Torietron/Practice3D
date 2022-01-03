@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "ScreenControl.h"
 
+static bool DisplayErrorFadeEnum = TRUE;
 static uint_fast16_t KeyEscape = 0;
 
 ScreenControl::ScreenControl(const uint_fast16_t w, const uint_fast16_t h, const uint_fast8_t b, const uint_fast16_t f)
@@ -141,6 +142,19 @@ void ScreenControl::Fade(const uint_fast8_t &ENUM_FADETYPE, const uint_fast8_t &
         case 1:
             if(Brightness >= 1) Brightness = Brightness - ENUM_FADESPEED; 
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness); 
+            break;
+        default:
+            if(DisplayErrorFadeEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: ScreenControl Fade()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorFadeEnum = FALSE;
+            }
             break;
     }
 }
