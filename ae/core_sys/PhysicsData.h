@@ -54,9 +54,9 @@ class PhysicsData { /* Manipulate time and space */
                 double Dot3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b);
                 float Dot3(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
                 float Dot3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
-                double Dot2Precise(const double &x, const double &z);
-                float Dot2(const double &x, const double &z);
-                float Dot2Fast(const float &x, const float &z);
+                double Dot2Precise(const double &a, const double &b);
+                float Dot2(const double &a, const double &b);
+                float Dot2Fast(const float &a, const float &b);
                 DxLib::VECTOR_D ConvertVector(const DxLib::VECTOR &a);
                 DxLib::VECTOR ConvertVector(const DxLib::VECTOR_D &a);
             private:
