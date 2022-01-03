@@ -547,16 +547,16 @@ float PhysicsData::_PhysicsFormula::Dot3Fast(const DxLib::VECTOR &a, const DxLib
 	return tempf;
 }
 
-double PhysicsData::_PhysicsFormula::Dot2Precise(const double &x, const double &z)
+double PhysicsData::_PhysicsFormula::Dot2Precise(const double &a, const double &b)
 {
-	tempd = (x*x+z*z);
+	tempd = (a*a+b*b);
 
 	return tempd;
 }
 
-float PhysicsData::_PhysicsFormula::Dot2(const double &x, const double &z)
+float PhysicsData::_PhysicsFormula::Dot2(const double &a, const double &b)
 {
-	tempd = (x*x+z*z);
+	tempd = (a*a+b*b);
 
     tempd = round(tempd * 10000000)/10000000;
     tempf = (float)tempd;
@@ -564,9 +564,9 @@ float PhysicsData::_PhysicsFormula::Dot2(const double &x, const double &z)
 	return tempf;
 }
 
-float PhysicsData::_PhysicsFormula::Dot2Fast(const float &x, const float &z)
+float PhysicsData::_PhysicsFormula::Dot2Fast(const float &a, const float &b)
 {
-	tempf = (x*x+z*z);
+	tempf = (a*a+b*b);
 	return tempf;
 }
 
