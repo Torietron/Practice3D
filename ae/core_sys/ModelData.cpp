@@ -53,13 +53,13 @@ void ModelData::Update(MQO_t &m)
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 
-//Blend two animations
-void ModelData::Blend(MMD_t &m, const float &blendRate)
+//Blend using the animation in BlendIndex
+void ModelData::ManualBlend(MMD_t &m, const float &blendRate)
 {
     MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex,blendRate);
 }
 
-//Blend for smoother transitions
+//Set AutoBlend to TRUE for smoother transistions
 void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
 {
     if(m.AutoBlend == TRUE)

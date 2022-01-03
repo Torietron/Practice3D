@@ -59,7 +59,7 @@ class ModelData { /* Manage models */
         ModelData(float rate = 0.39f);
         void Update(MMD_t &m);
         void Update(MQO_t &m);
-        void Blend(MMD_t &m, const float &blendRate);
+        void ManualBlend(MMD_t &m, const float &blendRate);
         void Draw(MMD_t &m, const float &blendRate1 = 1.0f, const float &blendRate2 = 0.0f);
         void Draw(const MQO_t &m);
         void SetPlayRate(float a);
