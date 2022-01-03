@@ -26,7 +26,7 @@ typedef struct _Camera3D_t {
 class ScreenControl { /* Manage screen modifications */
     public:
         uint_fast8_t WinMode, New, Cursor, LimitFPS, ShowFPS;
-        uint_fast8_t BitDepth, CursorIndex;
+        uint_fast8_t Brightness, BitDepth, CursorIndex;
         uint_fast16_t Width, Height, MaxFPS;
         int_fast32_t CursorH[2], CursorH2[2];
         _Camera2D_t C2D;
@@ -37,6 +37,8 @@ class ScreenControl { /* Manage screen modifications */
         void CountFPS();
         void DrawFPS();
         int DrawCursor(const int_fast16_t &padRight = 20, const int_fast16_t &padLeft = 2, const int_fast16_t &padBottom = 20, const int_fast16_t &padTop = 2);
+        void Fade(const uint_fast8_t &ENUM_FADETYPE, const uint_fast8_t &ENUM_FADESPEED);
+        void EndBlend();
         void SetFPSLocation(const int_fast16_t &x, const int_fast16_t &y);
         void SetFPSLimit(const uint_fast16_t &a);
         uint_fast16_t GetFPSLimit();
@@ -49,5 +51,17 @@ class ScreenControl { /* Manage screen modifications */
         uint_fast32_t start_time, end_time; 
         float average;
 };
+
+typedef enum { //FADE_IN, FADE_OUT
+    FADE_IN,
+    FADE_OUT
+} _ScreenFadeType_t;
+
+typedef enum { //SPEED1, SPEED2, SPEED3 -- (1,5,15) -- Clean divisions of 255
+    SPEED1 = 1,
+    SPEED2 = 5,
+    SPEED3 = 15
+} _ScreenFadeSpeed_t;
+
 
 #endif 

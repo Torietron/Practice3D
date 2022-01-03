@@ -9,6 +9,7 @@ ScreenControl::ScreenControl(const uint_fast16_t w, const uint_fast16_t h, const
 {
     ShowFPS = FALSE, LimitFPS = FALSE;
     WinMode = TRUE, New = TRUE, Cursor = FALSE;
+    Brightness = 0;
     CursorIndex = 0;
     CursorH[0] = 0, CursorH[1] = 0; 
     CursorH2[0] = 0, CursorH2[1] = 0;
@@ -123,6 +124,31 @@ int ScreenControl::DrawCursor(const int_fast16_t &padRight, const int_fast16_t &
         return 1;
     }
     return 0;
+}
+
+/*  Fade Types: FADE_IN, FADE_OUT  
+    Fade Speeds: SPEED1, SPEED2, SPEED3 
+    -- BlendEffect, turn-off/finish effect with EndBlend()
+*/
+void ScreenControl::Fade(const uint_fast8_t &ENUM_FADETYPE, const uint_fast8_t &ENUM_FADESPEED)
+{
+    switch(ENUM_FADETYPE)
+    {
+        case 0:
+            if(Brightness <= 254) Brightness = Brightness + ENUM_FADESPEED;
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness);  
+            break;
+        case 1:
+            if(Brightness >= 1) Brightness = Brightness - ENUM_FADESPEED; 
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness); 
+            break;
+    }
+}
+
+//Call after using any BlendEffects to turn-off/finish blend for subsequent draw calls
+void ScreenControl::EndBlend()
+{
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void ScreenControl::SetFPSLocation(const int_fast16_t &x, const int_fast16_t &y)

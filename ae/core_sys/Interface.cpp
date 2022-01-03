@@ -11,7 +11,6 @@ static uint_fast16_t KeyPress[256];
 Interface::Interface(const int_fast16_t select)
 :Selected(select)
 {
-    Brightness = 0;
     White = GetColor(255,255,255);
     Black = GetColor(0,0,0);
     Red = GetColor(255,0,0);
@@ -86,31 +85,6 @@ void Interface::DrawMarker3D(Sprite3D_t &markerObj, const DxLib::VECTOR &targetP
 {
     markerObj.Pos = VGet((targetPos.x + xOffset), (targetPos.y + yOffset), (targetPos.z + zOffset));
     DrawBillboard3D(markerObj.Pos, centerX, centerY, markerObj.Size, markerObj.Angle, markerObj.SpriteH, TRUE);
-}
-
-/*  Fade Types: FADE_IN, FADE_OUT  
-    Fade Speeds: SPEED1, SPEED2, SPEED3 
-    -- BlendEffect, turn-off/finish effect with EndBlend()
-*/
-void Interface::Fade(const uint_fast8_t &ENUM_FADETYPE, const uint_fast8_t &ENUM_FADESPEED)
-{
-    switch(ENUM_FADETYPE)
-    {
-        case 0:
-            if(Brightness <= 254) Brightness = Brightness + ENUM_FADESPEED;
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness);  
-            break;
-        case 1:
-            if(Brightness >= 1) Brightness = Brightness - ENUM_FADESPEED; 
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, Brightness); 
-            break;
-    }
-}
-
-//Call after using any BlendEffects to turn-off/finish blend for subsequent draw calls
-void Interface::EndBlend()
-{
-    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const int &a, const int_fast32_t &color)
