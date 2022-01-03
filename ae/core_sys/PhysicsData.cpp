@@ -388,7 +388,8 @@ void PhysicsData::Spin(double &angle, const char &L_or_R_Direction, const uint_f
     if(L_or_R_Direction == 'L') angle -= DX_PI_F/totalRotPoints;
 }
 
-//Fling Directions: FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
+/*  Singular axis movement
+    Fling Directions: FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT */
 bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed, float grav, float iMulti)
 {
     gravity_x = grav;
@@ -452,6 +453,7 @@ void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fas
     y -= velocity_y;
 }       
 
+//Apply accel
 void PhysicsData::Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav)
 {
     inertia_x = accel;
@@ -501,10 +503,10 @@ void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, Phy
 
     if(Delta.Time(Last, decayInterval))
     {
-        if(vel_x > 0) vel_x = floor(inertia_x * 10)/10;
-        if(vel_x < 0) vel_x = ceil(inertia_x * 10)/10;
-        if(vel_y > 0) vel_y = floor(inertia_y * 10)/10;
-        if(vel_y < 0) vel_y = ceil(inertia_y * 10)/10;
+        if(vel_x > 0) vel_x = floor(inertia_x * 1000)/1000;
+        if(vel_x < 0) vel_x = ceil(inertia_x * 1000)/1000;
+        if(vel_y > 0) vel_y = floor(inertia_y * 1000)/1000;
+        if(vel_y < 0) vel_y = ceil(inertia_y * 1000)/1000;
     }
 
     x += vel_x;
