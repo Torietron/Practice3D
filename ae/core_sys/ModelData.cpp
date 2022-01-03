@@ -13,7 +13,7 @@ void ModelData::Update(MMD_t &m)
     if(m.AnimSet != m.AnimIndex)
     {
 
-        m.LastDecay = 0.20f;
+        m.BlendDecay = 0.20f;
         MV1DetachAnim(m.ModelH,m.LastIndex);
         MV1DetachAnim(m.ModelH,m.AttachIndex);
         m.LastIndex = MV1AttachAnim(m.ModelH, m.AnimSet, -1, FALSE);
@@ -62,11 +62,11 @@ void ModelData::Blend(MMD_t &m, const float &blendRate)
 //Blend for smoother transitions
 void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
 {
-    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.LastDecay/2);
-    if(m.LastDecay > 0.00f) 
+    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.BlendDecay/2);
+    if(m.BlendDecay > 0.00f) 
     {
-        MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.LastDecay/2)+blendRate2));
-        m.LastDecay -= 0.02f;
+        MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+blendRate2));
+        m.BlendDecay -= 0.02f;
     }
     else MV1SetAttachAnimBlendRate(m.ModelH,m.IdleIndex,blendRate2);
     MV1DrawModel(m.ModelH);

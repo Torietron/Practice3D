@@ -9,7 +9,7 @@ typedef struct { /* MMD character model */
     int ModelH, AttachIndex, IdleIndex, LastIndex, BlendIndex;
     uint_least8_t AnimSet, AnimIndex;
     int_fast32_t Pace;
-    float PlayTime, TotalTime, PlayOffset, LastDecay, LastPlayTime;
+    float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
     VECTOR Pos, Rot, RotOffset;
     bool Event, Reverse;
 } MMD_t;
