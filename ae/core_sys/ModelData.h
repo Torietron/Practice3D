@@ -7,7 +7,7 @@
 
 typedef struct { /* MMD character model */
     int ModelH, AttachIndex, IdleIndex, LastIndex, BlendIndex;
-    uint_least8_t AnimSet, AnimIndex;
+    uint_least8_t AnimSet, AnimIndex, State;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
     VECTOR Pos, Rot, RotOffset;
@@ -16,7 +16,7 @@ typedef struct { /* MMD character model */
 
 typedef struct { /* DX accessory/prop/character/environment */
     int ModelH, AttachIndex;
-    uint_least8_t AnimSet, AnimIndex;
+    uint_least8_t AnimSet, AnimIndex, State;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset;
     VECTOR Pos, Rot, RotOffset;
@@ -25,19 +25,21 @@ typedef struct { /* DX accessory/prop/character/environment */
 
 typedef struct { /* MQO environment */
     int ModelH;
+    uint_least8_t State;
     VECTOR Pos, Rot;
     bool Event;
 } MQO_t;
 
 typedef struct { /* 2D Warp Model */
     int ModelH, Anim;
+    uint_least8_t State;
     VECTOR Pos, Rot;
     bool Event;
 } Live2D_t;
 
 typedef struct { /* 2D Sprite in a 3D position */
     int SpriteH;
-    uint_least8_t FluxReverse;
+    uint_least8_t FluxReverse, State;
     float Flux, FluxRate, Size, Angle;
     VECTOR Pos, Rot;
     int_fast16_t x, y;
@@ -47,10 +49,11 @@ typedef struct { /* 2D Sprite in a 3D position */
 
 typedef struct { /* 2D Sprite */
     int SpriteH;
-    float Angle;
-    VECTOR Pos;
+    uint_least8_t State;
     int_fast16_t x, y;
     uint_fast16_t w, h;
+    float Angle;
+    VECTOR Pos;
     bool Event;
 } Sprite2D_t;
 
