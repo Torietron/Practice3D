@@ -76,7 +76,7 @@ class PhysicsData { /* Manipulate time and space */
         void Spin(double &angle, const char &L_or_R_Direction = 'L', const uint_fast8_t &totalRotPoints = 32);
         bool Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed = 1, float grav = 1.00, float iMulti = 1.00);
         void Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude = 1);
-        void Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav = 1.00);
+        float Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav = 1.00);
         void Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval = 240, const float &grav_x = 1.00, const float &grav_y = 1.00);
         void Manipulate(float &x, float &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval = 240, const float &grav_x = 1.00, const float &grav_y = 1.00);
         float Get(const uint_fast8_t &ENUM_GET);
