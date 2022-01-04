@@ -6,6 +6,7 @@
 #include "PhysicsData.h"
 
 static bool DisplayErrorGetEnum = TRUE;
+static bool DisplayErrorAxisEnum = TRUE;
 static bool DisplayErrorRelAngle3 = TRUE, DisplayErrorRelAngle3Precise = TRUE, DisplayErrorRelAngle3Fast = TRUE;
 static bool DisplayErrorRelAngle2 = TRUE, DisplayErrorRelAngle2Precise = TRUE, DisplayErrorRelAngle2Fast = TRUE;
 
@@ -16,13 +17,14 @@ static double tempd;
 static VECTOR S;
 static VECTOR_D S_d, vec_d1, vec_d2;
 
-PhysicsData::PhysicsData(float a)
-:Decay(a)
+PhysicsData::PhysicsData(float decay, float pull)
+:Decay(decay),GravPullForce(pull)
 {
-    //to check or use with Get()
+    //to check or use with GetLast()
     velocity_x = 0.00f, velocity_y = 0.00f;
     inertia_x = 0.00f, inertia_y = 0.00f;
     gravity_x = 0.00f, gravity_y = 0.00f;
+    SetWorldGravity();
 }
 
 //center axis coords first, Rota is center by default
@@ -570,20 +572,22 @@ float PhysicsData::_PhysicsFormula::Dot2Fast(const float &a, const float &b)
 	return tempf;
 }
 
-DxLib::VECTOR_D PhysicsData::_PhysicsFormula::ConvertVector(const DxLib::VECTOR &a)
+//Returns converted Vector
+DxLib::VECTOR_D PhysicsData::_PhysicsFormula::ConvertVector(const DxLib::VECTOR &input)
 {
-    S_d.x = a.x;
-    S_d.y = a.y;
-    S_d.z = a.z;
+    S_d.x = input.x;
+    S_d.y = input.y;
+    S_d.z = input.z;
 
     return S_d;
 }
 
-DxLib::VECTOR PhysicsData::_PhysicsFormula::ConvertVector(const DxLib::VECTOR_D &a)
+//Returns converted Vector
+DxLib::VECTOR PhysicsData::_PhysicsFormula::ConvertVector(const DxLib::VECTOR_D &input)
 {
-    S_d.x = a.x;
-    S_d.y = a.y;
-    S_d.z = a.z;
+    S_d.x = input.x;
+    S_d.y = input.y;
+    S_d.z = input.z;
 
     S_d.x = round(S_d.x * 10000000)/10000000;
     S_d.y = round(S_d.y * 10000000)/10000000;
@@ -611,7 +615,8 @@ void PhysicsData::Spin(double &angle, const char &L_or_R_Direction, const uint_f
 }
 
 /*  Singular axis movement
-    Fling Directions: FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT */
+    Fling Directions: FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
+    - able to GetLast() [ velocity, inertia, gravity ] */
 bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed, float grav, float iMulti)
 {
     gravity_x = grav;
@@ -666,6 +671,7 @@ bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const 
     else return false;
 }
 
+//able to GetLast() [ velocity_x, velocity_y ]
 void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude)
 {
     tempd = sin(angle)*magnitude;
@@ -681,7 +687,7 @@ void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fas
 }       
 
 /*  Singular Axis application
-    - Reset Accel or Add/Sub to Accel beforehand
+    - Add/Sub/Reset Accel beforehand
     - Convert the end value to negative as necessary */
 float PhysicsData::Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav)
 {
@@ -693,6 +699,54 @@ float PhysicsData::Accelerate(float &vel, const float &velBase, const float &vel
 
     vel = tempf;
     return tempf;
+}
+
+/*  Singular Axis application
+    - Add/Sub/Reset Accel beforehand
+    - Convert the end value to negative as necessary 
+    AXIS_X, AXIS_Y, AXIS_Z*/
+float PhysicsData::Accelerate(PhysicsBody_t &body, const uint_fast8_t &ENUM_AXIS)
+{
+    body.Accel = body.Accel + body.AccelRate;
+    tempd = body.VelBase;
+    
+    switch(ENUM_AXIS)
+    {
+        case AXIS_X:
+            tempd = tempd + (body.Accel * gravity_x);
+            if(tempd > body.VelMax) tempd = body.VelMax;
+            if(tempd != body.VelMax && tempd != body.VelBase) tempd = round(tempd*10000000)/10000000;
+            tempf = (float)tempd;
+            body.Vel.x = tempf;
+            return tempf;
+        case AXIS_Y:
+            tempd = tempd + (body.Accel * gravity_y);
+            if(tempd > body.VelMax) tempd = body.VelMax;
+            if(tempd != body.VelMax && tempd != body.VelBase) tempd = round(tempd*10000000)/10000000;
+            tempf = (float)tempd;
+            body.Vel.y = tempf;
+            return tempf;
+        case AXIS_Z:
+            tempd = tempd + (body.Accel * gravity_z);
+            if(tempd > body.VelMax) tempd = body.VelMax;
+            if(tempd != body.VelMax && tempd != body.VelBase) tempd = round(tempd*10000000)/10000000;
+            tempf = (float)tempd;
+            body.Vel.z = tempf;
+            return tempf;
+        default:
+            if(DisplayErrorAxisEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData Accelerate()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorAxisEnum = FALSE;
+            }
+            return 0.0f;
+    }
 }
 
 void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval, const float &grav_x, const float &grav_y)
@@ -735,12 +789,48 @@ void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, Phy
 
     x += vel_x;
     y += vel_y;
-}       
+}      
+
+/*  Uses world_gravity
+    Rate of decay is set by Body.DecayInterval 
+    - Heavier objects should have higher decay intervals (resist)
+    - able to GetLast() [ velocity, inertia, gravity ]*/
+void PhysicsData::Manipulate(PhysicsBody_t &Body)
+{
+    velocity_x = Body.Vel.x;
+    velocity_y = Body.Vel.y;
+    velocity_z = Body.Vel.z;
+    gravity_x = world_gravity_x;
+    gravity_y = world_gravity_y;
+    gravity_z = world_gravity_z;
+
+    if(Delta.Time(Body.Last, Body.DecayInterval))
+    {
+        S_d.x = Body.Vel.x;
+        S_d.y = Body.Vel.y;
+        S_d.z = Body.Vel.z;
+        if(Body.Vel.x > 0) Body.Vel.x = (float)floor(((S_d.x * Decay) * gravity_x) * 10000000)/10000000;
+        if(Body.Vel.x < 0) Body.Vel.x = (float)ceil(((S_d.x * Decay) * gravity_x) * 10000000)/10000000;
+        if(Body.Vel.y > 0) Body.Vel.y = (float)floor(((S_d.y * Decay) * gravity_y) * 10000000)/10000000;
+        if(Body.Vel.y < 0) Body.Vel.y = (float)ceil(((S_d.y * Decay) * gravity_y) * 10000000)/10000000;
+        if(Body.Vel.z > 0) Body.Vel.z = (float)floor(((S_d.z * Decay) * gravity_z) * 10000000)/10000000;
+        if(Body.Vel.z < 0) Body.Vel.z = (float)ceil(((S_d.z * Decay) * gravity_z) * 10000000)/10000000;
+    }
+    inertia_x = Body.Vel.x;
+    inertia_y = Body.Vel.y;
+    inertia_z = Body.Vel.x;
+
+    Body.Pos.x += inertia_x;
+    Body.Pos.y += inertia_y;
+    Body.Pos.z += inertia_z;
+}
 
 /* from Propel() / Fling() / Manipulate()
-Get Values: DECAY, LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_INERTIA_X, 
-LAST_INERTIA_Y, LAST_GRAVITY_X, LAST_GRAVITY_Y */
-float PhysicsData::Get(const uint_fast8_t &ENUM_GET)
+Get Values: DECAY, 
+LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
+LAST_INERTIA_X, LAST_INERTIA_Z, LAST_INERTIA_Y, 
+LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
+float PhysicsData::GetLast(const uint_fast8_t &ENUM_GET)
 {
     //welcome to the leaning tower of switchisa
     switch(ENUM_GET)
@@ -751,21 +841,27 @@ float PhysicsData::Get(const uint_fast8_t &ENUM_GET)
             return velocity_x;
         case LAST_VELOCITY_Y:
             return velocity_y;
+        case LAST_VELOCITY_Z:
+            return velocity_z;
         case LAST_INERTIA_X:
             return inertia_x;
         case LAST_INERTIA_Y:
             return inertia_y;
+        case LAST_INERTIA_Z:
+            return inertia_z;
         case LAST_GRAVITY_X: 
             return gravity_x;
         case LAST_GRAVITY_Y:
             return gravity_y;
+        case LAST_GRAVITY_Z:
+            return gravity_z;
         default:
             if(DisplayErrorGetEnum)
             {
                 MessageBox
                 (
                     NULL,
-                    TEXT("Enum Error: PhysicsData Get()"),
+                    TEXT("Enum Error: PhysicsData GetLast()"),
                     TEXT("Error"),
                     MB_OK | MB_ICONERROR 
                 );
@@ -773,6 +869,22 @@ float PhysicsData::Get(const uint_fast8_t &ENUM_GET)
             }
             return 0.0f;
     }
+}
+
+//Set gravity to a lower value for a stronger effect
+void PhysicsData::SetWorldGravity(const float &x, const float &y, const float &z)
+{
+    world_gravity_x = x;
+    world_gravity_y = y;
+    world_gravity_z = z;
+}
+
+DxLib::VECTOR PhysicsData::GetWorldGravity()
+{
+    S.x = world_gravity_x;
+    S.y = world_gravity_y;
+    S.z = world_gravity_z;
+    return S;
 }
 
 //center axis coords first, Rota is center by default

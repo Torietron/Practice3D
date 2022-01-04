@@ -11,7 +11,7 @@ typedef struct { /* MMD character model */
     uint_least8_t AnimSet, AnimIndex, State;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
-    VECTOR Pos, Rot, RotOffset;
+    VECTOR Rot, RotOffset;
     PhysicsBody_t Body;
     bool Event, Reverse, AutoBlend;
 } MMD_t;
