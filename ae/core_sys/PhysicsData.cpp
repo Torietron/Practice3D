@@ -680,22 +680,19 @@ void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fas
     y -= velocity_y;
 }       
 
-//Apply accel
-void PhysicsData::Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav)
+/*  Singular Axis application
+    - Reset Accel or Add/Sub to Accel beforehand
+    - Convert the end value to negative as necessary */
+float PhysicsData::Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav)
 {
-    inertia_x = accel;
-    inertia_y = accel;
-    gravity_x = grav;
-    gravity_y = grav;
-
     tempd = velBase;
     tempd = tempd + (accel * grav);
     if(tempd > velMax) tempd = velMax;
+    if(tempd != velMax && tempd != velBase) tempd = round(tempd*10000000)/10000000;
+    tempf = (float)tempd;
 
-    tempd = round(tempd*10000000)/10000000;
-    velocity_x = (float)tempd;
-    velocity_y = (float)tempd;
-    vel = (float)tempd;
+    vel = tempf;
+    return tempf;
 }
 
 void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval, const float &grav_x, const float &grav_y)
@@ -740,7 +737,8 @@ void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, Phy
     y += vel_y;
 }       
 
-/* Get Values: DECAY, LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_INERTIA_X, 
+/* from Propel() / Fling() / Manipulate()
+Get Values: DECAY, LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_INERTIA_X, 
 LAST_INERTIA_Y, LAST_GRAVITY_X, LAST_GRAVITY_Y */
 float PhysicsData::Get(const uint_fast8_t &ENUM_GET)
 {
