@@ -32,7 +32,7 @@ extern EnemyData Enemy;
 void PracticeScene::Init()
 {
     Screen.C3D.Pos = VGet(0.0f, 20.0f, -20.0f);
-    Player.MMD.Pos = VGet(42.0f, 0.0f, 52.0f);
+    Player.MMD.Body.Pos = VGet(42.0f, 0.0f, 52.0f);
     Player.MMD.Rot = VGet(0.0f, (DX_PI_F/5) * -1, 0.0f);
     Screen.C3D.Anchor = ((DX_PI_F/5) * -1);
 
@@ -88,9 +88,9 @@ void PracticeScene::Draw()
     
     if(debugflag)
     {
-        DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.MMD.Pos.x,Player.MMD.Pos.y,Player.MMD.Pos.z);
+        DrawFormatString(0,20,GetColor(255,255,255),"x=%.1f y=%.1f z=%.1f",Player.MMD.Body.Pos.x,Player.MMD.Body.Pos.y,Player.MMD.Body.Pos.z);
         DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",Screen.C3D.AngleV, Screen.C3D.AngleH);
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
-        //DrawFormatString(0,80,-1,"Target=%d",Selected);
+        //DrawFormatString(0,80,-1,"test=%.1f",Physics.GetLast(DECAY));
     }
 }

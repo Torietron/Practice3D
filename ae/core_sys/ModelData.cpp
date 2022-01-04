@@ -41,7 +41,7 @@ void ModelData::Update(MMD_t &m)
     MV1SetAttachAnimTime(m.ModelH,m.LastIndex,m.LastPlayTime); 
 
     //Update spatial data
-    MV1SetPosition(m.ModelH,m.Pos);
+    MV1SetPosition(m.ModelH,m.Body.Pos);
     MV1SetRotationXYZ(m.ModelH,VGet(m.Rot.x,(m.Rot.y+m.RotOffset.y),m.Rot.z));
     MV1RefreshCollInfo(m.ModelH,-1);
 }

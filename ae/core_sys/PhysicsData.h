@@ -11,7 +11,8 @@ typedef struct { /* Track individual times and events */
 } PhysicsLastTime_t;
 
 typedef struct { /* For individual data */
-    float Accel, VelBase, VelMax;
+    uint_fast32_t DecayInterval;
+    float Accel, AccelRate, VelBase, VelMax;
     VECTOR Pos, Vel, Rot;
     PhysicsLastTime_t Last;
 } PhysicsBody_t;
@@ -63,33 +64,35 @@ class PhysicsData { /* Manipulate time and space */
                 double Dot2Precise(const double &a, const double &b);
                 float Dot2(const double &a, const double &b);
                 float Dot2Fast(const float &a, const float &b);
-                DxLib::VECTOR_D ConvertVector(const DxLib::VECTOR &a);
-                DxLib::VECTOR ConvertVector(const DxLib::VECTOR_D &a);
+                DxLib::VECTOR_D ConvertVector(const DxLib::VECTOR &input);
+                DxLib::VECTOR ConvertVector(const DxLib::VECTOR_D &input);
             private:
                 PhysicsData *parent;
         };
     public: //Manipulations here
         _PhysicsTimeDelta_t Delta;
         _PhysicsFormula Formula;
-        PhysicsData(float a = 0.99f);
+        PhysicsData(float decay = 0.99f, float pull = 1.0f);
         void Spin(float &angle, const char &L_or_R_Direction = 'L', const uint_fast8_t &totalRotPoints = 32);
         void Spin(double &angle, const char &L_or_R_Direction = 'L', const uint_fast8_t &totalRotPoints = 32);
         bool Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed = 1, float grav = 1.00, float iMulti = 1.00);
         void Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude = 1);
         float Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav = 1.00);
+        float Accelerate(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
         void Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval = 240, const float &grav_x = 1.00, const float &grav_y = 1.00);
         void Manipulate(float &x, float &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval = 240, const float &grav_x = 1.00, const float &grav_y = 1.00);
-        float Get(const uint_fast8_t &ENUM_GET);
+        void Manipulate(PhysicsBody_t &Body);
+        float GetLast(const uint_fast8_t &ENUM_GET);
+        void SetWorldGravity(const float &x = 1.0f, const float &y = 1.0f, const float &z = 1.0f);
+        DxLib::VECTOR GetWorldGravity();
         void DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &w, const int_fast16_t &h, const int_fast32_t &color = -65536, const uint_fast8_t &fillFlag = 0);
         void DrawHitCircle(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &collRadius, const int_fast32_t &color = -65536, const uint_fast8_t &fillFlag = 0);
     private:
-        const float Decay;
-        float velocity_x;
-        float velocity_y;
-        float inertia_x;
-        float inertia_y;
-        float gravity_x;
-        float gravity_y;
+        const float Decay, GravPullForce;
+        float velocity_x, velocity_y, velocity_z;
+        float inertia_x, inertia_y, inertia_z;
+        float gravity_x, gravity_y, gravity_z;
+        float world_gravity_x, world_gravity_y, world_gravity_z;
 };
 
 typedef enum { //FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
@@ -99,14 +102,23 @@ typedef enum { //FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
     FLING_LEFT
 } _PhysicsFlingDirection_t;
 
-typedef enum { //DECAY, LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_INERTIA_X, LAST_INERTIA_Y, LAST_GRAVITY_X, LAST_GRAVITY_Y
+typedef enum { //AXIS_X, AXIS_Y, AXIS_Z
+    AXIS_X,
+    AXIS_Y,
+    AXIS_Z
+} _PhysicsAxis_t;
+
+typedef enum { //DECAY, LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, LAST_INERTIA_X, LAST_INERTIA_Y, LAST_INERTIA_Z, LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z
     DECAY,
     LAST_VELOCITY_X,
     LAST_VELOCITY_Y,
+    LAST_VELOCITY_Z,
     LAST_INERTIA_X,
     LAST_INERTIA_Y,
+    LAST_INERTIA_Z,
     LAST_GRAVITY_X,
-    LAST_GRAVITY_Y
+    LAST_GRAVITY_Y,
+    LAST_GRAVITY_Z
 } _PhysicsGet_t;
 
 #endif
