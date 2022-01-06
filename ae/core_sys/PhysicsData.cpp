@@ -790,9 +790,9 @@ void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, Physi
     LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
 void PhysicsData::Manipulate(PhysicsBody_t &Body)
 {//diminishing pull with range
-    gravity.x = world_gravity_multi.x * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf(Body.Pos.x*Body.Pos.x) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
-    gravity.y = world_gravity_multi.y * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf(Body.Pos.y*Body.Pos.y) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
-    gravity.z = world_gravity_multi.z * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf(Body.Pos.z*Body.Pos.z) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));
+    gravity.x = world_gravity_multi.x * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf(Body.Pos.x - world_gravity_pos.x * Body.Pos.x - world_gravity_pos.x) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
+    gravity.y = world_gravity_multi.y * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf(Body.Pos.y - world_gravity_pos.y * Body.Pos.y - world_gravity_pos.y) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
+    gravity.z = world_gravity_multi.z * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf(Body.Pos.z - world_gravity_pos.z * Body.Pos.x - world_gravity_pos.z) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));
 
     if(Delta.Time(Body.Time, Body.Interval)) //F = M x S <- actual physicists please ignore this, thanks
     {
