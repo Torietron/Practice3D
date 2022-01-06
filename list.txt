@@ -1,21 +1,2 @@
-Any set of rules that depend on the physical world around it is directly a study of physics
-
--ability casting
--continue extending modeldata, overloads
-
-
-//elements -- DrawFlag[], #define MAX, Model_t, PhysicsBody_t
-MMD_t MMD;
-
-
-Accelerate(MMD[i].Body)
-Manipulate(MMD[i].Body)
-
-Accelerate(Body[i])
-Manipulate(Body[i])
-
-MMD[i].Body.Pos.x
-MMD[i].Body.Rot.x
-
-Sprite2D[i].Body.Pos.x
-Sprite2D[i].Body.Rot.x
+it's time to work on employable skills that will actually lead to a career
+which is apparently not this
