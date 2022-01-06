@@ -10,6 +10,7 @@ static bool DisplayErrorAxisEnum = TRUE;
 static bool DisplayErrorRelAngle3 = TRUE, DisplayErrorRelAngle3Precise = TRUE, DisplayErrorRelAngle3Fast = TRUE;
 static bool DisplayErrorRelAngle2 = TRUE, DisplayErrorRelAngle2Precise = TRUE, DisplayErrorRelAngle2Fast = TRUE;
 
+static float *gForce, *grav, *vel;
 static uint_fast8_t random;
 static int_fast16_t temp, dice1, dice2;
 static float tempf, dice1f, dice2f, hTemp1, hTemp2;
@@ -17,14 +18,15 @@ static double tempd;
 static VECTOR S;
 static VECTOR_D S_d, vec_d1, vec_d2;
 
-PhysicsData::PhysicsData(float decay, float pull)
-:Decay(decay),GravPullForce(pull)
+PhysicsData::PhysicsData(float pullRate)
+:GRAV_PULL_RATE(pullRate)
 {
-    //to check or use with GetLast()
-    velocity_x = 0.00f, velocity_y = 0.00f;
-    inertia_x = 0.00f, inertia_y = 0.00f;
-    gravity_x = 0.00f, gravity_y = 0.00f;
-    SetWorldGravity();
+    //to check or use with GetLastValue()
+    velocity.x = 0.00f, velocity.y = 0.00f;
+    gravity.x = 0.00f, gravity.y = 0.00f;
+    SetWorldGravityMulti();
+    SetWorldGravityPos();
+    SetWorldGravityRange();
 }
 
 //center axis coords first, Rota is center by default
@@ -616,53 +618,51 @@ void PhysicsData::Spin(double &angle, const char &L_or_R_Direction, const uint_f
 
 /*  Singular axis movement
     Fling Directions: FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
-    - able to GetLast() [ velocity, inertia, gravity ] */
+    - able to GetLastValue() [ velocity, inertia, gravity ] */
 bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed, float grav, float iMulti)
 {
-    gravity_x = grav;
-    gravity_y = grav;
-    inertia_x = (speed*gravity_x)*iMulti;
-    inertia_y = (speed*gravity_y)*iMulti;
+    gravity.x = grav;
+    gravity.y = grav;
 
     switch(ENUM_FLING_DIRECTION)
     {
         case FLING_DOWN:
             if(position <= destination-1)
             {
-                if(destination - position > 200) {velocity_y = ((speed*8)*gravity_y)*iMulti; position += (int)floor(velocity_y);}
-                if(destination - position > 40) {velocity_y = (speed*4)*gravity_y; position += (int)floor(velocity_y);}
-                if(destination - position > 15) {velocity_y = (speed*2)*gravity_y; position += (int)floor(velocity_y);}
-                if(destination - position > 1) {velocity_y = ((speed*1)*gravity_y)*iMulti; position += (int)floor(velocity_y);}
+                if(destination - position > 200) {velocity.y = ((speed*8)*gravity.y)*iMulti; position += (int)floor(velocity.y);}
+                if(destination - position > 40) {velocity.y = (speed*4)*gravity.y; position += (int)floor(velocity.y);}
+                if(destination - position > 15) {velocity.y = (speed*2)*gravity.y; position += (int)floor(velocity.y);}
+                if(destination - position > 1) {velocity.y = ((speed*1)*gravity.y)*iMulti; position += (int)floor(velocity.y);}
             }
             if(position == destination-1) position++;
             break;
         case FLING_UP:
             if(position >= destination+1)
             {
-                if(position - destination > 200) {velocity_y = ((speed*8)*gravity_y)*iMulti; position -= (int)floor(velocity_y);}
-                if(position - destination > 40) {velocity_y = (speed*4)*gravity_y; position -= (int)floor(velocity_y);}
-                if(position - destination > 15) {velocity_y = (speed*2)*gravity_y; position -= (int)floor(velocity_y);}
-                if(position - destination > 1) {velocity_y = ((speed*1)*gravity_y)*iMulti; position -= (int)floor(velocity_y);}
+                if(position - destination > 200) {velocity.y = ((speed*8)*gravity.y)*iMulti; position -= (int)floor(velocity.y);}
+                if(position - destination > 40) {velocity.y = (speed*4)*gravity.y; position -= (int)floor(velocity.y);}
+                if(position - destination > 15) {velocity.y = (speed*2)*gravity.y; position -= (int)floor(velocity.y);}
+                if(position - destination > 1) {velocity.y = ((speed*1)*gravity.y)*iMulti; position -= (int)floor(velocity.y);}
             }
             if(position == destination+1) position--;
             break;
         case FLING_LEFT:
             if(position >= destination+1)
             {
-                if(position - destination > 200) {velocity_x = ((speed*8)*gravity_x)*iMulti; position -= (int)floor(velocity_x);}
-                if(position - destination > 40) {velocity_x = (speed*4)*gravity_x; position -= (int)floor(velocity_x);}
-                if(position - destination > 15) {velocity_x = (speed*2)*gravity_x; position -= (int)floor(velocity_x);}
-                if(position - destination > 1) {velocity_x = ((speed*1)*gravity_x)*iMulti; position -= (int)floor(velocity_x);}
+                if(position - destination > 200) {velocity.x = ((speed*8)*gravity.x)*iMulti; position -= (int)floor(velocity.x);}
+                if(position - destination > 40) {velocity.x = (speed*4)*gravity.x; position -= (int)floor(velocity.x);}
+                if(position - destination > 15) {velocity.x = (speed*2)*gravity.x; position -= (int)floor(velocity.x);}
+                if(position - destination > 1) {velocity.x = ((speed*1)*gravity.x)*iMulti; position -= (int)floor(velocity.x);}
             }
             if(position == destination+1) position--;
             break;
         case FLING_RIGHT:
             if(position <= destination-1)
             {
-                if(destination - position > 200) {velocity_x = ((speed*8)*gravity_x)*iMulti; position += (int)floor(velocity_x);}
-                if(destination - position > 40) {velocity_x = (speed*4)*gravity_x; position += (int)floor(velocity_x);}
-                if(destination - position > 15) {velocity_x = (speed*2)*gravity_x; position += (int)floor(velocity_x);}
-                if(destination - position > 1) {velocity_x = ((speed*1)*gravity_x)*iMulti; position += (int)floor(velocity_x);}
+                if(destination - position > 200) {velocity.x = ((speed*8)*gravity.x)*iMulti; position += (int)floor(velocity.x);}
+                if(destination - position > 40) {velocity.x = (speed*4)*gravity.x; position += (int)floor(velocity.x);}
+                if(destination - position > 15) {velocity.x = (speed*2)*gravity.x; position += (int)floor(velocity.x);}
+                if(destination - position > 1) {velocity.x = ((speed*1)*gravity.x)*iMulti; position += (int)floor(velocity.x);}
             }
             if(position == destination-1) position++;
             break;
@@ -671,19 +671,19 @@ bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const 
     else return false;
 }
 
-//able to GetLast() [ velocity_x, velocity_y ]
+//able to GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y
 void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude)
 {
     tempd = sin(angle)*magnitude;
     tempd = round(tempd * 10000000)/10000000;
-    velocity_x = (float)tempd;
+    velocity.x = (float)tempd;
 
     tempd = cos(angle)*magnitude;
     tempd = round(tempd * 10000000)/10000000;
-    velocity_y = (float)tempd;
+    velocity.y = (float)tempd;
     
-    x += velocity_x;
-    y -= velocity_y;
+    x += velocity.x;
+    y -= velocity.y;
 }       
 
 /*  Singular Axis application
@@ -705,34 +705,19 @@ float PhysicsData::Accelerate(float &vel, const float &velBase, const float &vel
     - Add/Sub/Reset Accel beforehand
     - Convert the end value to negative as necessary 
     AXIS_X, AXIS_Y, AXIS_Z*/
-float PhysicsData::Accelerate(PhysicsBody_t &body, const uint_fast8_t &ENUM_AXIS)
+float PhysicsData::Accelerate(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
 {
-    body.Accel = body.Accel + body.AccelRate;
-    tempd = body.VelBase;
-    
     switch(ENUM_AXIS)
     {
         case AXIS_X:
-            tempd = tempd + (body.Accel * gravity_x);
-            if(tempd > body.VelMax) tempd = body.VelMax;
-            if(tempd != body.VelMax && tempd != body.VelBase) tempd = round(tempd*10000000)/10000000;
-            tempf = (float)tempd;
-            body.Vel.x = tempf;
-            return tempf;
+            vel = &Body.Vel.x;
+            break;
         case AXIS_Y:
-            tempd = tempd + (body.Accel * gravity_y);
-            if(tempd > body.VelMax) tempd = body.VelMax;
-            if(tempd != body.VelMax && tempd != body.VelBase) tempd = round(tempd*10000000)/10000000;
-            tempf = (float)tempd;
-            body.Vel.y = tempf;
-            return tempf;
+            vel = &Body.Vel.y;
+            break;
         case AXIS_Z:
-            tempd = tempd + (body.Accel * gravity_z);
-            if(tempd > body.VelMax) tempd = body.VelMax;
-            if(tempd != body.VelMax && tempd != body.VelBase) tempd = round(tempd*10000000)/10000000;
-            tempf = (float)tempd;
-            body.Vel.z = tempf;
-            return tempf;
+            vel = &Body.Vel.z;
+            break;
         default:
             if(DisplayErrorAxisEnum)
             {
@@ -747,121 +732,118 @@ float PhysicsData::Accelerate(PhysicsBody_t &body, const uint_fast8_t &ENUM_AXIS
             }
             return 0.0f;
     }
+
+    Body.Accel = Body.Accel + Body.AccelRate;
+    tempd = Body.VelBase + Body.Accel;
+
+    if(tempd > Body.VelMax) tempd = Body.VelMax;
+    if(tempd != Body.VelMax && tempd != Body.VelBase) tempd = round(tempd*10000000)/10000000;
+   
+    tempf = (float)tempd;
+    *vel = tempf;
+
+    return tempf;
 }
 
-void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval, const float &grav_x, const float &grav_y)
+void PhysicsData::Manipulate(int_fast16_t &x, int_fast16_t &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval, const float &gravX, const float &gravY, const float &decay)
 {
-    velocity_x = vel_x;
-    velocity_y = vel_y;
-    gravity_x = grav_x;
-    gravity_y = grav_y;
-    inertia_x = (velocity_x*Decay)*gravity_x;
-    inertia_y = (velocity_y*Decay)*gravity_y;
+    gravity.x = gravX;
+    gravity.y = gravY;
+    velocity.x = (velX*decay)*gravity.x;
+    velocity.y = (velY*decay)*gravity.y;
 
-    if(Delta.Time(Last, decayInterval))
+    if(Delta.Time(Last, interval))
     {
-        if(vel_x > 0) vel_x = floor(inertia_x);
-        if(vel_x < 0) vel_x = ceil(inertia_x);
-        if(vel_y > 0) vel_y = floor(inertia_y);
-        if(vel_y < 0) vel_y = ceil(inertia_y);
+        if(velX > 0) velX = floor(velocity.x);
+        if(velX < 0) velX = ceil(velocity.x);
+        if(velY > 0) velY = floor(velocity.y);
+        if(velY < 0) velY = ceil(velocity.y);
     }
 
-    x += (int)vel_x;
-    y += (int)vel_y;
+    x += (int)velX;
+    y += (int)velY;
 }
 
-void PhysicsData::Manipulate(float &x, float &y, float &vel_x, float &vel_y, PhysicsLastTime_t &Last, const uint_fast32_t &decayInterval, const float &grav_x, const float &grav_y)
+void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval, const float &gravX, const float &gravY, const float &decay)
 {
-    velocity_x = vel_x;
-    velocity_y = vel_y;
-    gravity_x = grav_x;
-    gravity_y = grav_y;
-    inertia_x = (velocity_x*Decay)*gravity_x;
-    inertia_y = (velocity_y*Decay)*gravity_y;
+    gravity.x = gravX;
+    gravity.y = gravY;
+    velocity.x = (velX*decay)*gravity.x;
+    velocity.y = (velY*decay)*gravity.y;
 
-    if(Delta.Time(Last, decayInterval))
+    if(Delta.Time(Last, interval))
     {
-        if(vel_x > 0) vel_x = floor(inertia_x * 1000)/1000;
-        if(vel_x < 0) vel_x = ceil(inertia_x * 1000)/1000;
-        if(vel_y > 0) vel_y = floor(inertia_y * 1000)/1000;
-        if(vel_y < 0) vel_y = ceil(inertia_y * 1000)/1000;
+        if(velX > 0) velX = floor(velocity.x * 1000)/1000;
+        if(velX < 0) velX = ceil(velocity.x * 1000)/1000;
+        if(velY > 0) velY = floor(velocity.y * 1000)/1000;
+        if(velY < 0) velY = ceil(velocity.y * 1000)/1000;
     }
 
-    x += vel_x;
-    y += vel_y;
+    x += velX;
+    y += velY;
 }      
 
 /*  Uses world_gravity
-    Rate of decay is set by Body.DecayInterval 
-    - Heavier objects should have higher decay intervals (resist)
-    - able to GetLast() [ velocity, inertia, gravity ]*/
+    Frequency of force decay is set by Body.Interval
+    - GetLastValue: 
+    LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
+    LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
 void PhysicsData::Manipulate(PhysicsBody_t &Body)
-{
-    velocity_x = Body.Vel.x;
-    velocity_y = Body.Vel.y;
-    velocity_z = Body.Vel.z;
-    gravity_x = world_gravity_x;
-    gravity_y = world_gravity_y;
-    gravity_z = world_gravity_z;
+{//diminishing pull with range
+    gravity.x = world_gravity_multi.x * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf(Body.Pos.x*Body.Pos.x) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
+    gravity.y = world_gravity_multi.y * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf(Body.Pos.y*Body.Pos.y) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
+    gravity.z = world_gravity_multi.z * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf(Body.Pos.z*Body.Pos.z) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));
 
-    if(Delta.Time(Body.Last, Body.DecayInterval))
+    if(Delta.Time(Body.Time, Body.Interval)) //F = M x S <- actual physicists please ignore this, thanks
     {
-        S_d.x = Body.Vel.x;
-        S_d.y = Body.Vel.y;
-        S_d.z = Body.Vel.z;
-        if(Body.Vel.x > 0) Body.Vel.x = (float)floor(((S_d.x * Decay) * gravity_x) * 10000000)/10000000;
-        if(Body.Vel.x < 0) Body.Vel.x = (float)ceil(((S_d.x * Decay) * gravity_x) * 10000000)/10000000;
-        if(Body.Vel.y > 0) Body.Vel.y = (float)floor(((S_d.y * Decay) * gravity_y) * 10000000)/10000000;
-        if(Body.Vel.y < 0) Body.Vel.y = (float)ceil(((S_d.y * Decay) * gravity_y) * 10000000)/10000000;
-        if(Body.Vel.z > 0) Body.Vel.z = (float)floor(((S_d.z * Decay) * gravity_z) * 10000000)/10000000;
-        if(Body.Vel.z < 0) Body.Vel.z = (float)ceil(((S_d.z * Decay) * gravity_z) * 10000000)/10000000;
-    }
-    inertia_x = Body.Vel.x;
-    inertia_y = Body.Vel.y;
-    inertia_z = Body.Vel.x;
+        ForceDecay(Body,AXIS_X);
+        ForceDecay(Body,AXIS_Y);
+        ForceDecay(Body,AXIS_Z);
 
-    Body.Pos.x += inertia_x;
-    Body.Pos.y += inertia_y;
-    Body.Pos.z += inertia_z;
+        if(Body.Grounded) Body.Vel = VGet(Body.Vel.x * Body.FrictionRatio, Body.Vel.y * Body.FrictionRatio, Body.Vel.z * Body.FrictionRatio);
+    }
+
+    gravity = VGet(Body.gForce.x, Body.gForce.y, Body.gForce.z);
+
+    if(Body.Pos.x > world_gravity_pos.x) gravity.x *= -1;
+    if(Body.Pos.y > world_gravity_pos.y) gravity.y *= -1;
+    if(Body.Pos.z > world_gravity_pos.z) gravity.z *= -1;
+
+    velocity = VGet(Body.Vel.x + gravity.x, Body.Vel.y + gravity.y, Body.Vel.z + gravity.z);
+
+    Body.Pos = VGet(Body.Pos.x + velocity.x, Body.Pos.y + velocity.y, Body.Pos.z + velocity.z);
+    if(Body.Pos.x - world_gravity_pos.x < 0.002 && Body.Pos.x - world_gravity_pos.x > -0.002 ) Body.Pos.x = world_gravity_pos.x;
+    if(Body.Pos.x - world_gravity_pos.y < 0.002 && Body.Pos.y - world_gravity_pos.y > -0.002 ) Body.Pos.y = world_gravity_pos.y;
+    if(Body.Pos.x - world_gravity_pos.z < 0.002 && Body.Pos.z - world_gravity_pos.z > -0.002 ) Body.Pos.z = world_gravity_pos.z;
 }
 
 /* from Propel() / Fling() / Manipulate()
-Get Values: DECAY, 
-LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
-LAST_INERTIA_X, LAST_INERTIA_Z, LAST_INERTIA_Y, 
+GetLastValue:
+LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z,
 LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
-float PhysicsData::GetLast(const uint_fast8_t &ENUM_GET)
+float PhysicsData::GetLastValue(const uint_fast8_t &ENUM_LAST)
 {
-    //welcome to the leaning tower of switchisa
-    switch(ENUM_GET)
+    switch(ENUM_LAST)
     {
-        case DECAY:
-            return Decay;
         case LAST_VELOCITY_X:
-            return velocity_x;
+            return velocity.x;
         case LAST_VELOCITY_Y:
-            return velocity_y;
+            return velocity.y;
         case LAST_VELOCITY_Z:
-            return velocity_z;
-        case LAST_INERTIA_X:
-            return inertia_x;
-        case LAST_INERTIA_Y:
-            return inertia_y;
-        case LAST_INERTIA_Z:
-            return inertia_z;
+            return velocity.z;
         case LAST_GRAVITY_X: 
-            return gravity_x;
+            return gravity.x;
         case LAST_GRAVITY_Y:
-            return gravity_y;
+            return gravity.y;
         case LAST_GRAVITY_Z:
-            return gravity_z;
+            return gravity.z;
         default:
             if(DisplayErrorGetEnum)
             {
                 MessageBox
                 (
                     NULL,
-                    TEXT("Enum Error: PhysicsData GetLast()"),
+                    TEXT("Enum Error: PhysicsData GetLastValue()"),
                     TEXT("Error"),
                     MB_OK | MB_ICONERROR 
                 );
@@ -871,21 +853,39 @@ float PhysicsData::GetLast(const uint_fast8_t &ENUM_GET)
     }
 }
 
-//Set gravity to a lower value for a stronger effect
-void PhysicsData::SetWorldGravity(const float &x, const float &y, const float &z)
+/*  Default = 1.0 (No effect)
+    Multiplier to lower other forces
+    Set to a lower value for a stronger effect */
+void PhysicsData::SetWorldGravityMulti(const float &x, const float &y, const float &z)
 {
-    world_gravity_x = x;
-    world_gravity_y = y;
-    world_gravity_z = z;
+    world_gravity_multi = VGet(x,y,z);
 }
 
-DxLib::VECTOR PhysicsData::GetWorldGravity()
+DxLib::VECTOR PhysicsData::GetWorldGravityMulti()
 {
-    S.x = world_gravity_x;
-    S.y = world_gravity_y;
-    S.z = world_gravity_z;
-    return S;
+    return world_gravity_multi;
 }
+
+void PhysicsData::SetWorldGravityPos(const float &x, const float &y, const float &z)
+{
+    world_gravity_pos = VGet(x,y,z);
+}
+
+void PhysicsData::SetWorldGravityRange(const float &x, const float &y, const float &z)
+{
+    world_gravity_range = VGet(x,y,z);
+}
+
+DxLib::VECTOR PhysicsData::GetWorldGravityPos()
+{
+    return world_gravity_pos;
+}
+
+DxLib::VECTOR PhysicsData::GetWorldGravityRange()
+{
+    return world_gravity_range;
+}
+
 
 //center axis coords first, Rota is center by default
 void PhysicsData::DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &w, const int_fast16_t &h, const int_fast32_t &color, const uint_fast8_t &fillFlag)
@@ -897,4 +897,52 @@ void PhysicsData::DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const
 void PhysicsData::DrawHitCircle(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &collRadius, const int_fast32_t &color, const uint_fast8_t &fillFlag)
 {
     DrawCircle(x, y, collRadius, color, fillFlag);
+}
+
+int PhysicsData::ForceDecay(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
+{
+    switch(ENUM_AXIS) //i'll never get a programmer job
+    {//but this is kinda fun
+        case AXIS_X:
+            tempd = Body.Vel.x;
+            vel = &Body.Vel.x;
+            gForce = &Body.gForce.x;
+            grav = &gravity.x;
+            break;
+        case AXIS_Y:
+            tempd = Body.Vel.y;
+            vel = &Body.Vel.y;
+            gForce = &Body.gForce.y;
+            grav = &gravity.y;
+            break;
+        case AXIS_Z:
+            tempd = Body.Vel.z;
+            vel = &Body.Vel.z;
+            gForce = &Body.gForce.z;
+            grav = &gravity.z;
+            break;
+    }
+
+    if(*vel == 0.00f) 
+    {
+        if(*grav < 0.0f) *grav = 0.0f;
+        *gForce += *grav;
+        if(*gForce > Body.TermVel) *gForce = Body.TermVel;
+        return 1; //see you on the other side slick
+    }
+    else if(*vel > 0.00f) 
+    {
+        *vel = (float)floor((tempd * Body.MassRatio) * 10000000)/10000000;
+        if(*vel < 0.00002f) *vel = 0.00f;
+    }
+    else if(*vel < 0.00f) 
+    {
+        *vel = (float)ceil((tempd * Body.MassRatio) * 10000000)/10000000;
+        if(*vel > -0.00002f) *vel = 0.00f;
+    }
+
+    *gForce -= GRAV_PULL_RATE;
+    if(*gForce < 0.0004f) *gForce = 0.00f;
+
+    return 0; //things happened
 }
