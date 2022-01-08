@@ -42,7 +42,7 @@ void ModelData::Update(MMD_t &m)
 
     //Update spatial data
     MV1SetPosition(m.ModelH,m.Body.Pos);
-    MV1SetRotationXYZ(m.ModelH,VGet(m.Rot.x,(m.Rot.y+m.RotOffset.y),m.Rot.z));
+    MV1SetRotationXYZ(m.ModelH,VGet((m.Body.Rot.x+m.RotOffset.x),(m.Body.Rot.y+m.RotOffset.y),(m.Body.Rot.z+m.RotOffset.z)));
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 

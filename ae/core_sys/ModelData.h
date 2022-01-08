@@ -11,7 +11,7 @@ typedef struct { /* MMD character model */
     uint_least8_t AnimSet, AnimIndex, State;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
-    VECTOR Rot, RotOffset;
+    VECTOR RotOffset;
     PhysicsBody_t Body;
     bool Event, Reverse, AutoBlend;
 } MMD_t;
@@ -42,7 +42,7 @@ typedef struct { /* 2D Warp Model */
 typedef struct { /* 2D Sprite in a 3D position */
     int SpriteH;
     uint_least8_t FluxReverse, State;
-    float Flux, FluxRate, Size, Angle;
+    float Flux, FluxRate, Size, SizeOffset, Angle;
     VECTOR Pos, Rot;
     int_fast16_t x, y;
     uint_fast16_t w, h;

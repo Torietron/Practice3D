@@ -10,10 +10,11 @@ typedef struct { /* Track individual times and events */
     bool Event;
 } PhysicsLastTime_t;
 
-typedef struct { /* For individual data */
-    uint_least8_t Grounded;
+typedef struct { /* Set Enable3D to TRUE for 3D calculations */
+    bool Enable3D;
+    int_least8_t Grounded;
     uint_fast32_t Interval;
-    float Accel, AccelRate, VelBase, VelMax; 
+    float Accel, AccelRate, VelBase, VelMax, Angle;
     float TermVel, FrictionRatio, MassRatio;
     VECTOR Pos, Vel, Rot, gForce;
     PhysicsLastTime_t Time;
@@ -50,7 +51,7 @@ class PhysicsData { /* Manipulate time and space */
                 float Humanize(float &a, const float &variation);
                 float& ApproxAngle(float &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);   
                 double& ApproxAngle(double &objAngle, float &objMainAxisCoord, const float &objInverseAxisAnchor, const int_fast16_t &focalPointCoord, const int_fast16_t &focalPointInverseCoord, const int_fast16_t &screenWidth, const float &turnRate = 1.00f, const int_fast16_t &totalRotPointMulti = 1, const uint_fast8_t &divisor = 4);
-                void AnchoredAngle(float &x, float &y, double &angle, const float &anchorX, const float &anchorY, const double &anchorAngle, const uint_fast16_t &distance);
+                void AnchoredAngle(float &x, float &y, float &angle, const float &anchorX, const float &anchorY, const float &anchorAngle, const float &distance);
                 double RelAngle3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b, const uint_fast8_t &formulaOrder = 0);
                 float RelAngle3(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
                 float RelAngle3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b, const uint_fast8_t &formulaOrder = 0);
@@ -63,9 +64,9 @@ class PhysicsData { /* Manipulate time and space */
                 double Dot3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b);
                 float Dot3(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
                 float Dot3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
-                double Dot2Precise(const double &a, const double &b);
-                float Dot2(const double &a, const double &b);
-                float Dot2Fast(const float &a, const float &b);
+                float Distance3(const DxLib::VECTOR &a, const DxLib::VECTOR &b);
+                float Distance2(const float &x1, const float &x2, const float &y1, const float &y2);
+                float Distance1(const float &a, const float &b);
                 DxLib::VECTOR_D ConvertVector(const DxLib::VECTOR &input);
                 DxLib::VECTOR ConvertVector(const DxLib::VECTOR_D &input);
             private:
@@ -74,11 +75,14 @@ class PhysicsData { /* Manipulate time and space */
     public: //Manipulations here
         _PhysicsTimeDelta_t Delta;
         _PhysicsFormula Formula;
-        PhysicsData(float pullRate = 0.2f);
+        PhysicsData(float pullRate = 0.3f);
         void Spin(float &angle, const char &L_or_R_Direction = 'L', const uint_fast8_t &totalRotPoints = 32);
         void Spin(double &angle, const char &L_or_R_Direction = 'L', const uint_fast8_t &totalRotPoints = 32);
         bool Fling(int_fast16_t &position, int_fast16_t destination, const uint_fast8_t ENUM_FLING_DIRECTION, uint_fast16_t speed = 1, float grav = 1.0f, float iMulti = 1.0f);
-        void Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude = 1);
+        void Propel(float &x, float &y, const float &angle2D, const float &magnitude = 1);
+        void PropelFast(float &x, float &y, const float &angle2D, const float &magnitude = 1);
+        void Propel(PhysicsBody_t &Body, const float &magnitude = 1, const float &offsetH = 0.0f, const float &offsetV = 0.0f);
+        void PropelFast(PhysicsBody_t &Body, const float &magnitude = 1, const float &offsetH = 0.0f, const float &offsetV = 0.0f);
         float Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav = 1.0f);
         float Accelerate(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
         void Manipulate(int_fast16_t &x, int_fast16_t &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
@@ -87,10 +91,10 @@ class PhysicsData { /* Manipulate time and space */
         float GetLastValue(const uint_fast8_t &ENUM_LAST);
         void SetWorldGravityMulti(const float &x = 0.0f, const float &y = 1.0f, const float &z = 0.0f);
         void SetWorldGravityPos(const float &x = 0.0f, const float &y = 0.0f, const float &z = 0.0f);
-        void SetWorldGravityRange(const float &x = 0.0f, const float &y = 700.0f, const float &z = 0.0f);
-        DxLib::VECTOR GetWorldGravityMulti();
-        DxLib::VECTOR GetWorldGravityPos();
-        DxLib::VECTOR GetWorldGravityRange();
+        void SetWorldGravityRange(const float &x = 1.0f, const float &y = 1700.0f, const float &z = 1.0f);
+        float GetWorldGravityMulti(const uint_fast8_t &ENUM_AXIS);
+        float GetWorldGravityPos(const uint_fast8_t &ENUM_AXIS);
+        float GetWorldGravityRange(const uint_fast8_t &ENUM_AXIS);
         void DrawHitBox(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &w, const int_fast16_t &h, const int_fast32_t &color = -65536, const uint_fast8_t &fillFlag = 0);
         void DrawHitCircle(const int_fast16_t &x, const int_fast16_t &y, const int_fast16_t &collRadius, const int_fast32_t &color = -65536, const uint_fast8_t &fillFlag = 0);
     private:
