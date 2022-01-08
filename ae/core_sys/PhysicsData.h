@@ -90,7 +90,7 @@ class PhysicsData { /* Manipulate time and space */
         void Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX = 1.0f, const uint_fast8_t &snapY = 1.0f, const uint_fast8_t &snapZ = 1.0f);
         float GetLastValue(const uint_fast8_t &ENUM_LAST);
         void SetWorldGravityMulti(const float &x = 0.0f, const float &y = 1.0f, const float &z = 0.0f);
-        void SetWorldGravityPos(const float &x = 0.0f, const float &y = 0.0f, const float &z = 0.0f);
+        void SetWorldGravityPos(const float &x = -0.0f, const float &y = 0.0f, const float &z = 0.0f);
         void SetWorldGravityRange(const float &x = 1.0f, const float &y = 1700.0f, const float &z = 1.0f);
         float GetWorldGravityMulti(const uint_fast8_t &ENUM_AXIS);
         float GetWorldGravityPos(const uint_fast8_t &ENUM_AXIS);

@@ -17,8 +17,8 @@ typedef struct {
 
 class PlayerData {
     public:
-        int_fast8_t Selected, isCasting;
-        uint_least8_t Jump;
+        int_fast8_t Selected;
+        uint_least8_t Jump, isCasting;
         VECTOR Last;
         MMD_t MMD;
         Sprite3D_t Marker;
@@ -29,7 +29,6 @@ class PlayerData {
         void UpdateSpells();
         void Draw(const Sphere_t *sObj);
     private:
-        float anchor_y;
         VECTOR *Pos, *Rot;
 };
 

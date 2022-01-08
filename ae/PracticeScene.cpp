@@ -36,6 +36,8 @@ void PracticeScene::Init()
     Player.MMD.Body.Rot = VGet(0.0f, (DX_PI_F/5) * -1, 0.0f);
     Screen.C3D.Anchor = ((DX_PI_F/5) * -1);
 
+    Physics.SetWorldGravityPos(-2000.0f,0.0f,-2000.0f);
+
     SDFlag[0] = 1, SDFlag[1] = 1;
     Sphere[0].Pos = VGet(-0.5f,10.0f,-46.0f), Sphere[0].Radius = 6.0f, Sphere[0].Active = true;
     Sphere[1].Pos = VGet(-40.0f,10.0f,-60.0f), Sphere[1].Radius = 6.0f, Sphere[1].Active = true;
@@ -71,8 +73,7 @@ void PracticeScene::Update()
     {
         if(Physics.Formula.SphereColl3D(Player.MMD.ModelH,Sphere[i].Pos,Sphere[i].Radius,HitPolyDim[i]))
         {
-            SDFlag[i] = 0;
-            Sphere[i].Active = false;
+            Player.MMD.Body.Pos = VGet(Player.Last.x, Player.Last.y,Player.Last.z);
         }
     }
 }
