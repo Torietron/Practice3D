@@ -69,6 +69,7 @@ void PlayerData::Load()
 
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
+    Last = VGet(Pos->x, Pos->y, Pos->z);
     
     if(Key.Poll[KEY_INPUT_Q] >= 1) Rot->y -= ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_E] >= 1) Rot->y += ROTATE_SPEED;
@@ -118,8 +119,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     if(Key.Poll[KEY_INPUT_SPACE] == 1)
     {
         if(MMD.Body.Grounded == TRUE) 
-        {   
-            anchor_y = Pos->y;
+        {
             MMD.Pace = 0;
             Jump = TRUE;
             MMD.Body.Grounded = FALSE;
