@@ -295,7 +295,7 @@ void PlayerData::Draw(const Sphere_t *sObj)
 {
     if(TargetLock == TRUE)
     {
-         Marker.SizeOffset = Physics.Formula.Distance3(*Pos,sObj[Selected].Pos) *.006f;
+        Marker.SizeOffset = Physics.Formula.Distance3(*Pos,sObj[Selected].Pos) *.006f;
         Marker.Size = 1.6f + Marker.SizeOffset;
         Ui.DrawMarker3D(Marker, sObj[Selected].Pos, (16.0f + Ui.Flux), 0.0f, 0.0f, 1.05f - (Marker.Size*.03f));
     }

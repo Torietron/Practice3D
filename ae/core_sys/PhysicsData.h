@@ -87,7 +87,7 @@ class PhysicsData { /* Manipulate time and space */
         float Accelerate(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
         void Manipulate(int_fast16_t &x, int_fast16_t &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
         void Manipulate(float &x, float &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
-        void Manipulate(PhysicsBody_t &Body);
+        void Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX = 1.0f, const uint_fast8_t &snapY = 1.0f, const uint_fast8_t &snapZ = 1.0f);
         float GetLastValue(const uint_fast8_t &ENUM_LAST);
         void SetWorldGravityMulti(const float &x = 0.0f, const float &y = 1.0f, const float &z = 0.0f);
         void SetWorldGravityPos(const float &x = 0.0f, const float &y = 0.0f, const float &z = 0.0f);
