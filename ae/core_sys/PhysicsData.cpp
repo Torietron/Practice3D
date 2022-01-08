@@ -7,6 +7,7 @@
 
 static bool DisplayErrorGetEnum = TRUE;
 static bool DisplayErrorAxisEnum = TRUE;
+static bool DisplayErrorGravRange = TRUE;
 static bool DisplayErrorRelAngle3 = TRUE, DisplayErrorRelAngle3Precise = TRUE, DisplayErrorRelAngle3Fast = TRUE;
 static bool DisplayErrorRelAngle2 = TRUE, DisplayErrorRelAngle2Precise = TRUE, DisplayErrorRelAngle2Fast = TRUE;
 
@@ -881,10 +882,11 @@ void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, Physi
 
 /*  Uses world_gravity
     Frequency of force decay is set by Body.Interval
+    - Optional gravity-snap args to prevent perpetual axis flips
     - GetLastValue: [Gravity will return 0 on contact]
     LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
     LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
-void PhysicsData::Manipulate(PhysicsBody_t &Body)
+void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, const uint_fast8_t &snapY, const uint_fast8_t &snapZ)
 {//diminishing pull with range
     Delta.Update();
     gravity.x = (world_gravity_multi.x) * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf((Body.Pos.x - world_gravity_pos.x) * (Body.Pos.x - world_gravity_pos.x)) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
@@ -910,9 +912,9 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body)
 
     Body.Pos = VGet(Body.Pos.x + velocity.x, Body.Pos.y + velocity.y, Body.Pos.z + velocity.z);
     
-    if(Formula.Distance1(Body.Pos.x,world_gravity_pos.x) < 0.6f) gravity.x = 0.0f, Body.Pos.x = world_gravity_pos.x, Body.gForce.x = 0.0f;
-    if(Formula.Distance1(Body.Pos.y,world_gravity_pos.y) < 0.6f) gravity.y = 0.0f, Body.Pos.y = world_gravity_pos.y, Body.gForce.y = 0.0f;
-    if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < 0.6f) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
+    if(Formula.Distance1(Body.Pos.x,world_gravity_pos.x) < snapX) gravity.x = 0.0f, Body.Pos.x = world_gravity_pos.x, Body.gForce.x = 0.0f;
+    if(Formula.Distance1(Body.Pos.y,world_gravity_pos.y) < snapY) gravity.y = 0.0f, Body.Pos.y = world_gravity_pos.y, Body.gForce.y = 0.0f;
+    if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < snapZ) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
 }
 
 /* from Propel() / Fling() / Manipulate()
@@ -969,6 +971,21 @@ void PhysicsData::SetWorldGravityPos(const float &x, const float &y, const float
     - Don't set to zero (divide error) */
 void PhysicsData::SetWorldGravityRange(const float &x, const float &y, const float &z)
 {
+    if(x == 0 || y == 0 || z == 0)
+    {
+        if(DisplayErrorGravRange)
+        {
+            MessageBox
+            (
+                NULL,
+                TEXT("Grav Error: PhysicsData SetWorldGravityRange() \nValue set to zero, divide error"),
+                TEXT("Error"),
+                MB_OK | MB_ICONERROR 
+            );
+            DisplayErrorGravRange = FALSE;
+        }
+    }
+
     world_gravity_range = VGet(x,y,z);
 }
 
