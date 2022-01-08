@@ -180,7 +180,7 @@ double& PhysicsData::_PhysicsFormula::ApproxAngle(double &objAngle, float &objMa
     return objAngle;
 }
 
-void PhysicsData::_PhysicsFormula::AnchoredAngle(float &x, float &y, double &angle, const float &anchorX, const float &anchorY, const double &anchorAngle, const uint_fast16_t &distance)
+void PhysicsData::_PhysicsFormula::AnchoredAngle(float &x, float &y, float &angle, const float &anchorX, const float &anchorY, const float &anchorAngle, const float &distance)
 {
     x = anchorX, y = anchorY, angle = anchorAngle;
     parent->Propel(x,y,angle,distance);
@@ -551,27 +551,36 @@ float PhysicsData::_PhysicsFormula::Dot3Fast(const DxLib::VECTOR &a, const DxLib
 	return tempf;
 }
 
-double PhysicsData::_PhysicsFormula::Dot2Precise(const double &a, const double &b)
+float PhysicsData::_PhysicsFormula::Distance3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
-	tempd = (a*a+b*b);
-
-	return tempd;
-}
-
-float PhysicsData::_PhysicsFormula::Dot2(const double &a, const double &b)
-{
-	tempd = (a*a+b*b);
-
-    tempd = round(tempd * 10000000)/10000000;
+    vec_d1 = VGetD(a.x,a.y,a.z);
+    vec_d2 = VGetD(b.x,b.y,b.z);
+    tempd = sqrt(((vec_d1.x - vec_d2.x)*(vec_d1.x - vec_d2.x)) + ((vec_d1.y - vec_d2.y)*(vec_d1.y - vec_d2.y)) + ((vec_d1.z - vec_d2.z)*(vec_d1.z - vec_d2.z)));
+    tempd = round(tempd*10000000)/10000000;
     tempf = (float)tempd;
-
-	return tempf;
+    return tempf;
 }
 
-float PhysicsData::_PhysicsFormula::Dot2Fast(const float &a, const float &b)
+float PhysicsData::_PhysicsFormula::Distance2(const float &x1, const float &x2, const float &y1, const float &y2)
 {
-	tempf = (a*a+b*b);
-	return tempf;
+    vec_d1.x = x1;
+    vec_d1.y = y1;
+    vec_d2.x = x2;
+    vec_d2.y = y2;
+    tempd = sqrt(((vec_d1.x - vec_d2.x)*(vec_d1.x - vec_d2.x)) + ((vec_d1.y - vec_d2.y)*(vec_d1.y - vec_d2.y)));
+    tempd = round(tempd*10000000)/10000000;
+    tempf = (float)tempd;
+    return tempf;
+}
+
+float PhysicsData::_PhysicsFormula::Distance1(const float &a, const float &b)
+{
+    vec_d1.x = a;
+    vec_d2.x = b;
+    tempd = sqrt(((vec_d1.x - vec_d2.x)*(vec_d1.x - vec_d2.x)));
+    tempd = round(tempd*10000000)/10000000;
+    tempf = (float)tempd;
+    return tempf;
 }
 
 //Returns converted Vector
@@ -671,23 +680,113 @@ bool PhysicsData::Fling(int_fast16_t &position, int_fast16_t destination, const 
     else return false;
 }
 
-//able to GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y
-void PhysicsData::Propel(float &x, float &y, const double &angle, const uint_fast16_t &magnitude)
+// GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y 
+void PhysicsData::Propel(float &x, float &y, const float &angle2D, const float &magnitude)
 {
-    tempd = sin(angle)*magnitude;
+    tempd = sin((double)angle2D)*magnitude;
     tempd = round(tempd * 10000000)/10000000;
     velocity.x = (float)tempd;
 
-    tempd = cos(angle)*magnitude;
+    tempd = cos((double)angle2D)*magnitude;
     tempd = round(tempd * 10000000)/10000000;
     velocity.y = (float)tempd;
     
     x += velocity.x;
     y -= velocity.y;
-}       
+}
+
+// GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y 
+void PhysicsData::PropelFast(float &x, float &y, const float &angle2D, const float &magnitude)
+{
+    tempf = sin(angle2D)*magnitude;
+    velocity.x = tempf;
+
+    tempf = cos(angle2D)*magnitude;
+    velocity.y = tempf;
+    
+    x += velocity.x;
+    y -= velocity.y;
+}
+
+/*  assign last velocity to Body.Vel if you want to use this with Manipulate()
+    - GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y */  
+void PhysicsData::Propel(PhysicsBody_t &Body, const float &magnitude, const float &offsetH, const float &offsetV)
+{
+    switch(Body.Enable3D)
+    {
+        case FALSE:
+
+            tempd = sin((double)Body.Angle + offsetH)*magnitude;
+            tempd = round(tempd * 10000000)/10000000;
+            velocity.x = (float)tempd;
+
+            tempd = cos((double)Body.Angle + offsetH)*magnitude;
+            tempd = round(tempd * 10000000)/10000000;
+            velocity.y = (float)tempd;
+            
+            Body.Pos.x += velocity.x;
+            Body.Pos.y -= velocity.y;
+            break;
+
+        case TRUE:
+
+            tempd = sin((double)Body.Rot.y + offsetH)*magnitude;
+            tempd = round(tempd * 10000000)/10000000;
+            velocity.x = (float)tempd;
+
+            tempd = cos((double)Body.Rot.y + offsetH)*magnitude;
+            tempd = round(tempd * 10000000)/10000000;
+            velocity.z = (float)tempd;
+
+            tempd = sin((double)Body.Rot.x + offsetV)*magnitude;
+            tempd = round(tempd * 10000000)/10000000;
+            velocity.y = (float)tempd;
+            
+            Body.Pos.x -= velocity.x; 
+            Body.Pos.z -= velocity.z; 
+            Body.Pos.y += velocity.y;
+            break;
+    }
+}
+
+/*  assign last velocity to Body.Vel if you want to use this with Manipulate()
+    - GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y */  
+void PhysicsData::PropelFast(PhysicsBody_t &Body, const float &magnitude, const float &offsetH, const float &offsetV)
+{
+    switch(Body.Enable3D)
+    {
+        case FALSE:
+
+            tempf = sin(Body.Angle + offsetH)*magnitude;
+            velocity.x = tempf;
+
+            tempf = cos(Body.Angle + offsetH)*magnitude;
+            velocity.y = tempf;
+            
+            Body.Pos.x += velocity.x;
+            Body.Pos.y -= velocity.y;
+            break;
+
+        case TRUE:
+
+            tempf = sin(Body.Rot.y + offsetH)*magnitude;
+            velocity.x = tempf;
+
+            tempf = cos(Body.Rot.y + offsetH)*magnitude;
+            velocity.z = tempf;
+
+            tempf = sin(Body.Rot.x + offsetV)*magnitude;
+            velocity.y = tempf;
+            
+            Body.Pos.x -= velocity.x; 
+            Body.Pos.z -= velocity.z; 
+            Body.Pos.y += velocity.y;
+            break;
+    }
+}
 
 /*  Singular Axis application
-    - Add/Sub/Reset Accel beforehand
+    - Add/Sub/Reset Accel as necessary
     - Convert the end value to negative as necessary */
 float PhysicsData::Accelerate(float &vel, const float &velBase, const float &velMax, const float &accel, const float &grav)
 {
@@ -734,12 +833,9 @@ float PhysicsData::Accelerate(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS
     }
 
     Body.Accel = Body.Accel + Body.AccelRate;
-    tempd = Body.VelBase + Body.Accel;
+    tempf = Body.VelBase + Body.Accel;
 
-    if(tempd > Body.VelMax) tempd = Body.VelMax;
-    if(tempd != Body.VelMax && tempd != Body.VelBase) tempd = round(tempd*10000000)/10000000;
-   
-    tempf = (float)tempd;
+    if(tempf > Body.VelMax) tempf = Body.VelMax;
     *vel = tempf;
 
     return tempf;
@@ -785,14 +881,15 @@ void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, Physi
 
 /*  Uses world_gravity
     Frequency of force decay is set by Body.Interval
-    - GetLastValue: 
+    - GetLastValue: [Gravity will return 0 on contact]
     LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
     LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
 void PhysicsData::Manipulate(PhysicsBody_t &Body)
 {//diminishing pull with range
-    gravity.x = world_gravity_multi.x * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf(Body.Pos.x - world_gravity_pos.x * Body.Pos.x - world_gravity_pos.x) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
-    gravity.y = world_gravity_multi.y * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf(Body.Pos.y - world_gravity_pos.y * Body.Pos.y - world_gravity_pos.y) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
-    gravity.z = world_gravity_multi.z * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf(Body.Pos.z - world_gravity_pos.z * Body.Pos.x - world_gravity_pos.z) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));
+    Delta.Update();
+    gravity.x = (world_gravity_multi.x) * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf((Body.Pos.x - world_gravity_pos.x) * (Body.Pos.x - world_gravity_pos.x)) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
+    gravity.y = (world_gravity_multi.y) * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf((Body.Pos.y - world_gravity_pos.y) * (Body.Pos.y - world_gravity_pos.y)) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
+    gravity.z = (world_gravity_multi.z) * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf((Body.Pos.z - world_gravity_pos.z) * (Body.Pos.z - world_gravity_pos.z)) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));
 
     if(Delta.Time(Body.Time, Body.Interval)) //F = M x S <- actual physicists please ignore this, thanks
     {
@@ -802,9 +899,9 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body)
 
         if(Body.Grounded) Body.Vel = VGet(Body.Vel.x * Body.FrictionRatio, Body.Vel.y * Body.FrictionRatio, Body.Vel.z * Body.FrictionRatio);
     }
-
-    gravity = VGet(Body.gForce.x, Body.gForce.y, Body.gForce.z);
-
+    
+    gravity = VGet(gravity.x + Body.gForce.x, gravity.y + Body.gForce.y, gravity.z + Body.gForce.z);
+  
     if(Body.Pos.x > world_gravity_pos.x) gravity.x *= -1;
     if(Body.Pos.y > world_gravity_pos.y) gravity.y *= -1;
     if(Body.Pos.z > world_gravity_pos.z) gravity.z *= -1;
@@ -812,9 +909,10 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body)
     velocity = VGet(Body.Vel.x + gravity.x, Body.Vel.y + gravity.y, Body.Vel.z + gravity.z);
 
     Body.Pos = VGet(Body.Pos.x + velocity.x, Body.Pos.y + velocity.y, Body.Pos.z + velocity.z);
-    if(Body.Pos.x - world_gravity_pos.x < 0.002 && Body.Pos.x - world_gravity_pos.x > -0.002 ) Body.Pos.x = world_gravity_pos.x;
-    if(Body.Pos.x - world_gravity_pos.y < 0.002 && Body.Pos.y - world_gravity_pos.y > -0.002 ) Body.Pos.y = world_gravity_pos.y;
-    if(Body.Pos.x - world_gravity_pos.z < 0.002 && Body.Pos.z - world_gravity_pos.z > -0.002 ) Body.Pos.z = world_gravity_pos.z;
+    
+    if(Formula.Distance1(Body.Pos.x,world_gravity_pos.x) < 0.6f) gravity.x = 0.0f, Body.Pos.x = world_gravity_pos.x, Body.gForce.x = 0.0f;
+    if(Formula.Distance1(Body.Pos.y,world_gravity_pos.y) < 0.6f) gravity.y = 0.0f, Body.Pos.y = world_gravity_pos.y, Body.gForce.y = 0.0f;
+    if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < 0.6f) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
 }
 
 /* from Propel() / Fling() / Manipulate()
@@ -853,17 +951,12 @@ float PhysicsData::GetLastValue(const uint_fast8_t &ENUM_LAST)
     }
 }
 
-/*  Default = 1.0 (No effect)
-    Multiplier to lower other forces
-    Set to a lower value for a stronger effect */
+/*  0.0 = (No Gravity)
+    a multiplier of 1x applies the full power gravity pull at close range
+    higher than 1x increases the strength of the field's Pull */
 void PhysicsData::SetWorldGravityMulti(const float &x, const float &y, const float &z)
 {
     world_gravity_multi = VGet(x,y,z);
-}
-
-DxLib::VECTOR PhysicsData::GetWorldGravityMulti()
-{
-    return world_gravity_multi;
 }
 
 void PhysicsData::SetWorldGravityPos(const float &x, const float &y, const float &z)
@@ -871,19 +964,90 @@ void PhysicsData::SetWorldGravityPos(const float &x, const float &y, const float
     world_gravity_pos = VGet(x,y,z);
 }
 
+/*  Range that the axial gravity should extend
+    ie: x + 500range = a field in which zero-g happens when 500 from the x 
+    - Don't set to zero (divide error) */
 void PhysicsData::SetWorldGravityRange(const float &x, const float &y, const float &z)
 {
     world_gravity_range = VGet(x,y,z);
 }
 
-DxLib::VECTOR PhysicsData::GetWorldGravityPos()
+float PhysicsData::GetWorldGravityMulti(const uint_fast8_t &ENUM_AXIS)
 {
-    return world_gravity_pos;
+    switch(ENUM_AXIS)
+    {
+        case AXIS_X:
+            return world_gravity_multi.x;
+        case AXIS_Y:
+            return world_gravity_multi.y;
+        case AXIS_Z:
+            return world_gravity_multi.z;
+        default:
+            if(DisplayErrorAxisEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData GetWorldGravityMulti()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorAxisEnum = FALSE;
+            }
+            return 0.0f;
+    }
 }
 
-DxLib::VECTOR PhysicsData::GetWorldGravityRange()
+float PhysicsData::GetWorldGravityPos(const uint_fast8_t &ENUM_AXIS)
 {
-    return world_gravity_range;
+    switch(ENUM_AXIS)
+    {
+        case AXIS_X:
+            return world_gravity_pos.x;
+        case AXIS_Y:
+            return world_gravity_pos.y;
+        case AXIS_Z:
+            return world_gravity_pos.z;
+        default:
+            if(DisplayErrorAxisEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData GetWorldGravityPos()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorAxisEnum = FALSE;
+            }
+            return 0.0f;
+    }
+}
+
+float PhysicsData::GetWorldGravityRange(const uint_fast8_t &ENUM_AXIS)
+{
+    switch(ENUM_AXIS)
+    {
+        case AXIS_X:
+            return world_gravity_range.x;
+        case AXIS_Y:
+            return world_gravity_range.y;
+        case AXIS_Z:
+            return world_gravity_range.z;
+        default:
+            if(DisplayErrorAxisEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData GetWorldGravityRange()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorAxisEnum = FALSE;
+            }
+            return 0.0f;
+    }
 }
 
 
@@ -899,6 +1063,7 @@ void PhysicsData::DrawHitCircle(const int_fast16_t &x, const int_fast16_t &y, co
     DrawCircle(x, y, collRadius, color, fillFlag);
 }
 
+//see you on the other side, slick!
 int PhysicsData::ForceDecay(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
 {
     switch(ENUM_AXIS) //i'll never get a programmer job
@@ -921,27 +1086,36 @@ int PhysicsData::ForceDecay(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
             gForce = &Body.gForce.z;
             grav = &gravity.z;
             break;
+        default:
+            if(DisplayErrorAxisEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData ForceDecay()\n Private function"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorAxisEnum = FALSE;
+            }
+            return -1;
     }
 
-    if(*vel == 0.00f) 
-    {
-        if(*grav < 0.0f) *grav = 0.0f;
-        *gForce += *grav;
-        if(*gForce > Body.TermVel) *gForce = Body.TermVel;
-        return 1; //see you on the other side slick
-    }
-    else if(*vel > 0.00f) 
+    if(*vel > 0.00f) 
     {
         *vel = (float)floor((tempd * Body.MassRatio) * 10000000)/10000000;
-        if(*vel < 0.00002f) *vel = 0.00f;
+        *gForce -= GRAV_PULL_RATE;
+        if(*vel < 0.3f) *vel = 0.00f;
     }
     else if(*vel < 0.00f) 
     {
         *vel = (float)ceil((tempd * Body.MassRatio) * 10000000)/10000000;
-        if(*vel > -0.00002f) *vel = 0.00f;
+        *gForce -= GRAV_PULL_RATE;
+        if(*vel > -0.3f) *vel = 0.00f;
     }
 
-    *gForce -= GRAV_PULL_RATE;
+    *gForce += *grav/2;
+    if(*gForce > Body.TermVel) *gForce = Body.TermVel;
     if(*gForce < 0.0004f) *gForce = 0.00f;
 
     return 0; //things happened
