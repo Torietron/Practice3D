@@ -19,6 +19,7 @@ class PlayerData {
     public:
         int_fast8_t Selected;
         uint_least8_t Jump, isCasting;
+        uint_fast8_t CastingTime;
         VECTOR Last;
         MMD_t MMD;
         Sprite3D_t Marker;

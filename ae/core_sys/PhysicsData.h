@@ -20,13 +20,14 @@ typedef struct { /* Set Enable3D to TRUE for 3D calculations */
     PhysicsLastTime_t Time;
 } PhysicsBody_t;
 
-typedef struct _PhysicsTimeDelta_t {
-    uint_least8_t Frames;
+typedef struct _PhysicsTimeDelta_t { //set AutoUpdate to FALSE to save some cpu cycles. If disabled you'll likely want to call Delta.Update() once per frame manually
+    uint_least8_t Frames, AutoUpdate;
     uint_fast16_t Ticks;
     uint_fast32_t dTime, xTime;
     char Label;
     bool Event;
     bool Time(PhysicsLastTime_t &Last, const uint_fast32_t &ElapsedGoal) {
+        if(AutoUpdate)this->Update();
         if(dTime - Last.Time > ElapsedGoal) {
             Last.Time = GetNowCount();
             Last.Count++; 
@@ -90,7 +91,7 @@ class PhysicsData { /* Manipulate time and space */
         void Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX = 1.0f, const uint_fast8_t &snapY = 1.0f, const uint_fast8_t &snapZ = 1.0f);
         float GetLastValue(const uint_fast8_t &ENUM_LAST);
         void SetWorldGravityMulti(const float &x = 0.0f, const float &y = 1.0f, const float &z = 0.0f);
-        void SetWorldGravityPos(const float &x = -0.0f, const float &y = 0.0f, const float &z = 0.0f);
+        void SetWorldGravityPos(const float &x = 0.0f, const float &y = 0.0f, const float &z = 0.0f);
         void SetWorldGravityRange(const float &x = 1.0f, const float &y = 1700.0f, const float &z = 1.0f);
         float GetWorldGravityMulti(const uint_fast8_t &ENUM_AXIS);
         float GetWorldGravityPos(const uint_fast8_t &ENUM_AXIS);

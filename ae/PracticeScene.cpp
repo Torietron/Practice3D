@@ -93,5 +93,7 @@ void PracticeScene::Draw()
         DrawFormatString(0,40,GetColor(255,255,255),"angleV=%.2f, angleH=%.2f",Screen.C3D.AngleV, Screen.C3D.AngleH);
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
         DrawFormatString(0,80,-1,"selected=%d",Player.Selected);
+        DrawFormatString(0,180,-1,"CT=%d",Player.CastingTime);
+        DrawFormatString(0,200,-1,"Key=%d",Key.Poll[KEY_INPUT_1]);
     }
 }
