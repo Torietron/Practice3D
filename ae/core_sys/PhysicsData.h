@@ -27,7 +27,7 @@ typedef struct _PhysicsTimeDelta_t { //set AutoUpdate to FALSE to save some cpu 
     char Label;
     bool Event;
     bool Time(PhysicsLastTime_t &Last, const uint_fast32_t &ElapsedGoal) {
-        if(AutoUpdate)this->Update();
+        if(AutoUpdate) this->Update();
         if(dTime - Last.Time > ElapsedGoal) {
             Last.Time = GetNowCount();
             Last.Count++; 

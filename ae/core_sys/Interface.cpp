@@ -83,8 +83,8 @@ void Interface::DrawBar(const int_fast16_t &x, const int_fast16_t &y, const doub
 //A flat value added to Flux is an easy xyz offset
 void Interface::DrawMarker3D(Sprite3D_t &markerObj, const DxLib::VECTOR &targetPos, const float &yOffset, const float &xOffset, const float &zOffset, const float &centerX, const float &centerY)
 {
-    markerObj.Pos = VGet((targetPos.x + xOffset), (targetPos.y + yOffset), (targetPos.z + zOffset));
-    DrawBillboard3D(markerObj.Pos, centerX, centerY, markerObj.Size, markerObj.Angle, markerObj.SpriteH, TRUE);
+    markerObj.Body.Pos = VGet((targetPos.x + xOffset), (targetPos.y + yOffset), (targetPos.z + zOffset));
+    DrawBillboard3D(markerObj.Body.Pos, centerX, centerY, markerObj.Size, markerObj.Angle, *markerObj.SpritePtr, TRUE);
 }
 
 void Interface::DrawValue(const int_fast16_t &x, const int_fast16_t &y, const int &a, const int_fast32_t &color)

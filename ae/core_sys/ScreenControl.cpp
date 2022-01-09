@@ -106,8 +106,7 @@ void ScreenControl::DrawFPS()
 }
 
 /*Image Cursor
-  Draws if Cursor is TRUE and an image is loaded in CursorH
-*/
+  Draws if Cursor is TRUE and an image is loaded in CursorH */
 int ScreenControl::DrawCursor(const int_fast16_t &padRight, const int_fast16_t &padLeft, const int_fast16_t &padBottom, const int_fast16_t &padTop)
 {
     if(Cursor == TRUE && CursorH[0] != 0) 
@@ -129,8 +128,7 @@ int ScreenControl::DrawCursor(const int_fast16_t &padRight, const int_fast16_t &
 
 /*  Fade Types: FADE_IN, FADE_OUT  
     Fade Speeds: SPEED1, SPEED2, SPEED3 
-    -- BlendEffect, turn-off/finish effect with EndBlend()
-*/
+    -- BlendEffect, turn-off/finish effect with EndBlend() */
 void ScreenControl::Fade(const uint_fast8_t &ENUM_FADETYPE, const uint_fast8_t &ENUM_FADESPEED)
 {
     switch(ENUM_FADETYPE)

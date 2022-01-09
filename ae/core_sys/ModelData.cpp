@@ -2,6 +2,9 @@
 #include <cstdint>
 #include "ModelData.h"
 
+static uint_fast32_t dTime; 
+static float fTime;
+
 ModelData::ModelData(float rate)
 :play_rate(rate)
 {
@@ -53,6 +56,24 @@ void ModelData::Update(MQO_t &m)
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 
+int ModelData::Update(Sprite3D_t &m, const float &framerate)
+{
+    if(m.SpriteMax == 0) return -1;
+
+    dTime = GetNowCount();
+    fTime = 1000 / framerate;
+    if(dTime - m.AnimTime > fTime)
+    {
+        m.AnimTime = GetNowCount();
+        m.SpriteIndex++;
+        if(m.SpriteIndex > m.SpriteMax) m.SpriteIndex = 0;
+        m.SpritePtr = &m.SpriteH[m.SpriteIndex];
+        return 1;
+    }
+
+    return 0;
+}
+
 //Blend using the animation in BlendIndex
 void ModelData::ManualBlend(MMD_t &m, const float &blendRate)
 {
@@ -78,6 +99,30 @@ void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
 void ModelData::Draw(const MQO_t &m)
 {
     MV1DrawModel(m.ModelH);
+}
+
+void ModelData::Draw(const Sprite3D_t &m, const float &y1, const float &y2, const float &y3, const float &y4)
+{
+    switch(m.EnableModi)
+    {
+        case FALSE:
+
+            DrawBillboard3D(m.Body.Pos,m.cx,m.cy,m.Size,m.Angle,*m.SpritePtr,TRUE);
+            break;
+
+        case TRUE:
+
+            DrawModiBillboard3D
+            (
+                m.Body.Pos,
+                m.a - m.Flux, y1,
+                m.b + m.Flux, y2,
+                m.c + m.Flux, y3,
+                m.d - m.Flux, y4,
+                *m.SpritePtr,TRUE
+            );
+            break;
+    }
 }
 
 void ModelData::SetPlayRate(float a)
