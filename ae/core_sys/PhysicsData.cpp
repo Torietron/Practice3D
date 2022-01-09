@@ -25,9 +25,14 @@ PhysicsData::PhysicsData(float pullRate)
     //to check or use with GetLastValue()
     velocity.x = 0.00f, velocity.y = 0.00f;
     gravity.x = 0.00f, gravity.y = 0.00f;
+
+    //world grav init
     SetWorldGravityMulti();
     SetWorldGravityPos();
     SetWorldGravityRange();
+
+    //TimeDelta init
+    Delta.AutoUpdate = TRUE;
 }
 
 //center axis coords first, Rota is center by default
@@ -883,12 +888,12 @@ void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, Physi
 /*  Uses world_gravity
     Frequency of force decay is set by Body.Interval
     - Optional gravity-snap args to prevent perpetual axis flips
+    - Be mindful of world_grav xyz pos and snap range, set unused grav axis pos off grid (-10000)
     - GetLastValue: [Gravity will return 0 on contact]
     LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
     LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
 void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, const uint_fast8_t &snapY, const uint_fast8_t &snapZ)
 {//diminishing pull with range
-    Delta.Update();
     gravity.x = (world_gravity_multi.x) * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf((Body.Pos.x - world_gravity_pos.x) * (Body.Pos.x - world_gravity_pos.x)) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
     gravity.y = (world_gravity_multi.y) * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf((Body.Pos.y - world_gravity_pos.y) * (Body.Pos.y - world_gravity_pos.y)) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
     gravity.z = (world_gravity_multi.z) * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf((Body.Pos.z - world_gravity_pos.z) * (Body.Pos.z - world_gravity_pos.z)) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));

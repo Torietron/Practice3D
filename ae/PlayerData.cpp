@@ -11,6 +11,7 @@
 #include "EnemyData.h"
 
 #define MAXSPELLS 200
+#define SPELL_ONE_CAST_TIME 90
 
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
@@ -18,6 +19,7 @@ static uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 
 static uint_fast8_t SpellDFlag[MAXSPELLS] = {0};
 static Spell_t SpellObj[MAXSPELLS];
+static PhysicsLastTime_t Cast[2];
 
 extern ScreenControl Screen;
 extern MousePoll Mouse;
@@ -30,7 +32,7 @@ PlayerData::PlayerData()
 {
     Pos = &MMD.Body.Pos;
     Rot = &MMD.Body.Rot;
-    Selected = -1; //-1 = no target
+    CastingTime = 0, Selected = -1; //-1 = no target
     isCasting = FALSE;
     Jump = FALSE, MMD.Body.Grounded = TRUE;
     MMD.Body.Enable3D = TRUE;
@@ -70,10 +72,10 @@ void PlayerData::Load()
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
     Last = VGet(Pos->x, Pos->y, Pos->z);
-    
-    if(Key.Poll[KEY_INPUT_Q] >= 1) Rot->y -= ROTATE_SPEED;
-    if(Key.Poll[KEY_INPUT_E] >= 1) Rot->y += ROTATE_SPEED;
-    if(Key.Poll[KEY_INPUT_A] >= 1)
+
+    if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
+    if(Key.Poll[KEY_INPUT_E] >= 1 && isCasting == FALSE) Rot->y += ROTATE_SPEED;
+    if(Key.Poll[KEY_INPUT_A] >= 1 && isCasting == FALSE)
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED,-DX_PI_F/2);
         MMD.RotOffset.x = DX_PI_F*2;
@@ -82,7 +84,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         MMD.Reverse = FALSE;
         MMD.RotOffset.y = (DX_PI_F/2) * -1;
     }
-    if(Key.Poll[KEY_INPUT_D] >= 1)
+    if(Key.Poll[KEY_INPUT_D] >= 1 &&isCasting == FALSE)
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED,+DX_PI_F/2);
         MMD.RotOffset.x = DX_PI_F*2;
@@ -92,7 +94,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         MMD.RotOffset.y = DX_PI_F/2;
     }
     
-    if(Key.Poll[KEY_INPUT_W] >= 1) 
+    if(Key.Poll[KEY_INPUT_W] >= 1 && isCasting == FALSE) 
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED);
         MMD.RotOffset.x = DX_PI_F*2;
@@ -104,7 +106,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(Key.Poll[KEY_INPUT_D] >= 1) MMD.RotOffset.y = DX_PI_F/4;
     }
     
-    if(Key.Poll[KEY_INPUT_S] >= 1) 
+    if(Key.Poll[KEY_INPUT_S] >= 1 && isCasting == FALSE) 
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED*0.75f,DX_PI_F);
         MMD.RotOffset.x = DX_PI_F/10; //Center of gravity would've been visually inconsistent
@@ -116,7 +118,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(Key.Poll[KEY_INPUT_D] >= 1) MMD.RotOffset.y = (DX_PI_F/7)* -1;
     }
     
-    if(Key.Poll[KEY_INPUT_SPACE] == 1)
+    if(Key.Poll[KEY_INPUT_SPACE] == 1 && isCasting == FALSE)
     {
         if(MMD.Body.Grounded == TRUE) 
         {
@@ -132,19 +134,19 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     if(Key.Poll[KEY_INPUT_W] == 0 && Key.Poll[KEY_INPUT_S] == 0
     && Key.Poll[KEY_INPUT_A] == 0 && Key.Poll[KEY_INPUT_D] == 0)
     {
-        if(MMD.Body.Grounded == TRUE) MMD.AnimIndex = 0, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
-        if(MMD.Body.Grounded == FALSE) MMD.AnimIndex = 2, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
+        if(MMD.Body.Grounded == TRUE && isCasting == FALSE) MMD.AnimIndex = 0, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
+        if(MMD.Body.Grounded == FALSE && isCasting == FALSE) MMD.AnimIndex = 2, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
         MMD.RotOffset.y = 0.0f;
     }
 
     //Camera
     //keep the camera a set distance from player
-    if(Key.Poll[KEY_INPUT_J] >= 1)
+    if(Key.Poll[KEY_INPUT_J] >= 1 && isCasting == FALSE)
     {
         Rot->y -= ROTATE_SPEED;
         Screen.C3D.Anchor = Rot->y;
     }
-    if(Key.Poll[KEY_INPUT_K] >= 1)
+    if(Key.Poll[KEY_INPUT_K] >= 1 && isCasting == FALSE)
     {
         Rot->y += ROTATE_SPEED; 
         Screen.C3D.Anchor = Rot->y;
@@ -169,7 +171,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         }
         
     }
-    else if(Mouse.Moved() && CameraLock == TRUE && Screen.Cursor == FALSE)
+    else if(Mouse.Moved() && CameraLock == TRUE && Screen.Cursor == FALSE && isCasting == FALSE)
     {
         Rot->y -= (ROTATE_SPEED*Mouse.GetDeltaX())/30;
         Screen.C3D.Anchor = Rot->y;
@@ -229,7 +231,26 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(Physics.GetLastValue(LAST_GRAVITY_Y) == 0) Jump = FALSE, MMD.Body.Grounded = TRUE;
     }
 
-    if(Key.Poll[KEY_INPUT_1] == 1 && TargetLock == TRUE) CreateSpell(sObj[Selected]);
+    //Caster control
+    if(Key.Poll[KEY_INPUT_1] >= 1 && TargetLock == TRUE) 
+    {
+        isCasting = TRUE;
+        if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
+        if(CastingTime >= SPELL_ONE_CAST_TIME)
+        {
+            CreateSpell(sObj[Selected]);
+            Key.Poll[KEY_INPUT_1] = 0;
+            CastingTime = 0;
+        }
+        
+    }
+    //Reset time on release
+    if(Key.Poll[KEY_INPUT_1] == 0) 
+    {
+        isCasting = FALSE;
+        CastingTime = 0;
+    }
+
     UpdateSpells();
     Model.Update(MMD);
 }
