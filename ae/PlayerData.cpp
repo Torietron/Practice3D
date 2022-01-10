@@ -260,7 +260,13 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     }
 
     //Caster control
-    if(Physics.Delta.Time(GCD,2500) && GCD.Event) GCD.Event = FALSE;
+    if(GCD.Event) 
+    {
+        if(Physics.Delta.Time(GCD,900))
+        {
+            GCD.Event = FALSE;
+        }
+    }
     if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
     {
         isCasting = TRUE;
@@ -289,6 +295,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(CastingTime >= SPELL_ONE_CAST_TIME)
         {
             GCD.Event = TRUE;
+            GCD.Time = GetNowCount();
             CreateSpell(sObj[Selected]);
             Key.Poll[KEY_INPUT_1] = 0;
             CastingTime = 0;
