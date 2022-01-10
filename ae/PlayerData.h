@@ -22,7 +22,8 @@ class PlayerData {
         uint_fast8_t CastingTime;
         VECTOR Last;
         MMD_t MMD;
-        Sprite3D_t Marker, MainCircle, MiniCircle;
+        Sprite3D_t Marker, MainCircle, MiniCircle, Sig;
+        PhysicsLastTime_t GCD;
         PlayerData();
         void Load();
         void Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX);

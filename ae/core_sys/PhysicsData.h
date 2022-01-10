@@ -6,8 +6,8 @@
 #include <cstdint>
 
 typedef struct { /* Track individual times and events */
+    uint_least8_t Event;
     uint_fast32_t Time, Count;
-    bool Event;
 } PhysicsLastTime_t;
 
 typedef struct { /* Set Enable3D to TRUE for 3D calculations */

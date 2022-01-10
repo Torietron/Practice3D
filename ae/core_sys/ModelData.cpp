@@ -3,7 +3,7 @@
 #include "ModelData.h"
 
 static uint_fast32_t dTime; 
-static float fTime;
+static float fTime, tempf1, tempf2;
 
 ModelData::ModelData(float rate)
 :play_rate(rate)
@@ -91,24 +91,56 @@ int ModelData::Update(Sprite3D_t &m, const float &framerate)
     {
         m.AnimTime = GetNowCount();
         m.SpriteIndex++;
-        if(m.SpriteIndex > m.SpriteMax) m.SpriteIndex = 0;
+        if(m.SpriteIndex > m.SpriteMax - 1) m.SpriteIndex = 0;
         m.SpritePtr = &m.SpriteH[m.SpriteIndex];
+        m.SpritePtr_D = &m.SpritePtr;
         return 1;
     }
 
     return 0;
 }
 
-//Blend using the animation in BlendIndex
-void ModelData::ManualBlend(MMD_t &m, const float &blendRate)
+//Sets pair of animations for blending
+void ModelData::SetManualBlend(MMD_t &m, const uint_fast8_t &index1,  const float &rate1, const uint_fast8_t &index2, const float &rate2)
 {
-    MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex,blendRate);
+    m.BlendIndex1 = MV1AttachAnim(m.ModelH, index1, -1, FALSE);
+    m.BlendIndex2 = MV1AttachAnim(m.ModelH, index2, -1, FALSE);
+    MV1SetAttachAnimBlendRate(m.ModelH, m.BlendIndex1, rate1);
+    MV1SetAttachAnimBlendRate(m.ModelH, m.BlendIndex2, rate2);
 }
 
-/*  Set AutoBlend to TRUE for smoother transistions
-    - AutoBlend requires an animation to be loaded into IdleIndex 
+//Blend variance and transition
+void ModelData::RunManualBlend(MMD_t &m, const float &incrementRate1, const float &incrementRate2, const float &maxRate1, const float &maxRate2, const float &minRate1, const float &minRate2)
+{
+    tempf1 = MV1GetAttachAnimBlendRate(m.ModelH, m.BlendIndex1);
+    tempf2 = MV1GetAttachAnimBlendRate(m.ModelH, m.BlendIndex2);
+
+    tempf1 += incrementRate1;
+    if(tempf1 > maxRate1) tempf1 = maxRate1;
+    else if(tempf1 < minRate1) tempf1 = minRate1;
+    MV1SetAttachAnimBlendRate(m.ModelH, m.BlendIndex1, tempf1);
+
+    tempf2 += incrementRate2;
+    if(tempf2 > maxRate2) tempf2 = maxRate2;
+    else if(tempf2 < minRate2) tempf2 = minRate2;
+    MV1SetAttachAnimBlendRate(m.ModelH, m.BlendIndex2, tempf2);
+}
+
+//Detach Blends and Reset AttachIndex to 1.0
+void ModelData::EndManualBlend(MMD_t &m)
+{
+    MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex1,0.0f);
+    MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex2,0.0f);
+    MV1DetachAnim(m.ModelH,m.BlendIndex1);
+    MV1DetachAnim(m.ModelH,m.BlendIndex2);
+    MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,1.0f);
+}
+
+/*  Set AutoBlend to TRUE for smoother transitions
+    - Add to BlendDecay before calling if you want longer transitions
+    - AutoBlend Max/Min should be 1.00f to 0.00f ratios
     - AutoBlend uses and updates LastIndex as necessary */
-void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
+void ModelData::Draw(MMD_t &m, const float &autoblend_max, const float &autoblend_min)
 {
     switch(m.AutoBlend)
     {
@@ -119,13 +151,13 @@ void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
 
         case TRUE:
 
-            MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.BlendDecay/2);
+            MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,autoblend_max-m.BlendDecay/2);
             if(m.BlendDecay > 0.00f)
             {
-                MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+blendRate2));
+                MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+autoblend_min));
                 m.BlendDecay -= 0.02f;
             }
-            else MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,blendRate2);
+            else MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,0.0f);
             break;
     }
 
@@ -143,7 +175,7 @@ void ModelData::Draw(const Sprite3D_t &m, const float &y1, const float &y2, cons
     {
         case FALSE:
 
-            DrawBillboard3D(m.Body.Pos,m.cx,m.cy,m.Size,m.Angle,*m.SpritePtr,TRUE);
+            DrawBillboard3D(m.Body.Pos,m.cx,m.cy,m.Size,m.Angle,**m.SpritePtr_D,TRUE);
             break;
 
         case TRUE:
@@ -155,7 +187,7 @@ void ModelData::Draw(const Sprite3D_t &m, const float &y1, const float &y2, cons
                 m.b + m.Flux, y2,
                 m.c + m.Flux, y3,
                 m.d - m.Flux, y4,
-                *m.SpritePtr,TRUE
+                **m.SpritePtr_D,TRUE
             );
             break;
     }
