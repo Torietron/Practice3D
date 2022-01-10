@@ -13,12 +13,10 @@
 #define MAXSPELLS 200
 #define SPELL_ONE_CAST_TIME 90
 
-int a = -20, b = 10, c = 17, d = 12, e = 21, f = -9, g = -19, h = -10;
-
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
-static uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 
+static uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 static uint_fast8_t SpellDFlag[MAXSPELLS] = {0};
 static Spell_t SpellObj[MAXSPELLS];
 static PhysicsLastTime_t Cast[2];
@@ -35,17 +33,16 @@ PlayerData::PlayerData()
     Pos = &MMD.Body.Pos;
     Rot = &MMD.Body.Rot;
     CastingTime = 0, Selected = -1; //-1 = no target
-    isCasting = FALSE;
-    Jump = FALSE, MMD.Body.Grounded = TRUE;
+    isCasting = FALSE, Jump = FALSE, MMD.Body.Grounded = TRUE;
 
     MMD.Body.Enable3D = TRUE;
     MMD.AttachIndex = 0;
     MMD.AnimSet = 0;
     MMD.AnimIndex = 0;
-    MMD.Pace = 0;
     MMD.PlayTime = 0.0f;
     MMD.PlayOffset = 0.0f;
     MMD.Reverse = FALSE, MMD.Event = FALSE;
+    MMD.AutoBlend = TRUE;
 
     MMD.Body.VelBase = 1.5f, MMD.Body.VelMax = 5.0f;
     MMD.Body.AccelRate = 0.35f; MMD.Body.TermVel = 3.0f;
@@ -73,13 +70,9 @@ void PlayerData::Load()
         MV1DeleteModel(MMD.ModelH);
     }
     MMD.ModelH = MV1LoadModel(_T("dat/Lat/LatMikuVer2.3_SailorWinter.pmd"));
-    MMD.IdleIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.AttachIndex = MV1AttachAnim(MMD.ModelH, 0, -1, FALSE);
     MMD.TotalTime = MV1GetAttachAnimTotalTime(MMD.ModelH,MMD.AttachIndex);
-    MMD.BlendDecay = 0.0f;
-    MMD.AutoBlend = TRUE;
     MV1SetupCollInfo(MMD.ModelH, -1, 1, 1, 1);
-    MMD.Pace = 0;
 
     Marker.SpriteH[0] = LoadGraph(_T("core/ph3.png"));
     Marker.SpritePtr = &Marker.SpriteH[0];
@@ -161,7 +154,6 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     {
         if(MMD.Body.Grounded == TRUE) 
         {
-            MMD.Pace = 0;
             Jump = TRUE;
             MMD.Body.Grounded = FALSE;
             Rot->x = DX_PI_F*2;
@@ -282,7 +274,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 
         MiniCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
         MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
-        Physics.PropelFast(MiniCircle.Body,5);
+        Physics.PropelFast(MiniCircle.Body,4);
 
         if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
         if(CastingTime >= SPELL_ONE_CAST_TIME)
