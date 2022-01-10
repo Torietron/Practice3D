@@ -12,11 +12,18 @@ ModelData::ModelData(float rate)
 
 void ModelData::Update(MMD_t &m)
 {
-    //Check and Update
-    if(m.AnimSet != m.AnimIndex)
+    //In the case that AutoBlend is enabled and finds no secondary anim (LastIndex) to blend with
+    if(m.LastIndex == 0 && m.AutoBlend == TRUE)
     {
+        //uses currently set animation as its default secondary
+        m.LastIndex = MV1AttachAnim(m.ModelH,m.AnimSet, -1, FALSE);
+        m.LastPlayTime = 0.0f;
+    }
 
-        m.BlendDecay = 0.20f;
+    //Check and Update - With AutoBlend
+    if(m.AnimSet != m.AnimIndex && m.AutoBlend == TRUE)
+    {
+        m.BlendDecay = 0.20f; //initial blending rate
         MV1DetachAnim(m.ModelH,m.LastIndex);
         MV1DetachAnim(m.ModelH,m.AttachIndex);
         m.LastIndex = MV1AttachAnim(m.ModelH, m.AnimSet, -1, FALSE);
@@ -25,6 +32,20 @@ void ModelData::Update(MMD_t &m)
         m.TotalTime = MV1GetAttachAnimTotalTime(m.ModelH,m.AttachIndex);
         m.PlayTime = 0.0f;
         m.AnimSet = m.AnimIndex; 
+    }
+    //Check and Update - Without AutoBlend
+    if(m.AnimSet != m.AnimIndex && m.AutoBlend == FALSE)
+    {
+        if(m.LastIndex != 0) //if previously set
+        {
+            MV1DetachAnim(m.ModelH,m.LastIndex); 
+            m.LastIndex = 0, m.LastPlayTime = 0.0f;  
+        }
+        MV1DetachAnim(m.ModelH,m.AttachIndex);
+        m.AttachIndex = MV1AttachAnim(m.ModelH, m.AnimIndex, -1, FALSE);
+        m.TotalTime = MV1GetAttachAnimTotalTime(m.ModelH,m.AttachIndex);
+        m.PlayTime = 0.0f;
+        m.AnimSet = m.AnimIndex;
     }
 
     //Advance through the animation
@@ -39,9 +60,13 @@ void ModelData::Update(MMD_t &m)
         if(m.PlayTime >= m.TotalTime) m.PlayTime = 0.0f;
     }
 
-    //Update the playback time point
+    //Apply new time point to the currently attached animation
     MV1SetAttachAnimTime(m.ModelH,m.AttachIndex,m.PlayTime); 
-    MV1SetAttachAnimTime(m.ModelH,m.LastIndex,m.LastPlayTime); 
+    //For AutoBlending - apply the old playback time point to the previous animation
+    if(m.AutoBlend)
+    {
+        MV1SetAttachAnimTime(m.ModelH,m.LastIndex,m.LastPlayTime); 
+    }
 
     //Update spatial data
     MV1SetPosition(m.ModelH,m.Body.Pos);
@@ -80,19 +105,30 @@ void ModelData::ManualBlend(MMD_t &m, const float &blendRate)
     MV1SetAttachAnimBlendRate(m.ModelH,m.BlendIndex,blendRate);
 }
 
-//Set AutoBlend to TRUE for smoother transistions
+/*  Set AutoBlend to TRUE for smoother transistions
+    - AutoBlend requires an animation to be loaded into IdleIndex 
+    - AutoBlend uses and updates LastIndex as necessary */
 void ModelData::Draw(MMD_t &m, const float &blendRate1, const float &blendRate2)
 {
-    if(m.AutoBlend == TRUE)
+    switch(m.AutoBlend)
     {
-        MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.BlendDecay/2);
-        if(m.BlendDecay > 0.00f)
-        {
-            MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+blendRate2));
-            m.BlendDecay -= 0.02f;
-        }
-        else MV1SetAttachAnimBlendRate(m.ModelH,m.IdleIndex,blendRate2);
+        case FALSE:
+
+            if(m.LastIndex != 0) MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,0.0f);
+            break;
+
+        case TRUE:
+
+            MV1SetAttachAnimBlendRate(m.ModelH,m.AttachIndex,blendRate1-m.BlendDecay/2);
+            if(m.BlendDecay > 0.00f)
+            {
+                MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,((m.BlendDecay/2)+blendRate2));
+                m.BlendDecay -= 0.02f;
+            }
+            else MV1SetAttachAnimBlendRate(m.ModelH,m.LastIndex,blendRate2);
+            break;
     }
+
     MV1DrawModel(m.ModelH);
 }
 
@@ -125,7 +161,7 @@ void ModelData::Draw(const Sprite3D_t &m, const float &y1, const float &y2, cons
     }
 }
 
-void ModelData::SetPlayRate(float a)
+void ModelData::SetPlayRate(const float &a)
 {
     play_rate = a;
 }

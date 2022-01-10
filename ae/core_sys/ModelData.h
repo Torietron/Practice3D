@@ -7,7 +7,7 @@
 #include <cstdint>
 
 typedef struct { /* MMD character model */
-    int ModelH, AttachIndex, IdleIndex, LastIndex, BlendIndex;
+    int ModelH, AttachIndex, LastIndex, BlendIndex;
     uint_least8_t AnimSet, AnimIndex, State;
     int_fast32_t Pace;
     float PlayTime, TotalTime, PlayOffset, BlendDecay, LastPlayTime;
@@ -40,7 +40,7 @@ typedef struct { /* 2D Warp Model */
 } Live2D_t;
 
 typedef struct { /* 2D Sprite in a 3D position */
-    int SpriteH[16], *SpritePtr;
+    int SpriteH[16], *SpritePtr, **SpritePtr_D;
     uint_least8_t FluxReverse, State, SpriteMax, SpriteIndex;
     uint_fast32_t AnimTime;
     float Flux, FluxRate, FluxMin, FluxMax; 
@@ -48,11 +48,11 @@ typedef struct { /* 2D Sprite in a 3D position */
     float cx, cy, a, b, c, d;
     VECTOR PosOffset, RotOffset;
     PhysicsBody_t Body;
-    bool Event, EnableModi;
+    bool Event, Reverse, EnableModi;
 } Sprite3D_t;
 
 typedef struct { /* 2D Sprite */
-    int SpriteH, *SpritePtr;
+    int SpriteH, *SpritePtr, **SpritePtr_D;
     uint_least8_t State, SpriteMax;
     int_fast16_t x, y;
     uint_fast16_t w, h;
@@ -71,7 +71,7 @@ class ModelData { /* Manage models */
         void Draw(MMD_t &m, const float &blendRate1 = 1.0f, const float &blendRate2 = 0.0f);
         void Draw(const MQO_t &m);
         void Draw(const Sprite3D_t &m, const float &y1 = 10.0f, const float &y2 = 10.0f, const float &y3 = -10.0f, const float &y4 = -10.0f);
-        void SetPlayRate(float a);
+        void SetPlayRate(const float &a);
         float GetPlayRate();
     private:
         float play_rate;
