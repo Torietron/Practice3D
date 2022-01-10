@@ -34,6 +34,7 @@ PlayerData::PlayerData()
     Rot = &MMD.Body.Rot;
     CastingTime = 0, Selected = -1; //-1 = no target
     isCasting = FALSE, Jump = FALSE, MMD.Body.Grounded = TRUE;
+    GCD.Event = FALSE;
 
     MMD.Body.Enable3D = TRUE;
     MMD.AttachIndex = 0;
@@ -47,6 +48,10 @@ PlayerData::PlayerData()
     MMD.Body.VelBase = 1.5f, MMD.Body.VelMax = 5.0f;
     MMD.Body.AccelRate = 0.35f; MMD.Body.TermVel = 3.0f;
     MMD.Body.MassRatio = 0.8f, MMD.Body.Interval = 50;
+
+    Sig.EnableModi = TRUE;
+    Sig.Body.Enable3D = TRUE;
+    Sig.a = -31, Sig.b = 29, Sig.c = 33, Sig.d = -33;
 
     MainCircle.a = -31, MainCircle.b = 29, MainCircle.c = 33, MainCircle.d = -33;
     MainCircle.EnableModi = TRUE;
@@ -77,33 +82,25 @@ void PlayerData::Load()
     Marker.SpriteH[0] = LoadGraph(_T("core/ph3.png"));
     Marker.SpritePtr = &Marker.SpriteH[0];
 
-    MainCircle.SpriteH[0] = LoadGraph(_T("dat/cc35-0.png"));
-    MainCircle.SpriteH[1] = LoadGraph(_T("dat/cc35-1.png"));
-    MainCircle.SpriteH[2] = LoadGraph(_T("dat/cc35-2.png"));
-    MainCircle.SpriteH[3] = LoadGraph(_T("dat/cc35-3.png"));
-    MainCircle.SpriteH[4] = LoadGraph(_T("dat/cc35-4.png"));
-    MainCircle.SpriteH[5] = LoadGraph(_T("dat/cc35-5.png"));
-    MainCircle.SpriteH[6] = LoadGraph(_T("dat/cc35-6.png"));
-    MainCircle.SpriteH[7] = LoadGraph(_T("dat/cc35-7.png"));
-    MainCircle.SpriteH[8] = LoadGraph(_T("dat/cc35-8.png"));
-    MainCircle.SpriteH[9] = LoadGraph(_T("dat/cc35-9.png"));
-    MainCircle.SpriteH[10] = LoadGraph(_T("dat/cc35-10.png"));
-    MainCircle.SpriteH[11] = LoadGraph(_T("dat/cc35-11.png"));
-    MainCircle.SpriteH[12] = LoadGraph(_T("dat/cc35-12.png"));
-    MainCircle.SpriteH[13] = LoadGraph(_T("dat/cc35-13.png"));
-    MainCircle.SpriteH[14] = LoadGraph(_T("dat/cc35-14.png"));
-    MainCircle.SpriteH[15] = LoadGraph(_T("dat/cc35-15.png"));
-
-    MainCircle.SpritePtr = &MainCircle.SpriteH[0];
+    Sig.SpriteH[0] = LoadGraph(_T("dat/c5b.png"));
+    LoadDivGraph(_T("dat/cc36k.png"),117,11,11,405,405,MainCircle.SpriteH);
+    MainCircle.SpriteMax = 117;
     MainCircle.SpriteIndex = 0;
-    MainCircle.SpriteMax = 16;
 
-    MiniCircle.SpritePtr = &MainCircle.SpriteH[0];
+    Sig.SpritePtr = &Sig.SpriteH[0];
+    Sig.SpritePtr_D = &Sig.SpritePtr;
+    MainCircle.SpritePtr = &MainCircle.SpriteH[0];
+
+    MiniCircle.SpritePtr_D = &MainCircle.SpritePtr;
+
+    GCD.Time = GetNowCount();
+
 }
 
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
     Last = VGet(Pos->x, Pos->y, Pos->z);
+    Ui.DrawValue(190,0,GCD.Event);
 
     if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_E] >= 1 && isCasting == FALSE) Rot->y += ROTATE_SPEED;
@@ -263,36 +260,53 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     }
 
     //Caster control
-    if(Key.Poll[KEY_INPUT_1] >= 1 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
+    if(Physics.Delta.Time(GCD,2500) && GCD.Event) GCD.Event = FALSE;
+    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
     {
         isCasting = TRUE;
+        MMD.AutoBlend = FALSE;
         MMD.AnimIndex = 4;
         MMD.RotOffset.y = 0;
         MMD.RotOffset.x = 0;
 
-        MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+        if(MMD.State == 0) 
+        {
+            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
 
-        MiniCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
-        MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
-        Physics.PropelFast(MiniCircle.Body,4);
+            MiniCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
+
+            Physics.PropelFast(MiniCircle.Body,4);
+
+            Model.SetManualBlend(MMD,0,0.05f,4,0.03f);
+
+            MMD.State = 1;
+        }
+        Model.RunManualBlend(MMD,0.11f,0.001f);
 
         if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
         if(CastingTime >= SPELL_ONE_CAST_TIME)
         {
+            GCD.Event = TRUE;
             CreateSpell(sObj[Selected]);
             Key.Poll[KEY_INPUT_1] = 0;
             CastingTime = 0;
-        } 
-        
-        if(Model.Update(MainCircle,55) == 1) MiniCircle.SpritePtr = &MainCircle.SpriteH[MainCircle.SpriteIndex];
+        }
+
+        Model.Update(MainCircle,24);
     }
 
     //Reset time on release
-    if(Key.Poll[KEY_INPUT_1] == 0) 
+    if(Key.Poll[KEY_INPUT_1] == 0 && MMD.State > 0) 
     {
         isCasting = FALSE;
         CastingTime = 0;
         MainCircle.Flux = 0.0f;
+        MainCircle.SpriteIndex = 0;
+        MMD.AutoBlend = TRUE;
+        Model.EndManualBlend(MMD);
+        MMD.State = 0;
     }
 
     UpdateSpells();
@@ -348,7 +362,7 @@ void PlayerData::UpdateSpells()
     {
         if(SpellDFlag[i] == 1)
         {
-            Physics.PropelFast(SpellObj[i].Body,MOVEMENT_SPEED*6);
+            Physics.PropelFast(SpellObj[i].Body,MOVEMENT_SPEED*9);
             if(SpellObj[i].Body.Pos.x > 3000.0f || SpellObj[i].Body.Pos.x < -3000.0f) SpellDFlag[i] = 0;
             if(SpellObj[i].Body.Pos.z > 3000.0f || SpellObj[i].Body.Pos.z < -3000.0f) SpellDFlag[i] = 0;
             if(SpellObj[i].Body.Pos.y > 3000.0f || SpellObj[i].Body.Pos.y < -3000.0f) SpellDFlag[i] = 0;
@@ -376,6 +390,7 @@ void PlayerData::Draw(const Sphere_t *sObj)
 
     if(isCasting == TRUE)
     {
+        Model.Draw(Sig,11.0f,12.0f,-9.0f,-8.0f);
         Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
         Model.Draw(MiniCircle);
     }
