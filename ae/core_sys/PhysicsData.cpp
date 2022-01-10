@@ -474,6 +474,9 @@ float PhysicsData::_PhysicsFormula::RelAngle2Fast(const DxLib::VECTOR &a, const 
     return tempf;
 }
 
+/*  cx = y1*z2 - z1*y2
+    cy = z1*x2 - x1*z2
+    cz = x1*y2 - y1*x2 */
 DxLib::VECTOR_D PhysicsData::_PhysicsFormula::Cross3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
 {
 	S_d.x = (a.y * b.z - a.z * b.y);
@@ -483,6 +486,9 @@ DxLib::VECTOR_D PhysicsData::_PhysicsFormula::Cross3Precise(const DxLib::VECTOR_
 	return S_d;
 }
 
+/*  cx = y1*z2 - z1*y2
+    cy = z1*x2 - x1*z2
+    cz = x1*y2 - y1*x2 */
 DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
 	vec_d1.x = a.x;
@@ -508,6 +514,9 @@ DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3(const DxLib::VECTOR &a, const
 	return S;
 }
 
+/*  cx = y1*z2 - z1*y2
+    cy = z1*x2 - x1*z2
+    cz = x1*y2 - y1*x2 */
 DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
 	S.x = (a.y * b.z - a.z * b.y);
@@ -517,6 +526,7 @@ DxLib::VECTOR PhysicsData::_PhysicsFormula::Cross3Fast(const DxLib::VECTOR &a, c
 	return S;
 }
 
+/*  Dot3 = x1*x2 + y1*y2 + z1*z2 */
 double PhysicsData::_PhysicsFormula::Dot3Precise(const DxLib::VECTOR_D &a, const DxLib::VECTOR_D &b)
 {
     vec_d1.x = a.x;
@@ -532,6 +542,7 @@ double PhysicsData::_PhysicsFormula::Dot3Precise(const DxLib::VECTOR_D &a, const
 	return tempd;
 }
 
+/*  Dot3 = x1*x2 + y1*y2 + z1*z2 */
 float PhysicsData::_PhysicsFormula::Dot3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
     vec_d1.x = a.x;
@@ -550,6 +561,7 @@ float PhysicsData::_PhysicsFormula::Dot3(const DxLib::VECTOR &a, const DxLib::VE
 	return tempf;
 }
 
+/*  Dot3 = x1*x2 + y1*y2 + z1*z2 */
 float PhysicsData::_PhysicsFormula::Dot3Fast(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
 	tempf = (a.x * b.x + a.y * b.y + a.z * b.z);
@@ -557,6 +569,7 @@ float PhysicsData::_PhysicsFormula::Dot3Fast(const DxLib::VECTOR &a, const DxLib
 	return tempf;
 }
 
+/*  Dis3 = squarert((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2)) */
 float PhysicsData::_PhysicsFormula::Distance3(const DxLib::VECTOR &a, const DxLib::VECTOR &b)
 {
     vec_d1 = VGetD(a.x,a.y,a.z);
@@ -567,6 +580,7 @@ float PhysicsData::_PhysicsFormula::Distance3(const DxLib::VECTOR &a, const DxLi
     return tempf;
 }
 
+/*  Dis2 = squarert((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)) */
 float PhysicsData::_PhysicsFormula::Distance2(const float &x1, const float &x2, const float &y1, const float &y2)
 {
     vec_d1.x = x1;
@@ -579,6 +593,7 @@ float PhysicsData::_PhysicsFormula::Distance2(const float &x1, const float &x2, 
     return tempf;
 }
 
+/*  Dis1 = squarert((a-b)*(a-b)) */
 float PhysicsData::_PhysicsFormula::Distance1(const float &a, const float &b)
 {
     vec_d1.x = a;
@@ -704,10 +719,10 @@ void PhysicsData::Propel(float &x, float &y, const float &angle2D, const float &
 // GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y 
 void PhysicsData::PropelFast(float &x, float &y, const float &angle2D, const float &magnitude)
 {
-    tempf = sin(angle2D)*magnitude;
+    tempf = sinf(angle2D)*magnitude;
     velocity.x = tempf;
 
-    tempf = cos(angle2D)*magnitude;
+    tempf = cosf(angle2D)*magnitude;
     velocity.y = tempf;
     
     x += velocity.x;
@@ -763,10 +778,10 @@ void PhysicsData::PropelFast(PhysicsBody_t &Body, const float &magnitude, const 
     {
         case FALSE:
 
-            tempf = sin(Body.Angle + offsetH)*magnitude;
+            tempf = sinf(Body.Angle + offsetH)*magnitude;
             velocity.x = tempf;
 
-            tempf = cos(Body.Angle + offsetH)*magnitude;
+            tempf = cosf(Body.Angle + offsetH)*magnitude;
             velocity.y = tempf;
             
             Body.Pos.x += velocity.x;
@@ -775,13 +790,13 @@ void PhysicsData::PropelFast(PhysicsBody_t &Body, const float &magnitude, const 
 
         case TRUE:
 
-            tempf = sin(Body.Rot.y + offsetH)*magnitude;
+            tempf = sinf(Body.Rot.y + offsetH)*magnitude;
             velocity.x = tempf;
 
-            tempf = cos(Body.Rot.y + offsetH)*magnitude;
+            tempf = cosf(Body.Rot.y + offsetH)*magnitude;
             velocity.z = tempf;
 
-            tempf = sin(Body.Rot.x + offsetV)*magnitude;
+            tempf = sinf(Body.Rot.x + offsetV)*magnitude;
             velocity.y = tempf;
             
             Body.Pos.x -= velocity.x; 

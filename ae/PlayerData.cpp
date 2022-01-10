@@ -15,6 +15,7 @@
 
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
+static bool DisplayErrorPlayerState;
 
 static uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 static uint_fast8_t SpellDFlag[MAXSPELLS] = {0};
@@ -57,9 +58,9 @@ PlayerData::PlayerData()
     MainCircle.EnableModi = TRUE;
     MainCircle.Body.Enable3D = TRUE;
 
-    MiniCircle.cx = 0.0f, MiniCircle.cy = -0.5f;
+    MiniCircle.cx = 0.33f, MiniCircle.cy = 0.3f;
     MiniCircle.Angle = 0.0f;
-    MiniCircle.Size = 21.0f;
+    MiniCircle.Size = 13.0f;
     MiniCircle.EnableModi = FALSE;
     MiniCircle.Body.Enable3D = TRUE;
 
@@ -94,7 +95,6 @@ void PlayerData::Load()
     MiniCircle.SpritePtr_D = &MainCircle.SpritePtr;
 
     GCD.Time = GetNowCount();
-
 }
 
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
@@ -102,6 +102,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     Last = VGet(Pos->x, Pos->y, Pos->z);
     Ui.DrawValue(190,0,GCD.Event);
 
+    //Player Movement controls
     if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_E] >= 1 && isCasting == FALSE) Rot->y += ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_A] >= 1 && isCasting == FALSE)
@@ -242,8 +243,8 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         else Selected = -1, TargetLock = FALSE;
     }
 
-    Screen.C3D.Pos.z = Pos->z + cos(Screen.C3D.Anchor)*40;
-    Screen.C3D.Pos.x = Pos->x + sin(Screen.C3D.Anchor)*40;
+    Screen.C3D.Pos.z = Pos->z + cosf(Screen.C3D.Anchor)*40;
+    Screen.C3D.Pos.x = Pos->x + sinf(Screen.C3D.Anchor)*40;
     
     //horizontal lock formula
     Screen.C3D.AngleH = Physics.Formula.RelAngle2(MMD.Body.Pos, Screen.C3D.Pos);
@@ -267,29 +268,19 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
             GCD.Event = FALSE;
         }
     }
+    //Spell One
     if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
     {
         isCasting = TRUE;
-        MMD.AutoBlend = FALSE;
         MMD.AnimIndex = 4;
         MMD.RotOffset.y = 0;
         MMD.RotOffset.x = 0;
 
         if(MMD.State == 0) 
         {
-            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
-            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
-
-            MiniCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
-            MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
-
-            Physics.PropelFast(MiniCircle.Body,4);
-
-            Model.SetManualBlend(MMD,0,0.05f,4,0.03f);
-
-            MMD.State = 1;
+            Target = &sObj[Selected].Pos;
+            SetState(1);
         }
-        Model.RunManualBlend(MMD,0.11f,0.001f);
 
         if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
         if(CastingTime >= SPELL_ONE_CAST_TIME)
@@ -300,24 +291,73 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
             Key.Poll[KEY_INPUT_1] = 0;
             CastingTime = 0;
         }
-
-        Model.Update(MainCircle,24);
+        
+        Model.RunManualBlend(MMD,0.115f,0.001f);
+        Model.Update(MainCircle,28);
+    }
+    //Spell Two
+    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
+    {
+        //code-me
     }
 
     //Reset time on release
-    if(Key.Poll[KEY_INPUT_1] == 0 && MMD.State > 0) 
+    if((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0) && MMD.State > 0) 
     {
         isCasting = FALSE;
-        CastingTime = 0;
-        MainCircle.Flux = 0.0f;
-        MainCircle.SpriteIndex = 0;
-        MMD.AutoBlend = TRUE;
-        Model.EndManualBlend(MMD);
-        MMD.State = 0;
+        SetState(0);
     }
 
     UpdateSpells();
     Model.Update(MMD);
+}
+
+/*  0 = Idle/Normal
+    1 = Currently Casting */
+int PlayerData::SetState(const uint_fast8_t &state)
+{
+    switch(state)
+    {
+        case 0:
+
+            MMD.AutoBlend = TRUE;
+            CastingTime = 0;
+            MainCircle.Flux = 0.0f;
+            MainCircle.SpriteIndex = 0;
+            Model.EndManualBlend(MMD);
+            MMD.State = 0;
+
+            return 0;
+        
+        case 1:
+            MMD.AutoBlend = FALSE;
+            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MiniCircle.Body.Pos = VGet(Target->x,Target->y,Target->z);
+            MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
+
+            Physics.PropelFast(MiniCircle.Body,20);
+            Model.SetManualBlend(MMD,0,0.05f,4,0.03f);
+            MMD.State = 1;
+
+            return 1;
+
+        default:
+
+            if(DisplayErrorPlayerState)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Sate Error: PlayerData SetState()\n switch defaulted."),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorPlayerState = FALSE;
+            }
+
+            return -1;
+    }
 }
 
 //I will have to make models later

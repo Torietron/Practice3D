@@ -27,10 +27,12 @@ class PlayerData {
         PlayerData();
         void Load();
         void Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX);
+        int SetState(const uint_fast8_t &state);
         void CreateSpell(const Sphere_t &sObj);
         void UpdateSpells();
         void Draw(const Sphere_t *sObj);
     private:
+        VECTOR const *Target;
         VECTOR *Pos, *Rot;
 };
 
