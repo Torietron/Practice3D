@@ -23,12 +23,12 @@ class PlayerData {
         VECTOR Last;
         MMD_t MMD;
         Sprite3D_t Marker, MainCircle, MiniCircle, Sig;
-        PhysicsLastTime_t GCD;
+        PhysicsLastTime_t GCD, Cancelled;
         PlayerData();
         void Load();
         void Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX);
         int SetState(const uint_fast8_t &state);
-        void CreateSpell(const Sphere_t &sObj);
+        int CreateSpell(const uint_fast8_t &spelltype);
         void UpdateSpells();
         void Draw(const Sphere_t *sObj);
     private:
