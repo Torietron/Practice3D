@@ -11,16 +11,19 @@
 #include "EnemyData.h"
 
 #define MAXSPELLS 200
+#define UNIQUE_SPELLS 3
 #define SPELL_ONE_CAST_TIME 90
+#define SPELL_TWO_CAST_TIME 42
 
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
-static bool DisplayErrorPlayerState;
 
+static bool DisplayErrorPlayerState = TRUE;
+static bool DisplayErrorCreateSpell = TRUE;
 static uint_least8_t CameraLock = TRUE, TargetLock = FALSE;
 static uint_fast8_t SpellDFlag[MAXSPELLS] = {0};
 static Spell_t SpellObj[MAXSPELLS];
-static PhysicsLastTime_t Cast[2];
+static PhysicsLastTime_t Cast[UNIQUE_SPELLS];
 
 extern ScreenControl Screen;
 extern MousePoll Mouse;
@@ -100,7 +103,6 @@ void PlayerData::Load()
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
     Last = VGet(Pos->x, Pos->y, Pos->z);
-    Ui.DrawValue(190,0,GCD.Event);
 
     //Player Movement controls
     if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
@@ -260,52 +262,108 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(Physics.GetLastValue(LAST_GRAVITY_Y) == 0) Jump = FALSE, MMD.Body.Grounded = TRUE;
     }
 
-    //Caster control
-    if(GCD.Event) 
+    //Casting cooldown control
+    if(GCD.Event)
     {
-        if(Physics.Delta.Time(GCD,900))
+        if(Physics.Delta.Time(GCD,500))
         {
             GCD.Event = FALSE;
         }
     }
-    //Spell One
-    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
+    if(Cancelled.Event)
     {
-        isCasting = TRUE;
-        MMD.AnimIndex = 4;
-        MMD.RotOffset.y = 0;
-        MMD.RotOffset.x = 0;
-
-        if(MMD.State == 0) 
+        if(Physics.Delta.Time(Cancelled,225))
         {
-            Target = &sObj[Selected].Pos;
-            SetState(1);
+            Cancelled.Event = FALSE;
         }
+    }
 
-        if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
-        if(CastingTime >= SPELL_ONE_CAST_TIME)
+    //Casting Control
+    //Spell One
+    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE) 
+    {
+        if(Key.Poll[KEY_INPUT_2] >= 1) Cancelled.Event = TRUE; //nope.jpg, only 1 at a time
+        else if(Cancelled.Event == FALSE)
         {
-            GCD.Event = TRUE;
-            GCD.Time = GetNowCount();
-            CreateSpell(sObj[Selected]);
-            Key.Poll[KEY_INPUT_1] = 0;
-            CastingTime = 0;
+            if(MMD.State == 0) 
+            {
+                Target = &sObj[Selected].Pos;
+                SetState(1);
+            }
+
+            if(Cast[1].Count > 0) //reset if another spell was active and unfinished
+            {
+                Cast[1].Count = 0;
+                CastingTime = 0; 
+            }
+            if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
+            if(CastingTime >= SPELL_ONE_CAST_TIME)
+            {
+                GCD.Event = TRUE;
+                GCD.Time = GetNowCount();
+                CreateSpell(0);
+                Key.Poll[KEY_INPUT_1] = 0;
+                Key.Poll[KEY_INPUT_2] = 0;
+                CastingTime = 0;
+                Cast[0].Count = 0;
+            }
+            
+            Model.RunManualBlend(MMD,0.115f,0.001f);
+            Model.Update(MainCircle,28);
         }
-        
-        Model.RunManualBlend(MMD,0.115f,0.001f);
-        Model.Update(MainCircle,28);
     }
     //Spell Two
-    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE) 
+    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE) 
     {
-        //code-me
+        if(Key.Poll[KEY_INPUT_1] >= 1) Cancelled.Event = TRUE; //nope.jpg, only 1 at a time
+        else if(Cancelled.Event == FALSE)
+        {
+            if(MMD.State == 0) 
+            {
+                Target = &sObj[Selected].Pos;
+                SetState(1);
+            }
+
+            if(Cast[0].Count > 0)  //reset if another spell was active and unfinished
+            {
+                Cast[0].Count = 0;
+                CastingTime = 0; 
+            }
+            if(Physics.Delta.Time(Cast[1],5)) CastingTime++;
+            if(CastingTime >= SPELL_TWO_CAST_TIME)
+            {
+                GCD.Event = TRUE;
+                GCD.Time = GetNowCount();
+                CreateSpell(1);
+                Key.Poll[KEY_INPUT_1] = 0;
+                Key.Poll[KEY_INPUT_2] = 0;
+                CastingTime = 0;
+                Cast[1].Count = 0;
+            }
+            
+            Model.RunManualBlend(MMD,0.115f,0.001f);
+            Model.Update(MainCircle,28);
+        }
     }
 
     //Reset time on release
-    if((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0) && MMD.State > 0) 
+    if(MMD.State > 0 && (Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0)) 
     {
-        isCasting = FALSE;
         SetState(0);
+        for(uint_fast8_t i = 0; i < UNIQUE_SPELLS; i++)
+        {
+            Cast[i].Count = 0;
+        }
+    }
+    //Handle spell cancellation - why are you pushing all the keys tho
+    if(MMD.State > 0 && Cancelled.Event) 
+    {
+        Cancelled.Time = GetNowCount();
+        SetState(0);
+        for(uint_fast8_t i = 0; i < UNIQUE_SPELLS; i++)
+        {
+            Cast[i].Count = 0;
+        }
     }
 
     UpdateSpells();
@@ -320,17 +378,24 @@ int PlayerData::SetState(const uint_fast8_t &state)
     {
         case 0:
 
+            isCasting = FALSE;
             MMD.AutoBlend = TRUE;
             CastingTime = 0;
             MainCircle.Flux = 0.0f;
             MainCircle.SpriteIndex = 0;
+
             Model.EndManualBlend(MMD);
             MMD.State = 0;
 
             return 0;
         
         case 1:
+
+            isCasting = TRUE;
             MMD.AutoBlend = FALSE;
+            MMD.AnimIndex = 4;
+            MMD.RotOffset.y = 0;
+            MMD.RotOffset.x = 0;
             Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
             MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
             MiniCircle.Body.Pos = VGet(Target->x,Target->y,Target->z);
@@ -349,7 +414,7 @@ int PlayerData::SetState(const uint_fast8_t &state)
                 MessageBox
                 (
                     NULL,
-                    TEXT("Sate Error: PlayerData SetState()\n switch defaulted."),
+                    TEXT("State Error: PlayerData SetState()\n switch defaulted."),
                     TEXT("Error"),
                     MB_OK | MB_ICONERROR 
                 );
@@ -361,45 +426,75 @@ int PlayerData::SetState(const uint_fast8_t &state)
 }
 
 //I will have to make models later
-void PlayerData::CreateSpell(const Sphere_t &sObj)
+int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
 {
     uint_fast8_t count = 0;
-    for(uint_fast8_t i = 0; i < MAXSPELLS; i++)
+    switch(spelltype)
     {
-        if(SpellDFlag[i] == 0)
-        {
-            SpellObj[i].Color = Ui.Cyan;
-            SpellObj[i].Radius = 2.4f;
-            SpellObj[i].PolyLevel = 1;
-            SpellObj[i].Body.Enable3D = TRUE;
-            SpellObj[i].Body.Pos = VGet(Pos->x, Pos->y + 21.0f, Pos->z);
-            SpellObj[i].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
-            SpellObj[i].Body.Rot.x = Physics.Formula.RelAngle3(sObj.Pos,SpellObj[i].Body.Pos);
-            SpellDFlag[i] = 1;
+        case 0:
+            
+            for(uint_fast8_t i = 0; i < MAXSPELLS; i++)
+            {
+                if(SpellDFlag[i] == 0)
+                {
+                    SpellObj[i].Color = Ui.Cyan;
+                    SpellObj[i].Radius = 2.4f;
+                    SpellObj[i].PolyLevel = 1;
+                    SpellObj[i].Body.Enable3D = TRUE;
+                    SpellObj[i].Body.Pos = VGet(Pos->x, Pos->y + 21.0f, Pos->z);
+                    SpellObj[i].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
+                    SpellObj[i].Body.Rot.x = Physics.Formula.RelAngle3(*Target,SpellObj[i].Body.Pos);
+                    SpellDFlag[i] = 1;
 
-            SpellObj[i+1].Color = Ui.Cyan;
-            SpellObj[i+1].Radius = 2.4f;
-            SpellObj[i+1].PolyLevel = 1;
-            SpellObj[i+1].Body.Enable3D = TRUE;
-            SpellObj[i+1].Body.Pos = VGet(Pos->x, Pos->y + 8.0f, Pos->z);
-            SpellObj[i+1].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
-            Physics.Propel(SpellObj[i+1].Body,20,+DX_PI_F/2);
-            SpellObj[i+1].Body.Rot.y = Physics.Formula.RelAngle2(SpellObj[i+1].Body.Pos,sObj.Pos);
-            SpellObj[i+1].Body.Rot.x = Physics.Formula.RelAngle3(sObj.Pos,SpellObj[i+1].Body.Pos);
-            SpellDFlag[i+1] = 1;
+                    SpellObj[i+1].Color = Ui.Cyan;
+                    SpellObj[i+1].Radius = 2.4f;
+                    SpellObj[i+1].PolyLevel = 1;
+                    SpellObj[i+1].Body.Enable3D = TRUE;
+                    SpellObj[i+1].Body.Pos = VGet(Pos->x, Pos->y + 8.0f, Pos->z);
+                    SpellObj[i+1].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
+                    Physics.Propel(SpellObj[i+1].Body,20,+DX_PI_F/2);
+                    SpellObj[i+1].Body.Rot.y = Physics.Formula.RelAngle2(SpellObj[i+1].Body.Pos,*Target);
+                    SpellObj[i+1].Body.Rot.x = Physics.Formula.RelAngle3(*Target,SpellObj[i+1].Body.Pos);
+                    SpellDFlag[i+1] = 1;
 
-            SpellObj[i+2].Color = Ui.Cyan;
-            SpellObj[i+2].Radius = 2.4f;
-            SpellObj[i+2].PolyLevel = 1;
-            SpellObj[i+2].Body.Enable3D = TRUE;
-            SpellObj[i+2].Body.Pos = VGet(Pos->x, Pos->y + 1.0f, Pos->z);
-            SpellObj[i+2].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
-            Physics.Propel(SpellObj[i+2].Body,20,-DX_PI_F/2);
-            SpellObj[i+2].Body.Rot.y = Physics.Formula.RelAngle2(SpellObj[i+2].Body.Pos,sObj.Pos);
-            SpellObj[i+2].Body.Rot.x = Physics.Formula.RelAngle3(sObj.Pos,SpellObj[i+2].Body.Pos);
-            SpellDFlag[i+2] = 1;
-            break;
-        }
+                    SpellObj[i+2].Color = Ui.Cyan;
+                    SpellObj[i+2].Radius = 2.4f;
+                    SpellObj[i+2].PolyLevel = 1;
+                    SpellObj[i+2].Body.Enable3D = TRUE;
+                    SpellObj[i+2].Body.Pos = VGet(Pos->x, Pos->y + 1.0f, Pos->z);
+                    SpellObj[i+2].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
+                    Physics.Propel(SpellObj[i+2].Body,20,-DX_PI_F/2);
+                    SpellObj[i+2].Body.Rot.y = Physics.Formula.RelAngle2(SpellObj[i+2].Body.Pos,*Target);
+                    SpellObj[i+2].Body.Rot.x = Physics.Formula.RelAngle3(*Target,SpellObj[i+2].Body.Pos);
+                    SpellDFlag[i+2] = 1;
+                    break;
+                }
+            }
+            return 0;
+
+        case 1:
+
+            for(uint_fast8_t i = 0; i < MAXSPELLS; i++)
+            {
+                
+            }
+            return 1;
+
+        default:
+
+            if(DisplayErrorCreateSpell)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Spell Error: PlayerData CreateSpell()\n switch defaulted."),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorCreateSpell = FALSE;
+            }
+
+            return -1;
     }
 }
 
@@ -435,7 +530,7 @@ void PlayerData::Draw(const Sphere_t *sObj)
         }
     }
 
-    if(isCasting == TRUE)
+    if(isCasting == TRUE && MMD.State == 1)
     {
         Model.Draw(Sig,11.0f,12.0f,-9.0f,-8.0f);
         Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
