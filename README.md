@@ -25,5 +25,5 @@
  -On Hold -- Transcend into a form of pure Energy <br />
   *while transcended you may cast while moving and gain a movement speed boost <br />
   
-  projectiles are target dummies are still placeholders
-  *it's time for me to start practicing model making
+  projectiles are target dummies are still placeholders <br />
+  *its time for me to start practicing model making <br />
