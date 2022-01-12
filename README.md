@@ -12,14 +12,14 @@
 -Alt + Enter to switch window modes (fullscreen/window) <br />
   *window is resizable in window mode <br />
   
- ### Abilities: <br />
- ##### Iceball Volley <br />
+ ### Abilities <br />
+ ##### Iceball Volley: <br />
  -Press and hold 1 to cast <br />
  -Fires 3 ice balls towards your target <br />
- ##### Vortex Toss <br />
+ ##### Vortex Toss: <br />
  -Press and hold 2 to cast <br />
  -Fires a dimensional vortex bomb <br />
- ##### Energy Ultimatum <br />
+ ##### Energy Ultimatum: <br />
  -Tap or Hold 3 <br />
  -On Tap -- Discharge energy to blink in your current direction <br />
  -On Hold -- Transcend into a form of pure Energy <br />
