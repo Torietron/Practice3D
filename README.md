@@ -26,4 +26,4 @@
   *while transcended you may cast while moving and gain a movement speed boost <br />
   
   projectiles are target dummies are still placeholders
-  *time for me to start practicing model making
+  *it's time for me to start practicing model making
