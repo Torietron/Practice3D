@@ -69,7 +69,7 @@ void ModelData::Update(MMD_t &m)
     }
 
     //Update spatial data
-    MV1SetPosition(m.ModelH,m.Body.Pos);
+    MV1SetPosition(m.ModelH,VGet((m.Body.Pos.x+m.PosOffset.x),(m.Body.Pos.y+m.PosOffset.y),(m.Body.Pos.z+m.PosOffset.z)));
     MV1SetRotationXYZ(m.ModelH,VGet((m.Body.Rot.x+m.RotOffset.x),(m.Body.Rot.y+m.RotOffset.y),(m.Body.Rot.z+m.RotOffset.z)));
     MV1RefreshCollInfo(m.ModelH,-1);
 }
@@ -81,7 +81,7 @@ void ModelData::Update(MQO_t &m)
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 
-int ModelData::Update(Sprite3D_t &m, const float &framerate)
+int ModelData::Update(Sprite3D_t &m, const float &framerate, const uint_fast8_t &skip)
 {
     if(m.SpriteMax == 0) return -1;
 
@@ -91,7 +91,8 @@ int ModelData::Update(Sprite3D_t &m, const float &framerate)
     {
         m.AnimTime = GetNowCount();
         m.SpriteIndex++;
-        if(m.SpriteIndex > m.SpriteMax - 1) m.SpriteIndex = 0;
+        m.SpriteIndex += skip;
+        if(m.SpriteIndex > m.SpriteMax) m.SpriteIndex = 0;
         m.SpritePtr = &m.SpriteH[m.SpriteIndex];
         m.SpritePtr_D = &m.SpritePtr;
         return 1;
@@ -100,7 +101,8 @@ int ModelData::Update(Sprite3D_t &m, const float &framerate)
     return 0;
 }
 
-//Sets pair of animations for blending
+/*  Sets pair of animations for blending
+    - Distorion occurs if the value exceeds 1.0f or is below 0.0f */
 void ModelData::SetManualBlend(MMD_t &m, const uint_fast8_t &index1,  const float &rate1, const uint_fast8_t &index2, const float &rate2)
 {
     m.BlendIndex1 = MV1AttachAnim(m.ModelH, index1, -1, FALSE);
@@ -109,7 +111,8 @@ void ModelData::SetManualBlend(MMD_t &m, const uint_fast8_t &index1,  const floa
     MV1SetAttachAnimBlendRate(m.ModelH, m.BlendIndex2, rate2);
 }
 
-//Blend variance and transition
+/*  Blend variance and transition
+    - Distorion occurs if the value exceeds 1.0f or is below 0.0f */
 void ModelData::RunManualBlend(MMD_t &m, const float &incrementRate1, const float &incrementRate2, const float &maxRate1, const float &maxRate2, const float &minRate1, const float &minRate2)
 {
     tempf1 = MV1GetAttachAnimBlendRate(m.ModelH, m.BlendIndex1);

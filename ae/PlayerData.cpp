@@ -12,8 +12,9 @@
 
 #define MAXSPELLS 200
 #define UNIQUE_SPELLS 3
-#define SPELL_ONE_CAST_TIME 90
-#define SPELL_TWO_CAST_TIME 42
+#define SPELL_ONE_CAST_TIME 22
+#define SPELL_TWO_CAST_TIME 29
+#define SPELL_THREE_CAST_TIME 8
 
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
@@ -37,7 +38,9 @@ PlayerData::PlayerData()
     Pos = &MMD.Body.Pos;
     Rot = &MMD.Body.Rot;
     CastingTime = 0, Selected = -1; //-1 = no target
-    isCasting = FALSE, Jump = FALSE, MMD.Body.Grounded = TRUE;
+    SpeedBonus = 0.0f;
+    isCasting = FALSE, Jump = FALSE, Blinked = FALSE, Morphed = FALSE;
+    MMD.Body.Grounded = TRUE;
     GCD.Event = FALSE;
 
     MMD.Body.Enable3D = TRUE;
@@ -67,6 +70,12 @@ PlayerData::PlayerData()
     MiniCircle.EnableModi = FALSE;
     MiniCircle.Body.Enable3D = TRUE;
 
+    EnergyWisp.cx = 0.5f, EnergyWisp.cy = -1.0f;
+    EnergyWisp.Angle = 0.0f;
+    EnergyWisp.Size = 11.0f;
+    EnergyWisp.EnableModi = FALSE;
+    EnergyWisp.Body.Enable3D = TRUE;
+
     Marker.Size = 0.0f;
     Marker.Angle = 0.0f;
 }
@@ -87,12 +96,17 @@ void PlayerData::Load()
     Marker.SpritePtr = &Marker.SpriteH[0];
 
     Sig.SpriteH[0] = LoadGraph(_T("dat/c5b.png"));
+    LoadDivGraph(_T("core/ph8.png"),120,11,11,500,500,EnergyWisp.SpriteH);
     LoadDivGraph(_T("dat/cc36k.png"),117,11,11,405,405,MainCircle.SpriteH);
-    MainCircle.SpriteMax = 117;
+    EnergyWisp.SpriteMax = 119;
+    EnergyWisp.SpriteIndex = 0;
+    MainCircle.SpriteMax = 116;
     MainCircle.SpriteIndex = 0;
 
     Sig.SpritePtr = &Sig.SpriteH[0];
     Sig.SpritePtr_D = &Sig.SpritePtr;
+    EnergyWisp.SpritePtr = &EnergyWisp.SpriteH[0];
+    EnergyWisp.SpritePtr_D = &EnergyWisp.SpritePtr;
     MainCircle.SpritePtr = &MainCircle.SpriteH[0];
 
     MiniCircle.SpritePtr_D = &MainCircle.SpritePtr;
@@ -109,16 +123,16 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     if(Key.Poll[KEY_INPUT_E] >= 1 && isCasting == FALSE) Rot->y += ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_A] >= 1 && isCasting == FALSE)
     {
-        Physics.Propel(MMD.Body,MOVEMENT_SPEED,-DX_PI_F/2);
+        Physics.Propel(MMD.Body,MOVEMENT_SPEED+SpeedBonus,-DX_PI_F/2);
         MMD.RotOffset.x = DX_PI_F*2;
-        if(MMD.Body.Grounded == TRUE) MMD.AnimIndex = 1;
+        if(MMD.Body.Grounded == TRUE) MMD.AnimIndex = 1; //keep this anim change in mind if autoblend is off
         else MMD.AnimIndex = 2;
         MMD.Reverse = FALSE;
         MMD.RotOffset.y = (DX_PI_F/2) * -1;
     }
     if(Key.Poll[KEY_INPUT_D] >= 1 && isCasting == FALSE)
     {
-        Physics.Propel(MMD.Body,MOVEMENT_SPEED,+DX_PI_F/2);
+        Physics.Propel(MMD.Body,MOVEMENT_SPEED+SpeedBonus,+DX_PI_F/2);
         MMD.RotOffset.x = DX_PI_F*2;
         if(MMD.Body.Grounded == TRUE) MMD.AnimIndex = 1;
         else MMD.AnimIndex = 2;
@@ -128,7 +142,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     
     if(Key.Poll[KEY_INPUT_W] >= 1 && isCasting == FALSE) 
     {
-        Physics.Propel(MMD.Body,MOVEMENT_SPEED);
+        Physics.Propel(MMD.Body,MOVEMENT_SPEED+SpeedBonus);
         MMD.RotOffset.x = DX_PI_F*2;
         if(MMD.Body.Grounded == TRUE) MMD.AnimIndex = 1;
         else MMD.AnimIndex = 2;
@@ -140,7 +154,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     
     if(Key.Poll[KEY_INPUT_S] >= 1 && isCasting == FALSE) 
     {
-        Physics.Propel(MMD.Body,MOVEMENT_SPEED*0.75f,DX_PI_F);
+        Physics.Propel(MMD.Body,MOVEMENT_SPEED*0.75f+SpeedBonus,DX_PI_F);
         MMD.RotOffset.x = DX_PI_F/10; //Center of gravity would've been visually inconsistent
         if(MMD.Body.Grounded == TRUE) MMD.AnimIndex = 1;
         else MMD.AnimIndex = 2;
@@ -225,7 +239,11 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         for(uint_fast8_t i = 0; i < MAX; i++)
         {
             Selected = Selected + 1;
-            if(sObj[Selected].Active) break;
+            if(sObj[Selected].Active) 
+            {
+                Target = &sObj[Selected].Pos; 
+                break;
+            }
         }
         TargetLock = TRUE;
         if(Selected > (MAX - Destroyed) - 1) Selected = -1;
@@ -265,7 +283,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     //Casting cooldown control
     if(GCD.Event)
     {
-        if(Physics.Delta.Time(GCD,500))
+        if(Physics.Delta.Time(GCD,300))
         {
             GCD.Event = FALSE;
         }
@@ -280,20 +298,17 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 
     //Casting Control
     //Spell One
-    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE) 
+    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
     {
-        if(Key.Poll[KEY_INPUT_2] >= 1) Cancelled.Event = TRUE; //nope.jpg, only 1 at a time
+        if(Key.Poll[KEY_INPUT_2] >= 1 || Key.Poll[KEY_INPUT_3] >= 1) Cancelled.Event = TRUE; //check for cancels
         else if(Cancelled.Event == FALSE)
         {
-            if(MMD.State == 0) 
-            {
-                Target = &sObj[Selected].Pos;
-                SetState(1);
-            }
+            if(MMD.State == 0) SetState(1);
 
-            if(Cast[1].Count > 0) //reset if another spell was active and unfinished
+            if(Cast[1].Count > 0 || Cast[2].Count > 0) //reset if another spell was active and unfinished
             {
                 Cast[1].Count = 0;
+                Cast[2].Count = 0;
                 CastingTime = 0; 
             }
             if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
@@ -304,29 +319,31 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
                 CreateSpell(0);
                 Key.Poll[KEY_INPUT_1] = 0;
                 Key.Poll[KEY_INPUT_2] = 0;
+                Key.Poll[KEY_INPUT_3] = 0;
                 CastingTime = 0;
                 Cast[0].Count = 0;
+                if(Morphed) SetState(2);
+                else SetState(0);
             }
-            
-            Model.RunManualBlend(MMD,0.115f,0.001f);
+
+            if(Morphed == TRUE && MMD.State == 2) SetState(3);
+            if(Morphed == FALSE && MMD.State == 3) SetState(1);
+            //Model.RunManualBlend(MMD,0.115f,0.001f);
             Model.Update(MainCircle,28);
         }
     }
     //Spell Two
-    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE) 
+    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
     {
-        if(Key.Poll[KEY_INPUT_1] >= 1) Cancelled.Event = TRUE; //nope.jpg, only 1 at a time
+        if(Key.Poll[KEY_INPUT_1] >= 1 || Key.Poll[KEY_INPUT_3] >= 1) Cancelled.Event = TRUE; //check for cancels
         else if(Cancelled.Event == FALSE)
         {
-            if(MMD.State == 0) 
-            {
-                Target = &sObj[Selected].Pos;
-                SetState(1);
-            }
+            if(MMD.State == 0) SetState(1);
 
-            if(Cast[0].Count > 0)  //reset if another spell was active and unfinished
+            if(Cast[0].Count > 0 || Cast[2].Count > 0)  //reset if another spell was active and unfinished
             {
                 Cast[0].Count = 0;
+                Cast[2].Count = 0;
                 CastingTime = 0; 
             }
             if(Physics.Delta.Time(Cast[1],5)) CastingTime++;
@@ -337,24 +354,86 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
                 CreateSpell(1);
                 Key.Poll[KEY_INPUT_1] = 0;
                 Key.Poll[KEY_INPUT_2] = 0;
+                Key.Poll[KEY_INPUT_3] = 0;
                 CastingTime = 0;
                 Cast[1].Count = 0;
+                if(Morphed) SetState(2);
+                else SetState(0);
             }
             
+            if(Morphed == TRUE && MMD.State == 2) SetState(3);
+            if(Morphed == FALSE && MMD.State == 3) SetState(1);
             Model.RunManualBlend(MMD,0.115f,0.001f);
             Model.Update(MainCircle,28);
         }
     }
-
-    //Reset time on release
-    if(MMD.State > 0 && (Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0)) 
+    //Spell Three
+    else if(Key.Poll[KEY_INPUT_3] >= 4 && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Morphed == FALSE) 
     {
-        SetState(0);
-        for(uint_fast8_t i = 0; i < UNIQUE_SPELLS; i++)
+        if(Key.Poll[KEY_INPUT_1] >= 1 || Key.Poll[KEY_INPUT_2] >= 1) Cancelled.Event = TRUE; //check for cancels
+        else if(Cancelled.Event == FALSE)
         {
-            Cast[i].Count = 0;
+            if(MMD.State != 2) SetState(2);
+
+            if(Cast[0].Count > 0 || Cast[1].Count > 0)  //reset time if another spell was active and unfinished
+            {
+                Cast[0].Count = 0;
+                Cast[1].Count = 0;
+                CastingTime = 0; 
+            }
+            if(Physics.Delta.Time(Cast[2],5)) CastingTime++;
+            if(CastingTime >= SPELL_THREE_CAST_TIME)
+            {
+                GCD.Event = TRUE;
+                GCD.Time = GetNowCount(); 
+                CreateSpell(2);
+                Key.Poll[KEY_INPUT_1] = 0;
+                Key.Poll[KEY_INPUT_2] = 0;
+                Key.Poll[KEY_INPUT_3] = 0;
+                CastingTime = 0;
+                Cast[2].Count = 0;
+            }
+
+            Model.RunManualBlend(MMD,3.115f,1.001f,29.084999f,7.039001f);
+            Model.Update(MainCircle,28);
         }
     }
+
+    //Handle key release
+    if(MMD.State > 0 && ((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0 && Key.Poll[KEY_INPUT_3] == 0) || (TargetLock == FALSE && Key.Poll[KEY_INPUT_3] == 0)) )
+    {
+        if(Morphed == TRUE)
+        {
+            SetState(2);
+        }
+        else if(Cast[2].Count > 0 && Morphed == FALSE)
+        {
+            if(Blinked == FALSE)
+            {
+                BlinkDecay = 2.0f;
+                if(Key.Poll[KEY_INPUT_S] >=1) 
+                {
+                    BlinkOffset.y += DX_PI_F;
+                }
+                else BlinkOffset.y = 0.0f;
+                BlinkRot.y = MMD.RotOffset.y;
+                Blinked = TRUE;
+            }
+        }
+        //else if((Cast[0].Count > 0 || Cast[1].Count > 0) && Morphed == FALSE)
+        //{
+            //SetState(1);
+        //}
+        else
+        {
+            SetState(0);
+            for(uint_fast8_t i = 0; i < UNIQUE_SPELLS; i++)
+            {
+                Cast[i].Count = 0;
+            }
+        }
+    }
+
     //Handle spell cancellation - why are you pushing all the keys tho
     if(MMD.State > 0 && Cancelled.Event) 
     {
@@ -371,7 +450,9 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 }
 
 /*  0 = Idle/Normal
-    1 = Currently Casting */
+    1 = Normal Casting 
+    2 = Morphed/Energy Form 
+    3 = Morphed Casting*/
 int PlayerData::SetState(const uint_fast8_t &state)
 {
     switch(state)
@@ -379,12 +460,11 @@ int PlayerData::SetState(const uint_fast8_t &state)
         case 0:
 
             isCasting = FALSE;
-            MMD.AutoBlend = TRUE;
+            if(MMD.AutoBlend == FALSE) {MMD.AutoBlend = TRUE; Model.EndManualBlend(MMD);}
             CastingTime = 0;
             MainCircle.Flux = 0.0f;
             MainCircle.SpriteIndex = 0;
 
-            Model.EndManualBlend(MMD);
             MMD.State = 0;
 
             return 0;
@@ -392,7 +472,8 @@ int PlayerData::SetState(const uint_fast8_t &state)
         case 1:
 
             isCasting = TRUE;
-            MMD.AutoBlend = FALSE;
+            if(MMD.AutoBlend) MMD.AutoBlend = FALSE;
+            else Model.EndManualBlend(MMD);
             MMD.AnimIndex = 4;
             MMD.RotOffset.y = 0;
             MMD.RotOffset.x = 0;
@@ -406,6 +487,36 @@ int PlayerData::SetState(const uint_fast8_t &state)
             MMD.State = 1;
 
             return 1;
+        
+        case 2:
+
+            isCasting = FALSE;
+            if(MMD.AutoBlend) MMD.AutoBlend = FALSE;
+            else Model.EndManualBlend(MMD);
+            CastingTime = 0;
+            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+
+            Model.SetManualBlend(MMD,0,0.05f,2,0.03f);
+            MMD.State = 2;
+
+            return 2;
+
+        case 3:
+
+            isCasting = FALSE;
+            if(MMD.AutoBlend) MMD.AutoBlend = FALSE;
+            else Model.EndManualBlend(MMD);
+            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MiniCircle.Body.Pos = VGet(Target->x,Target->y,Target->z);
+            MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
+
+            Physics.PropelFast(MiniCircle.Body,20);
+            Model.SetManualBlend(MMD,0,0.05f,4,0.03f);
+            MMD.State = 3;
+
+            return 3;
 
         default:
 
@@ -428,7 +539,6 @@ int PlayerData::SetState(const uint_fast8_t &state)
 //I will have to make models later
 int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
 {
-    uint_fast8_t count = 0;
     switch(spelltype)
     {
         case 0:
@@ -476,9 +586,30 @@ int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
 
             for(uint_fast8_t i = 0; i < MAXSPELLS; i++)
             {
-                
+                if(SpellDFlag[i] == 0)
+                {
+                    SpellObj[i].Color = Ui.Red;
+                    SpellObj[i].Radius = 10.0f;
+                    SpellObj[i].PolyLevel = 128;
+                    SpellObj[i].Body.Enable3D = TRUE;
+                    SpellObj[i].Probe.Enable3D = TRUE;
+                    SpellObj[i].Body.Pos = VGet(Pos->x, Pos->y+11.0f, Pos->z);
+                    SpellObj[i].Body.Rot = VGet(Rot->x, Rot->y, Rot->z);
+                    SpellObj[i].Body.Rot.y = Physics.Formula.RelAngle2(SpellObj[i].Body.Pos,*Target);
+                    SpellObj[i].Body.Rot.x = Physics.Formula.RelAngle3(*Target,SpellObj[i].Body.Pos);
+                    SpellDFlag[i] = 2;
+                    break;
+                }
             }
             return 1;
+        
+        case 2:
+
+            //Mighty Morphin' Miku Rangers?
+            Morphed = TRUE;
+            SpeedBonus = 4.0f;
+            EnergyWisp.Angle = 0.0f;
+            return 2;
 
         default:
 
@@ -509,6 +640,66 @@ void PlayerData::UpdateSpells()
             if(SpellObj[i].Body.Pos.z > 3000.0f || SpellObj[i].Body.Pos.z < -3000.0f) SpellDFlag[i] = 0;
             if(SpellObj[i].Body.Pos.y > 3000.0f || SpellObj[i].Body.Pos.y < -3000.0f) SpellDFlag[i] = 0;
         }
+
+        if(SpellDFlag[i] == 2)
+        {
+            SpellObj[i].Probe.Pos = VGet(SpellObj[i].Body.Pos.x, SpellObj[i].Body.Pos.y+3, SpellObj[i].Body.Pos.z);
+            SpellObj[i].Probe.Rot = VGet(SpellObj[i].Body.Rot.x+DX_PI_F/4, SpellObj[i].Body.Rot.y+DX_PI_F/3, SpellObj[i].Body.Rot.z);
+            Physics.PropelFast(SpellObj[i].Probe,1.2f);
+            Physics.PropelFast(SpellObj[i].Body,MOVEMENT_SPEED*3.0f);
+            if(SpellObj[i].Body.Pos.x > 2000.0f || SpellObj[i].Body.Pos.x < -2000.0f) SpellDFlag[i] = 0;
+            if(SpellObj[i].Body.Pos.z > 2000.0f || SpellObj[i].Body.Pos.z < -2000.0f) SpellDFlag[i] = 0;
+            if(SpellObj[i].Body.Pos.y > 2000.0f || SpellObj[i].Body.Pos.y < -2000.0f) SpellDFlag[i] = 0;
+        }
+    }
+
+    if(MMD.State == 2 || MMD.State == 3)
+    {
+        if(Morphed)
+        {
+            if(Physics.Delta.Time(Cast[2],90)) SpeedBonus -= 0.14f;
+            if(SpeedBonus < 0.5f) SpeedBonus = 0.0f, Morphed = FALSE;
+            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            EnergyWisp.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            Model.Update(EnergyWisp,48,(int)floorf(SpeedBonus*2.5f));
+            Cast[2].Count = 0;
+
+            if(TargetLock)
+            {
+                MiniCircle.Body.Pos = VGet(Target->x,Target->y,Target->z);
+                MiniCircle.Body.Rot = VGet(Rot->x,Rot->y+DX_PI_F,Rot->z);
+                Physics.PropelFast(MiniCircle.Body,20);
+            }
+        }
+        else if(Blinked)
+        {
+            if(BlinkDecay <= 0.0f) 
+            {
+                BlinkDecay = 0.0f;
+                Cast[2].Count = 0;
+                SetState(0);
+                for(uint_fast8_t i = 0; i < UNIQUE_SPELLS; i++)
+                {
+                    Cast[i].Count = 0;
+                }
+                BlinkOffset.y = 0.0f;
+                Blinked = FALSE;
+            }
+            else 
+            {
+                BlinkDecay -= 0.1f;
+                Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+                EnergyWisp.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+                Physics.PropelFast(MMD.Body,3.2f,BlinkRot.y+BlinkOffset.y);
+                Model.Update(EnergyWisp,48,4);
+            }   
+        }
+        else
+        {
+            Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+        }
     }
 }
 
@@ -528,6 +719,10 @@ void PlayerData::Draw(const Sphere_t *sObj)
             DrawSphere3D(SpellObj[i].Body.Pos,SpellObj[i].Radius,SpellObj[i].PolyLevel,SpellObj[i].Color,Ui.Black,FALSE);
             DrawCapsule3D(SpellObj[i].Body.Pos,VGet(SpellObj[i].Body.Pos.x,SpellObj[i].Body.Pos.y-0.40f,SpellObj[i].Body.Pos.z),SpellObj[i].Radius,SpellObj[i].PolyLevel,Ui.Turquoise,Ui.Black,FALSE);
         }
+        if(SpellDFlag[i] == 2)
+        {
+            DrawCone3D(SpellObj[i].Body.Pos,SpellObj[i].Probe.Pos,SpellObj[i].Radius,SpellObj[i].PolyLevel,SpellObj[i].Color,Ui.Black,FALSE);
+        }
     }
 
     if(isCasting == TRUE && MMD.State == 1)
@@ -537,5 +732,14 @@ void PlayerData::Draw(const Sphere_t *sObj)
         Model.Draw(MiniCircle);
     }
 
-    Model.Draw(MMD);
+    if(isCasting == FALSE && (MMD.State == 2 || MMD.State == 3))
+    {
+        if(Morphed == FALSE && Blinked == FALSE) Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
+        if(Morphed == FALSE || SpeedBonus > 0.0f) Model.Draw(Sig,11.0f,12.0f,-9.0f,-8.0f);
+    }
+
+    if(Morphed == TRUE && TargetLock == TRUE && MMD.State == 3) Model.Draw(MiniCircle);
+    if(Morphed == FALSE && Blinked == FALSE) Model.Draw(MMD);
+    if(Morphed == TRUE || Blinked == TRUE) Model.Draw(EnergyWisp);
+    if(Morphed == TRUE && SpeedBonus < 1.2f) Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
 }
