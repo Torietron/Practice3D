@@ -1,5 +1,5 @@
 # Practice3D <br />
-## 3rd Person view
+###### 3rd Person view
 
 ### Controls <br />
 * Spells/Abilities are activated by pressing 1, 2 or 3
