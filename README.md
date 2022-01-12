@@ -1,5 +1,5 @@
 # Practice3D <br />
-###### 3rd Person view
+###### 3rd Person view - Tab targeting system
 ###### The pre-compiled windows binary (exe) is available in the .zip in releases
 
 ### Controls <br />
@@ -16,10 +16,10 @@
   
  ### Abilities <br />
  ##### Iceball Volley: <br />
- * Press and hold 1 to cast <br />
+ * Press and hold 1 to cast - _**(requires an active target)**_ <br />
  * Fires 3 ice balls towards your target <br />
  ##### Vortex Toss: <br />
- * Press and hold 2 to cast <br />
+ * Press and hold 2 to cast - _**(requires an active target)**_ <br />
  * Fires a dimensional vortex bomb <br />
  ##### Energy Ultimatum: <br />
  * Tap or Hold 3 <br />
