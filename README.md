@@ -1,5 +1,6 @@
 # Practice3D <br />
 ###### 3rd Person view
+###### The pre-compiled windows binary (exe) is available in the .zip in releases
 
 ### Controls <br />
 * Spells/Abilities are activated by pressing 1, 2 or 3
@@ -26,5 +27,5 @@
  * On Hold -- Transcend into a form of pure Energy <br />
  * while transcended you may cast while moving and gain a movement speed boost <br />
   
-  projectiles are target dummies are still placeholders <br />
+  projectiles and target dummies are still placeholders <br />
   *its time for me to start practicing model making <br />
