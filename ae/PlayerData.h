@@ -12,17 +12,18 @@ typedef struct {
     uint_fast8_t PolyLevel;
     int_fast32_t Color;
     float Radius, AngleH, AngleV;
-    PhysicsBody_t Body;            
+    PhysicsBody_t Body, Probe;            
 } Spell_t;
 
 class PlayerData {
     public:
         int_fast8_t Selected;
-        uint_least8_t Jump, isCasting;
+        uint_least8_t Jump, isCasting, Blinked, Morphed;
         uint_fast8_t CastingTime;
-        VECTOR Last;
+        float SpeedBonus, BlinkDecay;
+        VECTOR Last, BlinkRot, BlinkOffset;
         MMD_t MMD;
-        Sprite3D_t Marker, MainCircle, MiniCircle, Sig;
+        Sprite3D_t Marker, MainCircle, MiniCircle, Sig, EnergyWisp;
         PhysicsLastTime_t GCD, Cancelled;
         PlayerData();
         void Load();

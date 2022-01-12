@@ -66,7 +66,7 @@ class ModelData { /* Manage models */
         ModelData(float rate = 0.39f);
         void Update(MMD_t &m);
         void Update(MQO_t &m);
-        int Update(Sprite3D_t &m, const float &framerate);
+        int Update(Sprite3D_t &m, const float &framerate, const uint_fast8_t &skip = 0);
         void SetManualBlend(MMD_t &m, const uint_fast8_t &index1, const float &rate1, const uint_fast8_t &index2, const float &rate2);
         void RunManualBlend(MMD_t &m, const float &incrementRate1, const float &incrementRate2, const float &maxRate1 = 9999.9f, const float &maxRate2 = 9999.9f, const float &minRate1 = 0.0f, const float &minRate2 = 0.0f);
         void EndManualBlend(MMD_t &m);
