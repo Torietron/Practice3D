@@ -24,3 +24,6 @@
  -On Tap -- Discharge energy to blink in your current direction <br />
  -On Hold -- Transcend into a form of pure Energy <br />
   *while transcended you may cast while moving and gain a movement speed boost <br />
+  
+  projectiles are target dummies are still placeholders
+  *time for me to start practicing model making
