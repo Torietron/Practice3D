@@ -8,7 +8,7 @@
 * Q/E to rotate character independently <br />
 * Space to jump <br />
 * Right Click to toggle camera rotation _**(disabled while targeting something)**_ <br />
-* Tab to cycle targets <br />
+* Tab to cycle targets _**(camera will automatically face towards the locked target)**_ <br />
 * Shift to deactivate targeting <br />
 * Y to escape mouse cursor <br />
 * Alt + Enter to switch window modes (fullscreen/window) <br />
