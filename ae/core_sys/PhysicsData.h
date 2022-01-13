@@ -15,8 +15,8 @@ typedef struct { /* Set Enable3D to TRUE for 3D calculations */
     int_least8_t Grounded;
     uint_fast32_t Interval;
     float Accel, AccelRate, VelBase, VelMax, Angle;
-    float TermVel, FrictionRatio, MassRatio;
-    VECTOR Pos, Vel, Rot, gForce;
+    float TermVel, FrictionRatio, MassRatio, Radius, RadiusOffset;
+    VECTOR Pos, Vel, Rot, gForce, gFloor;
     PhysicsLastTime_t Time;
 } PhysicsBody_t;
 
@@ -46,7 +46,9 @@ class PhysicsData { /* Manipulate time and space */
             public: //Calculations here
                 bool BoxColl2D(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight);
                 bool BoxColl2D(const float &aX, const float &aY, const float &aWidth, const float &aHeight, const float &bX, const float &bY, const float &bWidth, const float &bHeight);
-                bool RadialColl2D(const float &aX, const float &aY, const float &aR, const float &bX, const float &bY, const float &bR);
+                bool RadialColl(const float &aX, const float &aY, const float &aR, const float &bX, const float &bY, const float &bR);
+                bool RadialColl(const PhysicsBody_t &Body1, const PhysicsBody_t &Body2);
+                bool RadialCollFast(const PhysicsBody_t &Body1, const PhysicsBody_t &Body2);
                 bool SphereColl3D(const int &modelH, const DxLib::VECTOR &spherePos, const float &radius, MV1_COLL_RESULT_POLY_DIM &hpd);     
                 float Standardize(float &a, const float &min, const float &max);
                 float Humanize(float &a, const float &variation);
@@ -89,6 +91,7 @@ class PhysicsData { /* Manipulate time and space */
         void Manipulate(int_fast16_t &x, int_fast16_t &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
         void Manipulate(float &x, float &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
         void Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX = 1.0f, const uint_fast8_t &snapY = 1.0f, const uint_fast8_t &snapZ = 1.0f);
+        int GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
         float GetLastValue(const uint_fast8_t &ENUM_LAST);
         void SetWorldGravityMulti(const float &x = 0.0f, const float &y = 1.0f, const float &z = 0.0f);
         void SetWorldGravityPos(const float &x = 0.0f, const float &y = 0.0f, const float &z = 0.0f);

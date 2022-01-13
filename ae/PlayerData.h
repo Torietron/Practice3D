@@ -11,7 +11,6 @@
 typedef struct {
     uint_fast8_t PolyLevel;
     int_fast32_t Color;
-    float Radius, AngleH, AngleV;
     PhysicsBody_t Body, Probe;            
 } Spell_t;
 

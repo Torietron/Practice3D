@@ -5,9 +5,7 @@
 #include <cmath>
 #include "PhysicsData.h"
 
-static bool DisplayErrorGetEnum = TRUE;
-static bool DisplayErrorAxisEnum = TRUE;
-static bool DisplayErrorGravRange = TRUE;
+static bool DisplayErrorGetEnum = TRUE, DisplayErrorAxisEnum = TRUE, DisplayErrorGravRange = TRUE, DisplayErrorGravEnum;
 static bool DisplayErrorRelAngle3 = TRUE, DisplayErrorRelAngle3Precise = TRUE, DisplayErrorRelAngle3Fast = TRUE;
 static bool DisplayErrorRelAngle2 = TRUE, DisplayErrorRelAngle2Precise = TRUE, DisplayErrorRelAngle2Fast = TRUE;
 
@@ -62,7 +60,7 @@ bool PhysicsData::BoxCollisionTL(int_fast16_t aX, int_fast16_t aY, int_fast16_t 
 */
 
 //center axis coords first, Rota is center by default
-bool PhysicsData::_PhysicsFormula::RadialColl2D(const float &aX, const float &aY, const float &aR, const float &bX, const float &bY, const float &bR)
+bool PhysicsData::_PhysicsFormula::RadialColl(const float &aX, const float &aY, const float &aR, const float &bX, const float &bY, const float &bR)
 {
     S.x = aX - bX;
     S.y = aY - bY;
@@ -74,6 +72,78 @@ bool PhysicsData::_PhysicsFormula::RadialColl2D(const float &aX, const float &aY
     tempf = sqrtf(S.x * S.x + S.y * S.y);
     if(tempf <= bR + bR) return true;
 
+    return false;
+}
+
+//1st arg's Enabled3D flag will determine type (xy / xz)
+bool PhysicsData::_PhysicsFormula::RadialColl(const PhysicsBody_t &Body1, const PhysicsBody_t &Body2)
+{
+    switch(Body1.Enable3D)
+    {
+        case FALSE:
+
+            S_d.x = Body1.Pos.x - Body2.Pos.x;
+            S_d.y = Body1.Pos.y - Body2.Pos.y;
+            tempd = sqrt(S_d.x * S_d.x + S_d.y * S_d.y);
+            if(tempd <= Body1.Radius + Body1.Radius + Body1.RadiusOffset) return true;
+
+            S_d.x = Body2.Pos.x - Body1.Pos.x;
+            S_d.y = Body2.Pos.y - Body1.Pos.y;
+            tempd = sqrt(S_d.x * S_d.x + S_d.y * S_d.y);
+            if(tempd <= Body2.Radius + Body2.Radius + Body2.RadiusOffset) return true;
+
+            break;
+        
+        case TRUE:
+
+            S_d.x = Body1.Pos.x - Body2.Pos.x;
+            S_d.z = Body1.Pos.z - Body2.Pos.z;
+            tempd = sqrt(S_d.x * S_d.x + S_d.z * S_d.z);
+            if(tempd <= Body1.Radius + Body1.Radius + Body1.RadiusOffset) return true;
+
+            S_d.x = Body2.Pos.x - Body1.Pos.x;
+            S_d.z = Body2.Pos.z - Body1.Pos.z;
+            tempd = sqrt(S_d.x * S_d.x + S_d.z * S_d.z);
+            if(tempd <= Body2.Radius + Body2.Radius + Body2.RadiusOffset) return true;
+
+            break;
+    }
+    return false;
+}
+
+//1st arg's Enabled3D flag will determine type (xy / xz)
+bool PhysicsData::_PhysicsFormula::RadialCollFast(const PhysicsBody_t &Body1, const PhysicsBody_t &Body2)
+{
+    switch(Body1.Enable3D)
+    {
+        case FALSE:
+
+            S.x = Body1.Pos.x - Body2.Pos.x;
+            S.y = Body1.Pos.y - Body2.Pos.y;
+            tempf = sqrtf(S.x * S.x + S.y * S.y);
+            if(tempf <= Body1.Radius + Body1.Radius + Body1.RadiusOffset) return true;
+
+            S.x = Body2.Pos.x - Body1.Pos.x;
+            S.y = Body2.Pos.y - Body1.Pos.y;
+            tempf = sqrtf(S.x * S.x + S.y * S.y);
+            if(tempf <= Body2.Radius + Body2.Radius + Body2.RadiusOffset) return true;
+
+            break;
+        
+        case TRUE:
+
+            S.x = Body1.Pos.x - Body2.Pos.x;
+            S.z = Body1.Pos.z - Body2.Pos.z;
+            tempf = sqrtf(S.x * S.x + S.z * S.z);
+            if(tempf <= Body1.Radius + Body1.Radius + Body1.RadiusOffset) return true;
+
+            S.x = Body2.Pos.x - Body1.Pos.x;
+            S.z = Body2.Pos.z - Body1.Pos.z;
+            tempf = sqrtf(S.x * S.x + S.z * S.z);
+            if(tempf <= Body2.Radius + Body2.Radius + Body2.RadiusOffset) return true;
+
+            break;
+    }
     return false;
 }
 
@@ -902,7 +972,7 @@ void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, Physi
 
 /*  Uses world_gravity
     Frequency of force decay is set by Body.Interval
-    - Optional gravity-snap args to prevent perpetual axis flips
+    - Optional gravity-snap args to help prevent perpetual axis flips/orbits
     - Be mindful of world_grav xyz pos and snap range, set unused grav axis pos off grid (-10000)
     - GetLastValue: [Gravity will return 0 on contact]
     LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
@@ -935,6 +1005,57 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, con
     if(Formula.Distance1(Body.Pos.x,world_gravity_pos.x) < snapX) gravity.x = 0.0f, Body.Pos.x = world_gravity_pos.x, Body.gForce.x = 0.0f;
     if(Formula.Distance1(Body.Pos.y,world_gravity_pos.y) < snapY) gravity.y = 0.0f, Body.Pos.y = world_gravity_pos.y, Body.gForce.y = 0.0f;
     if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < snapZ) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
+}
+
+// Uses gFloor to check if you've passed through, if so it moves the body to the world_grav_pos
+int PhysicsData::GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
+{
+    switch(ENUM_AXIS)
+    {
+        case AXIS_X:
+
+            if(Body.Pos.x < Body.gFloor.x) 
+            {
+                Body.Pos.x = world_gravity_pos.x;
+                return 1;
+            }
+            return 0;
+
+        case AXIS_Y:
+
+            if(Body.Pos.y < Body.gFloor.y) 
+            {
+                Body.Pos.y = world_gravity_pos.y;
+                return 1;
+            }
+            return 0;
+
+        case AXIS_Z:
+
+            if(Body.Pos.z < Body.gFloor.z) 
+            {
+                Body.Pos.z = world_gravity_pos.z;
+                return 1;
+            }
+            return 0;
+
+        default:
+
+            if(DisplayErrorGravEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData GravityFloor()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorGravEnum = FALSE;
+            }
+            return -1;
+    }
+    
+    return 0;
 }
 
 /* from Propel() / Fling() / Manipulate()
