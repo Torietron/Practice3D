@@ -23,7 +23,7 @@
  * Fires a dimensional vortex bomb <br />
  ##### Energy Ultimatum: <br />
  * Tap or Hold 3 <br />
- * On Tap -- Discharge energy to blink in your current direction _**(can't tap-cast to blink while transcended)**_<br />
+ * On Tap -- Discharge energy to blink in your current direction _**(disabled while transcended)**_<br />
  * On Hold -- Temporarily Transcend into a form of pure Energy  <br />
  * while transcended you may cast while moving and will gain a decaying movement speed boost <br />
   
