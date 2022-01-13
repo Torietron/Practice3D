@@ -6,8 +6,8 @@
 * Spells/Abilities are activated by pressing 1, 2 or 3
 * WASD to move, Mouse to rotate <br />
 * Q/E to rotate character independently <br />
-* Right Click to toggle camera rotation (around character) <br />
 * Space to jump <br />
+* Right Click to toggle camera rotation _**(disabled while targeting something)**_ <br />
 * Tab to cycle targets <br />
 * Shift to deactivate targeting <br />
 * Y to escape mouse cursor <br />
@@ -24,7 +24,7 @@
  ##### Energy Ultimatum: <br />
  * Tap or Hold 3 <br />
  * On Tap -- Discharge energy to blink in your current direction <br />
- * On Hold -- Transcend into a form of pure Energy <br />
+ * On Hold -- Transcend into a form of pure Energy _**(cannot tap-cast to blink while transcended)**_ <br />
  * while transcended you may cast while moving and gain a movement speed boost <br />
   
   projectiles and target dummies are still placeholders <br />
