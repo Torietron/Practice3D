@@ -44,8 +44,8 @@ class PhysicsData { /* Manipulate time and space */
     protected:
         class _PhysicsFormula {
             public: //Calculations here
-                bool BoxColl2D(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight);
-                bool BoxColl2D(const float &aX, const float &aY, const float &aWidth, const float &aHeight, const float &bX, const float &bY, const float &bWidth, const float &bHeight);
+                bool BoxColl(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight);
+                bool BoxColl(const float &aX, const float &aY, const float &aWidth, const float &aHeight, const float &bX, const float &bY, const float &bWidth, const float &bHeight);
                 bool RadialColl(const float &aX, const float &aY, const float &aR, const float &bX, const float &bY, const float &bR);
                 bool RadialColl(const PhysicsBody_t &Body1, const PhysicsBody_t &Body2);
                 bool RadialCollFast(const PhysicsBody_t &Body1, const PhysicsBody_t &Body2);

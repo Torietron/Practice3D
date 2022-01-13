@@ -34,7 +34,7 @@ PhysicsData::PhysicsData(float pullRate)
 }
 
 //center axis coords first, Rota is center by default
-bool PhysicsData::_PhysicsFormula::BoxColl2D(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight)
+bool PhysicsData::_PhysicsFormula::BoxColl(const int_fast16_t &aX, const int_fast16_t &aY, const int_fast16_t &aWidth, const int_fast16_t &aHeight, const int_fast16_t &bX, const int_fast16_t &bY, const int_fast16_t &bWidth, const int_fast16_t &bHeight)
 {
     if(((aX - aWidth > bX - bWidth && aX - aWidth < bX + bWidth)  || (bX - bWidth > aX - aWidth && bX - bWidth < aX + aWidth))
     && ((aY - aHeight > bY - bHeight && aY - aHeight < bY + bHeight) || (bY - bHeight > aY - aHeight && bY - bHeight < aY + aHeight))) return true;
@@ -42,7 +42,7 @@ bool PhysicsData::_PhysicsFormula::BoxColl2D(const int_fast16_t &aX, const int_f
 }
 
 //center axis coords first, Rota is center by default
-bool PhysicsData::_PhysicsFormula::BoxColl2D(const float &aX, const float &aY, const float &aWidth, const float &aHeight, const float &bX, const float &bY, const float &bWidth, const float &bHeight)
+bool PhysicsData::_PhysicsFormula::BoxColl(const float &aX, const float &aY, const float &aWidth, const float &aHeight, const float &bX, const float &bY, const float &bWidth, const float &bHeight)
 {
     if(((aX - aWidth > bX - bWidth && aX - aWidth < bX + bWidth)  || (bX - bWidth > aX - aWidth && bX - bWidth < aX + aWidth))
     && ((aY - aHeight > bY - bHeight && aY - aHeight < bY + bHeight) || (bY - bHeight > aY - aHeight && bY - bHeight < aY + aHeight))) return true;
@@ -1007,34 +1007,56 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, con
     if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < snapZ) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
 }
 
-// Uses gFloor to check if you've passed through, if so it moves the body to the world_grav_pos
+/*  Uses gFloor to check if you've passed through a specific point
+    if so it moves the body to the world_grav_pos and resets gForce*/
 int PhysicsData::GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
 {
     switch(ENUM_AXIS)
     {
         case AXIS_X:
 
-            if(Body.Pos.x < Body.gFloor.x) 
+            if(Body.gForce.x < 0.0f && Body.Pos.x < Body.gFloor.x)
             {
                 Body.Pos.x = world_gravity_pos.x;
+                Body.gForce.x = 0.0f;
+                return 1;
+            }
+            else if(Body.gForce.x > 0.0f && Body.Pos.x > Body.gFloor.x)
+            {
+                Body.Pos.x = world_gravity_pos.x;
+                Body.gForce.x = 0.0f;
                 return 1;
             }
             return 0;
 
         case AXIS_Y:
 
-            if(Body.Pos.y < Body.gFloor.y) 
+            if(Body.gForce.y > 0.0f && Body.Pos.y < Body.gFloor.y)
             {
                 Body.Pos.y = world_gravity_pos.y;
+                Body.gForce.y = 0.0f;
+                return 1;
+            }
+            else if(Body.gForce.y < 0.0f && Body.Pos.y > Body.gFloor.y)
+            {
+                Body.Pos.y = world_gravity_pos.y;
+                Body.gForce.y = 0.0f;
                 return 1;
             }
             return 0;
 
         case AXIS_Z:
 
-            if(Body.Pos.z < Body.gFloor.z) 
+            if(Body.gForce.z < 0.0f && Body.Pos.z < Body.gFloor.z)
             {
                 Body.Pos.z = world_gravity_pos.z;
+                Body.gForce.z = 0.0f;
+                return 1;
+            }
+            else if(Body.gForce.z > 0.0f && Body.Pos.z > Body.gFloor.z)
+            {
+                Body.Pos.z = world_gravity_pos.z;
+                Body.gForce.z = 0.0f;
                 return 1;
             }
             return 0;
