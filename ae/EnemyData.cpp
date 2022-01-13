@@ -8,7 +8,7 @@ void EnemyData::Draw(Sphere_t *sObj, const uint_fast16_t MAX, uint_fast16_t *DFl
     {
         if(DFlag[i] == 1)
         {
-            DrawSphere3D(sObj[i].Pos, sObj[i].Radius, 200, GetColor(200,0,120), GetColor(100,0,60), TRUE);
+            DrawSphere3D(sObj[i].Body.Pos, sObj[i].Body.Radius, 200, GetColor(200,0,120), GetColor(100,0,60), TRUE);
         }
     }
 }

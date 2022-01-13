@@ -55,6 +55,8 @@ PlayerData::PlayerData()
     MMD.Body.VelBase = 1.5f, MMD.Body.VelMax = 5.0f;
     MMD.Body.AccelRate = 0.35f; MMD.Body.TermVel = 3.0f;
     MMD.Body.MassRatio = 0.8f, MMD.Body.Interval = 50;
+    MMD.Body.gFloor.y = 0.0f;
+    MMD.Body.Radius = 1.5f;
 
     Sig.EnableModi = TRUE;
     Sig.Body.Enable3D = TRUE;
@@ -117,7 +119,7 @@ void PlayerData::Load()
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
     Last = VGet(Pos->x, Pos->y, Pos->z);
-
+    
     //Player Movement controls
     if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
     if(Key.Poll[KEY_INPUT_E] >= 1 && isCasting == FALSE) Rot->y += ROTATE_SPEED;
@@ -241,7 +243,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
             Selected = Selected + 1;
             if(sObj[Selected].Active) 
             {
-                Target = &sObj[Selected].Pos; 
+                Target = &sObj[Selected].Body.Pos; 
                 break;
             }
         }
@@ -255,7 +257,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     {
         if(sObj[Selected].Active)
         {
-            Screen.C3D.AngleH = Physics.Formula.RelAngle2(MMD.Body.Pos, sObj[Selected].Pos);
+            Screen.C3D.AngleH = Physics.Formula.RelAngle2(MMD.Body.Pos, sObj[Selected].Body.Pos);
             Rot->y = Screen.C3D.AngleH;
             Screen.C3D.Anchor = Rot->y - DX_PI_F/10;
             Ui.UpdateFlux();
@@ -277,6 +279,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     {
         Physics.Manipulate(MMD.Body);
         MMD.RotOffset.x = DX_PI_F*2;
+        Physics.GravityFloor(MMD.Body,AXIS_Y);
         if(Physics.GetLastValue(LAST_GRAVITY_Y) == 0) Jump = FALSE, MMD.Body.Grounded = TRUE;
     }
 
@@ -420,10 +423,6 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
                 Blinked = TRUE;
             }
         }
-        //else if((Cast[0].Count > 0 || Cast[1].Count > 0) && Morphed == FALSE)
-        //{
-            //SetState(1);
-        //}
         else
         {
             SetState(0);
@@ -548,7 +547,7 @@ int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
                 if(SpellDFlag[i] == 0)
                 {
                     SpellObj[i].Color = Ui.Cyan;
-                    SpellObj[i].Radius = 2.4f;
+                    SpellObj[i].Body.Radius = 2.4f;
                     SpellObj[i].PolyLevel = 1;
                     SpellObj[i].Body.Enable3D = TRUE;
                     SpellObj[i].Body.Pos = VGet(Pos->x, Pos->y + 21.0f, Pos->z);
@@ -557,7 +556,7 @@ int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
                     SpellDFlag[i] = 1;
 
                     SpellObj[i+1].Color = Ui.Cyan;
-                    SpellObj[i+1].Radius = 2.4f;
+                    SpellObj[i+1].Body.Radius = 2.4f;
                     SpellObj[i+1].PolyLevel = 1;
                     SpellObj[i+1].Body.Enable3D = TRUE;
                     SpellObj[i+1].Body.Pos = VGet(Pos->x, Pos->y + 8.0f, Pos->z);
@@ -568,7 +567,7 @@ int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
                     SpellDFlag[i+1] = 1;
 
                     SpellObj[i+2].Color = Ui.Cyan;
-                    SpellObj[i+2].Radius = 2.4f;
+                    SpellObj[i+2].Body.Radius = 2.4f;
                     SpellObj[i+2].PolyLevel = 1;
                     SpellObj[i+2].Body.Enable3D = TRUE;
                     SpellObj[i+2].Body.Pos = VGet(Pos->x, Pos->y + 1.0f, Pos->z);
@@ -589,7 +588,7 @@ int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
                 if(SpellDFlag[i] == 0)
                 {
                     SpellObj[i].Color = Ui.Red;
-                    SpellObj[i].Radius = 10.0f;
+                    SpellObj[i].Body.Radius = 10.0f;
                     SpellObj[i].PolyLevel = 128;
                     SpellObj[i].Body.Enable3D = TRUE;
                     SpellObj[i].Probe.Enable3D = TRUE;
@@ -662,6 +661,7 @@ void PlayerData::UpdateSpells()
             Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
             EnergyWisp.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
             MainCircle.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
+            if(SpeedBonus < 1.2f) Model.Update(MainCircle,28);
             Model.Update(EnergyWisp,48,(int)floorf(SpeedBonus*2.5f));
             Cast[2].Count = 0;
 
@@ -707,21 +707,21 @@ void PlayerData::Draw(const Sphere_t *sObj)
 {
     if(TargetLock == TRUE)
     {
-        Marker.SizeOffset = Physics.Formula.Distance3(*Pos,sObj[Selected].Pos) *.006f;
+        Marker.SizeOffset = Physics.Formula.Distance3(*Pos,sObj[Selected].Body.Pos) *.006f;
         Marker.Size = 1.6f + Marker.SizeOffset;
-        Ui.DrawMarker3D(Marker, sObj[Selected].Pos, (16.0f + Ui.Flux), 0.0f, 0.0f, 1.05f - (Marker.Size*.03f));
+        Ui.DrawMarker3D(Marker, sObj[Selected].Body.Pos, (16.0f + Ui.Flux), 0.0f, 0.0f, 1.05f - (Marker.Size*.03f));
     }
 
     for(uint_fast8_t i = 0; i < MAXSPELLS; i++)
     {
         if(SpellDFlag[i] == 1)
         {
-            DrawSphere3D(SpellObj[i].Body.Pos,SpellObj[i].Radius,SpellObj[i].PolyLevel,SpellObj[i].Color,Ui.Black,FALSE);
-            DrawCapsule3D(SpellObj[i].Body.Pos,VGet(SpellObj[i].Body.Pos.x,SpellObj[i].Body.Pos.y-0.40f,SpellObj[i].Body.Pos.z),SpellObj[i].Radius,SpellObj[i].PolyLevel,Ui.Turquoise,Ui.Black,FALSE);
+            DrawSphere3D(SpellObj[i].Body.Pos,SpellObj[i].Body.Radius,SpellObj[i].PolyLevel,SpellObj[i].Color,Ui.Black,FALSE);
+            DrawCapsule3D(SpellObj[i].Body.Pos,VGet(SpellObj[i].Body.Pos.x,SpellObj[i].Body.Pos.y-0.40f,SpellObj[i].Body.Pos.z),SpellObj[i].Body.Radius,SpellObj[i].PolyLevel,Ui.Turquoise,Ui.Black,FALSE);
         }
         if(SpellDFlag[i] == 2)
         {
-            DrawCone3D(SpellObj[i].Body.Pos,SpellObj[i].Probe.Pos,SpellObj[i].Radius,SpellObj[i].PolyLevel,SpellObj[i].Color,Ui.Black,FALSE);
+            DrawCone3D(SpellObj[i].Body.Pos,SpellObj[i].Probe.Pos,SpellObj[i].Body.Radius,SpellObj[i].PolyLevel,SpellObj[i].Color,Ui.Black,FALSE);
         }
     }
 

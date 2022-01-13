@@ -81,17 +81,19 @@ void ModelData::Update(MQO_t &m)
     MV1RefreshCollInfo(m.ModelH,-1);
 }
 
-int ModelData::Update(Sprite3D_t &m, const float &framerate, const uint_fast8_t &skip)
+/*  3rd arg is skipRate, to skip frames
+    ie skip = 1 (to use every other sprite)*/
+int ModelData::Update(Sprite3D_t &m, const float &frameRate, const uint_fast8_t &skipRate)
 {
     if(m.SpriteMax == 0) return -1;
 
     dTime = GetNowCount();
-    fTime = 1000 / framerate;
+    fTime = 1000 / frameRate;
     if(dTime - m.AnimTime > fTime)
     {
         m.AnimTime = GetNowCount();
         m.SpriteIndex++;
-        m.SpriteIndex += skip;
+        m.SpriteIndex += skipRate;
         if(m.SpriteIndex > m.SpriteMax) m.SpriteIndex = 0;
         m.SpritePtr = &m.SpriteH[m.SpriteIndex];
         m.SpritePtr_D = &m.SpritePtr;

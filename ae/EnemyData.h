@@ -4,11 +4,11 @@
 
 #include "DxLib.h"
 #include <cstdint>
+#include "PhysicsData.h"
 
 typedef struct {
-	VECTOR Pos;
-	float Radius;
 	bool Active;
+	PhysicsBody_t Body;
 } Sphere_t;
 
 class EnemyData {

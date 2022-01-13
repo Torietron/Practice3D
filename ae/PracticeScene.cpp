@@ -15,6 +15,7 @@
 static uint_fast16_t Destroyed = 0;
 static uint_fast16_t SDFlag[SPHERES] = {0};
 static int Light;
+static float CollAngleH;
 
 static MV1_COLL_RESULT_POLY_DIM HitPolyDim[SPHERES];
 static Sphere_t Sphere[SPHERES];
@@ -39,8 +40,8 @@ void PracticeScene::Init()
     Physics.SetWorldGravityPos(-2000.0f,0.0f,-2000.0f);
 
     SDFlag[0] = 1, SDFlag[1] = 1;
-    Sphere[0].Pos = VGet(-0.5f,10.0f,-46.0f), Sphere[0].Radius = 6.0f, Sphere[0].Active = true;
-    Sphere[1].Pos = VGet(-40.0f,10.0f,-60.0f), Sphere[1].Radius = 6.0f, Sphere[1].Active = true;
+    Sphere[0].Body.Pos = VGet(-0.5f,10.0f,-46.0f), Sphere[0].Body.Radius = 6.0f, Sphere[0].Body.RadiusOffset = 2.0f, Sphere[0].Active = true;
+    Sphere[1].Body.Pos = VGet(-40.0f,10.0f,-60.0f), Sphere[1].Body.Radius = 6.0f, Sphere[1].Body.RadiusOffset = 2.0f, Sphere[1].Active = true;
 }
 
 void PracticeScene::Load()
@@ -71,9 +72,10 @@ void PracticeScene::Update()
     //Collision
     for(uint_fast8_t i = 0; i < SPHERES; i++)
     {
-        if(Physics.Formula.SphereColl3D(Player.MMD.ModelH,Sphere[i].Pos,Sphere[i].Radius,HitPolyDim[i]))
+        if(Physics.Formula.RadialColl(Player.MMD.Body,Sphere[i].Body))
         {
-            Player.MMD.Body.Pos = VGet(Player.Last.x, Player.Last.y,Player.Last.z);
+            Player.MMD.Body.Pos.x = Player.Last.x;
+            Player.MMD.Body.Pos.z = Player.Last.z;
         }
     }
 }
@@ -94,6 +96,5 @@ void PracticeScene::Draw()
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
         DrawFormatString(0,80,-1,"selected=%d",Player.Selected);
         DrawFormatString(0,180,-1,"CT=%d",Player.CastingTime);
-        DrawFormatString(0,200,-1,"Key=%d",Key.Poll[KEY_INPUT_1]);
     }
 }
