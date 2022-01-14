@@ -304,7 +304,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     //Spell One
     if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
     {
-        if(Key.Poll[KEY_INPUT_2] >= 1 || Key.Poll[KEY_INPUT_3] >= 1) Cancelled.Event = TRUE; //check for cancels
+        if((Key.Poll[KEY_INPUT_2] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
         else if(Cancelled.Event == FALSE)
         {
             if(MMD.State == 0) SetState(1);
@@ -339,7 +339,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     //Spell Two
     else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
     {
-        if(Key.Poll[KEY_INPUT_1] >= 1 || Key.Poll[KEY_INPUT_3] >= 1) Cancelled.Event = TRUE; //check for cancels
+        if((Key.Poll[KEY_INPUT_1] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
         else if(Cancelled.Event == FALSE)
         {
             if(MMD.State == 0) SetState(1);
@@ -374,33 +374,29 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     //Spell Three
     else if(Key.Poll[KEY_INPUT_3] >= 4 && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Morphed == FALSE) 
     {
-        if(Key.Poll[KEY_INPUT_1] >= 1 || Key.Poll[KEY_INPUT_2] >= 1) Cancelled.Event = TRUE; //check for cancels
-        else if(Cancelled.Event == FALSE)
+        if(MMD.State != 2) SetState(2);
+
+        if(Cast[0].Count > 0 || Cast[1].Count > 0)  //reset time if another spell was active and unfinished
         {
-            if(MMD.State != 2) SetState(2);
-
-            if(Cast[0].Count > 0 || Cast[1].Count > 0)  //reset time if another spell was active and unfinished
-            {
-                Cast[0].Count = 0;
-                Cast[1].Count = 0;
-                CastingTime = 0; 
-            }
-            if(Physics.Delta.Time(Cast[2],5)) CastingTime++;
-            if(CastingTime >= SPELL_THREE_CAST_TIME)
-            {
-                GCD.Event = TRUE;
-                GCD.Time = GetNowCount(); 
-                CreateSpell(2);
-                Key.Poll[KEY_INPUT_1] = 0;
-                Key.Poll[KEY_INPUT_2] = 0;
-                Key.Poll[KEY_INPUT_3] = 0;
-                CastingTime = 0;
-                Cast[2].Count = 0;
-            }
-
-            Model.RunManualBlend(MMD,3.115f,1.001f,29.084999f,7.039001f);
-            Model.Update(MainCircle,28);
+            Cast[0].Count = 0;
+            Cast[1].Count = 0;
+            CastingTime = 0; 
         }
+        if(Physics.Delta.Time(Cast[2],5)) CastingTime++;
+        if(CastingTime >= SPELL_THREE_CAST_TIME)
+        {
+            GCD.Event = TRUE;
+            GCD.Time = GetNowCount(); 
+            CreateSpell(2);
+            Key.Poll[KEY_INPUT_1] = 0;
+            Key.Poll[KEY_INPUT_2] = 0;
+            Key.Poll[KEY_INPUT_3] = 0;
+            CastingTime = 0;
+            Cast[2].Count = 0;
+        }
+
+        Model.RunManualBlend(MMD,3.115f,1.001f,29.084999f,7.039001f);
+        Model.Update(MainCircle,28);
     }
 
     //Handle key release
@@ -447,6 +443,8 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 
     UpdateSpells();
     Model.Update(MMD);
+    Ui.DrawValue(90,0,MMD.State);
+    Ui.DrawValue(140,0,Cancelled.Event);
 }
 
 /*  0 = Idle/Normal
