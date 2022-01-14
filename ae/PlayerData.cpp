@@ -329,10 +329,9 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         Model.Update(MainCircle,28);
     }
     //Spell One
-    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
+    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && (MMD.Body.Grounded == TRUE || Morphed == TRUE) && Cancelled.Event == FALSE && Blinked == FALSE) 
     {
         if((Key.Poll[KEY_INPUT_2] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
-        //else if(Morphed == FALSE && MMD.State == 2 && Key.Poll[KEY_INPUT_3] == 0) SetState(0);
         else if(Cancelled.Event == FALSE && (Morphed == TRUE || (Morphed == FALSE && Key.Poll[KEY_INPUT_3] == 0)))
         {
             if(MMD.State == 0) SetState(1);
@@ -365,7 +364,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         }
     }
     //Spell Two
-    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
+    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && (MMD.Body.Grounded == TRUE || Morphed == TRUE) && Cancelled.Event == FALSE && Blinked == FALSE) 
     {
         if((Key.Poll[KEY_INPUT_1] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
         else if(Cancelled.Event == FALSE && (Morphed == TRUE || (Morphed == FALSE && Key.Poll[KEY_INPUT_3] == 0)))
@@ -401,7 +400,9 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     }
 
     //Handle key release
-    if(MMD.State > 0 && ((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0 && Key.Poll[KEY_INPUT_3] == 0) || (TargetLock == FALSE && Key.Poll[KEY_INPUT_3] == 0)))
+    if(MMD.State > 0 && ((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0 && Key.Poll[KEY_INPUT_3] == 0) 
+                     || (TargetLock == FALSE && Key.Poll[KEY_INPUT_3] == 0) 
+                     || (Cast[2].Count > 0 && Jump == TRUE)))
     {
         if(Morphed == TRUE)
         {
@@ -447,6 +448,9 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     Ui.DrawValue(90,0,MMD.State);
     Ui.DrawValue(140,0,Cancelled.Event);
     Ui.DrawValue(160,0,Blinked);
+    Ui.DrawValue(180,0,Key.Poll[KEY_INPUT_1]);
+    Ui.DrawValue(200,0,Key.Poll[KEY_INPUT_3]);
+    Ui.DrawValue(220,0,(int)Cast[2].Count);
 }
 
 /*  0 = Idle/Normal
