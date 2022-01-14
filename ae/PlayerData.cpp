@@ -14,7 +14,7 @@
 #define UNIQUE_SPELLS 3
 #define SPELL_ONE_CAST_TIME 22
 #define SPELL_TWO_CAST_TIME 29
-#define SPELL_THREE_CAST_TIME 8
+#define SPELL_THREE_CAST_TIME 9
 
 static const float ROTATE_SPEED = DX_PI_F/45;
 static const float MOVEMENT_SPEED = DX_PI_F/5;
@@ -301,80 +301,10 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     }
 
     //Casting Control
-    //Spell One
-    if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
-    {
-        if((Key.Poll[KEY_INPUT_2] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
-        else if(Cancelled.Event == FALSE)
-        {
-            if(MMD.State == 0) SetState(1);
-
-            if(Cast[1].Count > 0 || Cast[2].Count > 0) //reset if another spell was active and unfinished
-            {
-                Cast[1].Count = 0;
-                Cast[2].Count = 0;
-                CastingTime = 0; 
-            }
-            if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
-            if(CastingTime >= SPELL_ONE_CAST_TIME)
-            {
-                GCD.Event = TRUE;
-                GCD.Time = GetNowCount();
-                CreateSpell(0);
-                Key.Poll[KEY_INPUT_1] = 0;
-                Key.Poll[KEY_INPUT_2] = 0;
-                Key.Poll[KEY_INPUT_3] = 0;
-                CastingTime = 0;
-                Cast[0].Count = 0;
-                if(Morphed) SetState(2);
-                else SetState(0);
-            }
-
-            if(Morphed == TRUE && MMD.State == 2) SetState(3);
-            if(Morphed == FALSE && MMD.State == 3) SetState(1);
-            //Model.RunManualBlend(MMD,0.115f,0.001f);
-            Model.Update(MainCircle,28);
-        }
-    }
-    //Spell Two
-    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
-    {
-        if((Key.Poll[KEY_INPUT_1] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
-        else if(Cancelled.Event == FALSE)
-        {
-            if(MMD.State == 0) SetState(1);
-
-            if(Cast[0].Count > 0 || Cast[2].Count > 0)  //reset if another spell was active and unfinished
-            {
-                Cast[0].Count = 0;
-                Cast[2].Count = 0;
-                CastingTime = 0; 
-            }
-            if(Physics.Delta.Time(Cast[1],5)) CastingTime++;
-            if(CastingTime >= SPELL_TWO_CAST_TIME)
-            {
-                GCD.Event = TRUE;
-                GCD.Time = GetNowCount();
-                CreateSpell(1);
-                Key.Poll[KEY_INPUT_1] = 0;
-                Key.Poll[KEY_INPUT_2] = 0;
-                Key.Poll[KEY_INPUT_3] = 0;
-                CastingTime = 0;
-                Cast[1].Count = 0;
-                if(Morphed) SetState(2);
-                else SetState(0);
-            }
-            
-            if(Morphed == TRUE && MMD.State == 2) SetState(3);
-            if(Morphed == FALSE && MMD.State == 3) SetState(1);
-            Model.RunManualBlend(MMD,0.115f,0.001f);
-            Model.Update(MainCircle,28);
-        }
-    }
     //Spell Three
-    else if(Key.Poll[KEY_INPUT_3] >= 4 && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Morphed == FALSE) 
+    if(Key.Poll[KEY_INPUT_3] >= 4 && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Morphed == FALSE) 
     {
-        if(MMD.State != 2) SetState(2);
+        if(MMD.State != 2) SetState(2), Cast[2].Count++;
 
         if(Cast[0].Count > 0 || Cast[1].Count > 0)  //reset time if another spell was active and unfinished
         {
@@ -398,9 +328,80 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         Model.RunManualBlend(MMD,3.115f,1.001f,29.084999f,7.039001f);
         Model.Update(MainCircle,28);
     }
+    //Spell One
+    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_1] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
+    {
+        if((Key.Poll[KEY_INPUT_2] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
+        //else if(Morphed == FALSE && MMD.State == 2 && Key.Poll[KEY_INPUT_3] == 0) SetState(0);
+        else if(Cancelled.Event == FALSE && (Morphed == TRUE || (Morphed == FALSE && Key.Poll[KEY_INPUT_3] == 0)))
+        {
+            if(MMD.State == 0) SetState(1);
+
+            if(Cast[1].Count > 0 || Cast[2].Count > 0) //reset if another spell was active and unfinished
+            {
+                Cast[1].Count = 0;
+                CastingTime = 0; 
+            }
+            if(Physics.Delta.Time(Cast[0],5)) CastingTime++;
+            if(CastingTime >= SPELL_ONE_CAST_TIME)
+            {
+                GCD.Event = TRUE;
+                GCD.Time = GetNowCount();
+                CreateSpell(0);
+                Key.Poll[KEY_INPUT_1] = 0;
+                Key.Poll[KEY_INPUT_2] = 0;
+                Key.Poll[KEY_INPUT_3] = 0;
+                CastingTime = 0;
+                Cast[0].Count = 0;
+                if(Morphed) SetState(2);
+                else SetState(0);
+            }
+
+            if(Morphed == TRUE && MMD.State == 2) SetState(3);
+            if(Morphed == FALSE && MMD.State == 3) SetState(1);
+            Model.RunManualBlend(MMD,0.115f,0.001f);
+            Model.Update(MainCircle,28);
+            if(Cast[2].Count > 0) Key.Poll[KEY_INPUT_1] = 0; //force release/cancel to blink
+        }
+    }
+    //Spell Two
+    else if(GCD.Event == FALSE && Key.Poll[KEY_INPUT_2] >= 4 && TargetLock == TRUE && MMD.Body.Grounded == TRUE && Cancelled.Event == FALSE && Blinked == FALSE) 
+    {
+        if((Key.Poll[KEY_INPUT_1] >= 1) && Morphed == FALSE) Cancelled.Event = TRUE; //check for cancels
+        else if(Cancelled.Event == FALSE && (Morphed == TRUE || (Morphed == FALSE && Key.Poll[KEY_INPUT_3] == 0)))
+        {
+            if(MMD.State == 0) SetState(1);
+
+            if(Cast[0].Count > 0 || Cast[2].Count > 0)  //reset if another spell was active and unfinished
+            {
+                Cast[0].Count = 0;
+                CastingTime = 0; 
+            }
+            if(Physics.Delta.Time(Cast[1],5)) CastingTime++;
+            if(CastingTime >= SPELL_TWO_CAST_TIME)
+            {
+                GCD.Event = TRUE;
+                GCD.Time = GetNowCount();
+                CreateSpell(1);
+                Key.Poll[KEY_INPUT_1] = 0;
+                Key.Poll[KEY_INPUT_2] = 0;
+                Key.Poll[KEY_INPUT_3] = 0;
+                CastingTime = 0;
+                Cast[1].Count = 0;
+                if(Morphed) SetState(2);
+                else SetState(0);
+            }
+            
+            if(Morphed == TRUE && MMD.State == 2) SetState(3);
+            if(Morphed == FALSE && MMD.State == 3) SetState(1);
+            Model.RunManualBlend(MMD,0.115f,0.001f);
+            Model.Update(MainCircle,28);
+            if(Cast[2].Count > 0) Key.Poll[KEY_INPUT_2] = 0; //force release/cancel to blink
+        }
+    }
 
     //Handle key release
-    if(MMD.State > 0 && ((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0 && Key.Poll[KEY_INPUT_3] == 0) || (TargetLock == FALSE && Key.Poll[KEY_INPUT_3] == 0)) )
+    if(MMD.State > 0 && ((Key.Poll[KEY_INPUT_1] == 0 && Key.Poll[KEY_INPUT_2] == 0 && Key.Poll[KEY_INPUT_3] == 0) || (TargetLock == FALSE && Key.Poll[KEY_INPUT_3] == 0)))
     {
         if(Morphed == TRUE)
         {
@@ -445,6 +446,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     Model.Update(MMD);
     Ui.DrawValue(90,0,MMD.State);
     Ui.DrawValue(140,0,Cancelled.Event);
+    Ui.DrawValue(160,0,Blinked);
 }
 
 /*  0 = Idle/Normal
