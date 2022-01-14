@@ -20,20 +20,21 @@ class PlayerData {
         uint_least8_t Jump, isCasting, Blinked, Morphed;
         uint_fast8_t CastingTime;
         float SpeedBonus, BlinkDecay;
-        VECTOR Last, BlinkRot, BlinkOffset;
+        VECTOR Last, Last2, BlinkRot, BlinkOffset;
         MMD_t MMD;
         Sprite3D_t Marker, MainCircle, MiniCircle, Sig, EnergyWisp;
         PhysicsLastTime_t GCD, Cancelled;
         PlayerData();
         void Load();
         void Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX);
-        int SetState(const uint_fast8_t &state);
-        int CreateSpell(const uint_fast8_t &spelltype);
-        void UpdateSpells();
         void Draw(const Sphere_t *sObj);
     private:
         VECTOR const *Target;
         VECTOR *Pos, *Rot;
+        int SetState(const uint_fast8_t &state);
+        int CreateSpell(const uint_fast8_t &spelltype);
+        void UpdateSpells();
+        void CaptureLast();
 };
 
 #endif
