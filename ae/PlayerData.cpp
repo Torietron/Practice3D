@@ -607,6 +607,7 @@ int PlayerData::CreateSpell(const uint_fast8_t &spelltype)
 
             //Mighty Morphin' Miku Rangers?
             Morphed = TRUE;
+            Blinked = FALSE;
             SpeedBonus = 4.0f;
             EnergyWisp.Angle = 0.0f;
             return 2;
