@@ -279,7 +279,6 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     {
         Physics.Manipulate(MMD.Body);
         MMD.RotOffset.x = DX_PI_F*2;
-        Physics.GravityFloor(MMD.Body,AXIS_Y);
         if(Physics.GetLastValue(LAST_GRAVITY_Y) == 0) Jump = FALSE, MMD.Body.Grounded = TRUE;
     }
 

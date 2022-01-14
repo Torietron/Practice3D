@@ -90,8 +90,8 @@ class PhysicsData { /* Manipulate time and space */
         float Accelerate(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
         void Manipulate(int_fast16_t &x, int_fast16_t &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
         void Manipulate(float &x, float &y, float &velX, float &velY, PhysicsLastTime_t &Last, const uint_fast32_t &interval = 240, const float &gravX = 1.0f, const float &gravY = 1.0f, const float &decay = 0.99f);
-        void Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX = 1.0f, const uint_fast8_t &snapY = 1.0f, const uint_fast8_t &snapZ = 1.0f);
-        int GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
+        void Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX = 1.0f, const uint_fast8_t &snapY = 1.0f, const uint_fast8_t &snapZ = 1.0f, const bool &floor = TRUE, const bool &accelDecay = TRUE, const float &accelDecRate = 0.80f);
+        void ManipulateFast(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS, const uint_fast8_t &snap = 1.0f, const bool &floor = TRUE, const bool &accelDecay = TRUE, const float &accelDecRate = 0.80f);
         float GetLastValue(const uint_fast8_t &ENUM_LAST);
         void SetWorldGravityMulti(const float &x = 0.0f, const float &y = 1.0f, const float &z = 0.0f);
         void SetWorldGravityPos(const float &x = 0.0f, const float &y = 0.0f, const float &z = 0.0f);
@@ -106,6 +106,8 @@ class PhysicsData { /* Manipulate time and space */
         VECTOR velocity, gravity;
         VECTOR world_gravity_multi, world_gravity_pos, world_gravity_range;
         int ForceDecay(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
+        int ForceDecayFast(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
+        int GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS);
 };
 
 typedef enum { //FLING_DOWN, FLING_UP, FLING_RIGHT, FLING_LEFT
