@@ -39,7 +39,8 @@ PlayerData::PlayerData()
     Rot = &MMD.Body.Rot;
     CastingTime = 0, Selected = -1; //-1 = no target
     SpeedBonus = 0.0f;
-    isCasting = FALSE, Jump = FALSE, Blinked = FALSE, Morphed = FALSE;
+    isCasting = FALSE, Jump = FALSE;
+    Blinked = FALSE, Morphed = FALSE;
     MMD.Body.Grounded = TRUE;
     GCD.Event = FALSE;
 
@@ -56,7 +57,7 @@ PlayerData::PlayerData()
     MMD.Body.AccelRate = 0.35f; MMD.Body.TermVel = 3.0f;
     MMD.Body.MassRatio = 0.8f, MMD.Body.Interval = 50;
     MMD.Body.gFloor.y = 0.0f;
-    MMD.Body.Radius = 1.5f;
+    MMD.Body.Radius = 0.9f;
 
     Sig.EnableModi = TRUE;
     Sig.Body.Enable3D = TRUE;
@@ -118,7 +119,8 @@ void PlayerData::Load()
 
 void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_fast16_t MAX)
 {
-    Last = VGet(Pos->x, Pos->y, Pos->z);
+    //Store last pos
+    CaptureLast();
     
     //Player Movement controls
     if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
@@ -741,4 +743,10 @@ void PlayerData::Draw(const Sphere_t *sObj)
     if(Morphed == FALSE && Blinked == FALSE) Model.Draw(MMD);
     if(Morphed == TRUE || Blinked == TRUE) Model.Draw(EnergyWisp);
     if(Morphed == TRUE && SpeedBonus < 1.2f) Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
+}
+
+void PlayerData::CaptureLast()
+{
+    Last2 = VGet(Last.x, Last.y, Last.z);
+    Last = VGet(Pos->x, Pos->y, Pos->z);
 }

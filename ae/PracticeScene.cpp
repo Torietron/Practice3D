@@ -40,8 +40,8 @@ void PracticeScene::Init()
     Physics.SetWorldGravityPos(-2000.0f,0.0f,-2000.0f);
 
     SDFlag[0] = 1, SDFlag[1] = 1;
-    Sphere[0].Body.Pos = VGet(-0.5f,10.0f,-46.0f), Sphere[0].Body.Radius = 6.0f, Sphere[0].Body.RadiusOffset = 2.0f, Sphere[0].Active = true;
-    Sphere[1].Body.Pos = VGet(-40.0f,10.0f,-60.0f), Sphere[1].Body.Radius = 6.0f, Sphere[1].Body.RadiusOffset = 2.0f, Sphere[1].Active = true;
+    Sphere[0].Body.Pos = VGet(-0.5f,10.0f,-46.0f), Sphere[0].Body.Radius = 6.0f, Sphere[0].Body.RadiusOffset = -4.0f, Sphere[0].Active = true;
+    Sphere[1].Body.Pos = VGet(-40.0f,10.0f,-60.0f), Sphere[1].Body.Radius = 6.0f, Sphere[1].Body.RadiusOffset = -4.0f, Sphere[1].Active = true;
 }
 
 void PracticeScene::Load()
