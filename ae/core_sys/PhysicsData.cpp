@@ -799,7 +799,8 @@ void PhysicsData::PropelFast(float &x, float &y, const float &angle2D, const flo
     y -= velocity.y;
 }
 
-/*  assign last velocity to Body.Vel if you want to use this with Manipulate()
+/*  can assign last velocity to Body.Vel if you want to use this with Manipulate()
+    can use Body.Accel for the magnitude arguement if using with Accelerate()
     - GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y */  
 void PhysicsData::Propel(PhysicsBody_t &Body, const float &magnitude, const float &offsetH, const float &offsetV)
 {
@@ -840,8 +841,9 @@ void PhysicsData::Propel(PhysicsBody_t &Body, const float &magnitude, const floa
     }
 }
 
-/*  assign last velocity to Body.Vel if you want to use this with Manipulate()
-    - GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y */  
+/*  can assign last velocity to Body.Vel if you want to use this with Manipulate()
+    can use Body.Accel for the magnitude arguement if using with Accelerate()
+    - GetLast: LAST_VELOCITY_X, LAST_VELOCITY_Y */   
 void PhysicsData::PropelFast(PhysicsBody_t &Body, const float &magnitude, const float &offsetH, const float &offsetV)
 {
     switch(Body.Enable3D)
@@ -972,12 +974,13 @@ void PhysicsData::Manipulate(float &x, float &y, float &velX, float &velY, Physi
 
 /*  Uses world_gravity
     Frequency of force decay is set by Body.Interval
-    - Optional gravity-snap args to help prevent perpetual axis flips/orbits
+    - Optional gravity-snap args to help prevent perpetual axis orbits
+    - Last arg to FALSE will disable check on gFloor and allow axis flips
     - Be mindful of world_grav xyz pos and snap range, set unused grav axis pos off grid (-10000)
     - GetLastValue: [Gravity will return 0 on contact]
     LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
     LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
-void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, const uint_fast8_t &snapY, const uint_fast8_t &snapZ)
+void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, const uint_fast8_t &snapY, const uint_fast8_t &snapZ, const bool &floor, const bool &accelDecay, const float &accelDecRate)
 {//diminishing pull with range
     gravity.x = (world_gravity_multi.x) * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf((Body.Pos.x - world_gravity_pos.x) * (Body.Pos.x - world_gravity_pos.x)) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
     gravity.y = (world_gravity_multi.y) * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf((Body.Pos.y - world_gravity_pos.y) * (Body.Pos.y - world_gravity_pos.y)) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
@@ -990,6 +993,11 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, con
         ForceDecay(Body,AXIS_Z);
 
         if(Body.Grounded) Body.Vel = VGet(Body.Vel.x * Body.FrictionRatio, Body.Vel.y * Body.FrictionRatio, Body.Vel.z * Body.FrictionRatio);
+        if(accelDecay && Body.Accel > 0.0f) 
+        {
+            Body.Accel *= accelDecRate;
+            if(Body.Accel < 0.0004f) Body.Accel = 0.0f;
+        }
     }
     
     gravity = VGet(gravity.x + Body.gForce.x, gravity.y + Body.gForce.y, gravity.z + Body.gForce.z);
@@ -1005,79 +1013,90 @@ void PhysicsData::Manipulate(PhysicsBody_t &Body, const uint_fast8_t &snapX, con
     if(Formula.Distance1(Body.Pos.x,world_gravity_pos.x) < snapX) gravity.x = 0.0f, Body.Pos.x = world_gravity_pos.x, Body.gForce.x = 0.0f;
     if(Formula.Distance1(Body.Pos.y,world_gravity_pos.y) < snapY) gravity.y = 0.0f, Body.Pos.y = world_gravity_pos.y, Body.gForce.y = 0.0f;
     if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < snapZ) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
+
+    if(floor) GravityFloor(Body,AXIS_X);
+    if(floor) GravityFloor(Body,AXIS_Y);
+    if(floor) GravityFloor(Body,AXIS_Z);
 }
 
-/*  Uses gFloor to check if you've passed through a specific point
-    if so it moves the body to the world_grav_pos and resets gForce*/
-int PhysicsData::GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
-{
+/*  Uses world_gravity, Singular axis application
+    Frequency of force decay is set by Body.Interval, 
+    *** Using Fast version for more than one axis may disrupt decay time (reapply old time manually)
+    - Optional gravity-snap args to help prevent perpetual axis orbits
+    - Last arg to FALSE will disable check on gFloor and allow axis flips
+    - Be mindful of world_grav xyz pos and snap range, set unused grav axis pos off grid (-10000)
+    - GetLastValue: [Gravity will return 0 on contact]
+    LAST_VELOCITY_X, LAST_VELOCITY_Y, LAST_VELOCITY_Z, 
+    LAST_GRAVITY_X, LAST_GRAVITY_Y, LAST_GRAVITY_Z */
+void PhysicsData::ManipulateFast(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS, const uint_fast8_t &snap, const bool &floor, const bool &accelDecay, const float &accelDecRate)
+{//diminishing pull with range
     switch(ENUM_AXIS)
     {
         case AXIS_X:
 
-            if(Body.gForce.x < 0.0f && Body.Pos.x < Body.gFloor.x)
+            gravity.x = (world_gravity_multi.x) * (GRAV_PULL_RATE * (((world_gravity_range.x + sqrtf(world_gravity_pos.x*world_gravity_pos.x)) - (sqrtf((Body.Pos.x - world_gravity_pos.x) * (Body.Pos.x - world_gravity_pos.x)) + sqrtf(world_gravity_pos.x*world_gravity_pos.x))) / world_gravity_range.x));
+            
+            if(Delta.Time(Body.Time, Body.Interval))
             {
-                Body.Pos.x = world_gravity_pos.x;
-                Body.gForce.x = 0.0f;
-                return 1;
+                ForceDecay(Body,ENUM_AXIS);
+                if(Body.Grounded) Body.Vel.x = Body.Vel.x * Body.FrictionRatio;
+                if(accelDecay && Body.Accel > 0.0f) 
+                {
+                    Body.Accel *= accelDecRate;
+                    if(Body.Accel < 0.0004f) Body.Accel = 0.0f;
+                }
             }
-            else if(Body.gForce.x > 0.0f && Body.Pos.x > Body.gFloor.x)
-            {
-                Body.Pos.x = world_gravity_pos.x;
-                Body.gForce.x = 0.0f;
-                return 1;
-            }
-            return 0;
-
+            
+            gravity.x = gravity.x + Body.gForce.x;
+            if(Body.Pos.x > world_gravity_pos.x) gravity.x *= -1;
+            
+            velocity.x = Body.Vel.x + gravity.x;
+            Body.Pos.x = Body.Pos.x + velocity.x;
+            
+            if(Formula.Distance1(Body.Pos.x,world_gravity_pos.x) < snap) gravity.x = 0.0f, Body.Pos.x = world_gravity_pos.x, Body.gForce.x = 0.0f;
+            if(floor) GravityFloor(Body,ENUM_AXIS);
+            break;
+        
         case AXIS_Y:
 
-            if(Body.gForce.y > 0.0f && Body.Pos.y < Body.gFloor.y)
+            gravity.y = (world_gravity_multi.y) * (GRAV_PULL_RATE * (((world_gravity_range.y + sqrtf(world_gravity_pos.y*world_gravity_pos.y)) - (sqrtf((Body.Pos.y - world_gravity_pos.y) * (Body.Pos.y - world_gravity_pos.y)) + sqrtf(world_gravity_pos.y*world_gravity_pos.y))) / world_gravity_range.y));
+            
+            if(Delta.Time(Body.Time, Body.Interval))
             {
-                Body.Pos.y = world_gravity_pos.y;
-                Body.gForce.y = 0.0f;
-                return 1;
+                ForceDecay(Body,ENUM_AXIS);
+                if(Body.Grounded) Body.Vel.y = Body.Vel.y * Body.FrictionRatio;
             }
-            else if(Body.gForce.y < 0.0f && Body.Pos.y > Body.gFloor.y)
-            {
-                Body.Pos.y = world_gravity_pos.y;
-                Body.gForce.y = 0.0f;
-                return 1;
-            }
-            return 0;
+            
+            gravity.y = gravity.y + Body.gForce.y;
+            if(Body.Pos.y > world_gravity_pos.y) gravity.y *= -1;
+            
+            velocity.y = Body.Vel.y + gravity.y;
+            Body.Pos.y = Body.Pos.y + velocity.y;
+            
+            if(Formula.Distance1(Body.Pos.y,world_gravity_pos.y) < snap) gravity.y = 0.0f, Body.Pos.y = world_gravity_pos.y, Body.gForce.y = 0.0f;
+            if(floor) GravityFloor(Body,ENUM_AXIS);
+            break;
 
         case AXIS_Z:
 
-            if(Body.gForce.z < 0.0f && Body.Pos.z < Body.gFloor.z)
-            {
-                Body.Pos.z = world_gravity_pos.z;
-                Body.gForce.z = 0.0f;
-                return 1;
-            }
-            else if(Body.gForce.z > 0.0f && Body.Pos.z > Body.gFloor.z)
-            {
-                Body.Pos.z = world_gravity_pos.z;
-                Body.gForce.z = 0.0f;
-                return 1;
-            }
-            return 0;
+            gravity.z = (world_gravity_multi.z) * (GRAV_PULL_RATE * (((world_gravity_range.z + sqrtf(world_gravity_pos.z*world_gravity_pos.z)) - (sqrtf((Body.Pos.z - world_gravity_pos.z) * (Body.Pos.z - world_gravity_pos.z)) + sqrtf(world_gravity_pos.z*world_gravity_pos.z))) / world_gravity_range.z));
 
-        default:
-
-            if(DisplayErrorGravEnum)
+            if(Delta.Time(Body.Time, Body.Interval))
             {
-                MessageBox
-                (
-                    NULL,
-                    TEXT("Enum Error: PhysicsData GravityFloor()"),
-                    TEXT("Error"),
-                    MB_OK | MB_ICONERROR 
-                );
-                DisplayErrorGravEnum = FALSE;
+                ForceDecay(Body,ENUM_AXIS);
+                if(Body.Grounded) Body.Vel.z = Body.Vel.z * Body.FrictionRatio;
             }
-            return -1;
+            
+            gravity.z = gravity.z + Body.gForce.z;
+            if(Body.Pos.z > world_gravity_pos.z) gravity.z *= -1;
+            
+            velocity.z = Body.Vel.z + gravity.z;
+            Body.Pos.z = Body.Pos.z + velocity.z;
+            
+            if(Formula.Distance1(Body.Pos.z,world_gravity_pos.z) < snap) gravity.z = 0.0f, Body.Pos.z = world_gravity_pos.z, Body.gForce.z = 0.0f;
+            if(floor) GravityFloor(Body,ENUM_AXIS);
+            break;
     }
-    
-    return 0;
 }
 
 /* from Propel() / Fling() / Manipulate()
@@ -1299,4 +1318,138 @@ int PhysicsData::ForceDecay(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
     if(*gForce < 0.0004f) *gForce = 0.00f;
 
     return 0; //things happened
+}
+
+//see you on the other side, slick!
+int PhysicsData::ForceDecayFast(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
+{
+    switch(ENUM_AXIS) //i'll never get a programmer job
+    {//but this is kinda fun
+        case AXIS_X:
+            vel = &Body.Vel.x;
+            gForce = &Body.gForce.x;
+            grav = &gravity.x;
+            break;
+        case AXIS_Y:
+            vel = &Body.Vel.y;
+            gForce = &Body.gForce.y;
+            grav = &gravity.y;
+            break;
+        case AXIS_Z:
+            vel = &Body.Vel.z;
+            gForce = &Body.gForce.z;
+            grav = &gravity.z;
+            break;
+        default:
+            if(DisplayErrorAxisEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData ForceDecayFast()\n Private function"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorAxisEnum = FALSE;
+            }
+            return -1;
+    }
+
+    if(*vel > 0.00f) 
+    {
+        *vel = floorf((*vel * Body.MassRatio) * 10000000)/10000000;
+        *gForce -= GRAV_PULL_RATE;
+        if(*vel < 0.3f) *vel = 0.00f;
+    }
+    else if(*vel < 0.00f) 
+    {
+        *vel = ceilf((*vel * Body.MassRatio) * 10000000)/10000000;
+        *gForce -= GRAV_PULL_RATE;
+        if(*vel > -0.3f) *vel = 0.00f;
+    }
+
+    *gForce += *grav/2;
+    if(*gForce > Body.TermVel) *gForce = Body.TermVel;
+    if(*gForce < 0.0004f) *gForce = 0.00f;
+
+    return 0; //things happened
+}
+
+/*  Uses gFloor to check if you've passed through a specific point
+    if so it moves the body to the world_grav_pos and resets gForce*/
+int PhysicsData::GravityFloor(PhysicsBody_t &Body, const uint_fast8_t &ENUM_AXIS)
+{
+    switch(ENUM_AXIS)
+    {
+        case AXIS_X:
+
+            if(Body.gForce.x < 0.0f && Body.Pos.x < Body.gFloor.x)
+            {
+                Body.Pos.x = world_gravity_pos.x;
+                Body.gForce.x = 0.0f;
+                gravity.x = 0.0f;
+                return 1;
+            }
+            else if(Body.gForce.x > 0.0f && Body.Pos.x > Body.gFloor.x)
+            {
+                Body.Pos.x = world_gravity_pos.x;
+                Body.gForce.x = 0.0f;
+                gravity.x = 0.0f;
+                return 1;
+            }
+            return 0;
+
+        case AXIS_Y:
+
+            if(Body.gForce.y > 0.0f && Body.Pos.y < Body.gFloor.y)
+            {
+                Body.Pos.y = world_gravity_pos.y;
+                Body.gForce.y = 0.0f;
+                gravity.y = 0.0f;
+                return 1;
+            }
+            else if(Body.gForce.y < 0.0f && Body.Pos.y > Body.gFloor.y)
+            {
+                Body.Pos.y = world_gravity_pos.y;
+                Body.gForce.y = 0.0f;
+                gravity.y = 0.0f;
+                return 1;
+            }
+            return 0;
+
+        case AXIS_Z:
+
+            if(Body.gForce.z < 0.0f && Body.Pos.z < Body.gFloor.z)
+            {
+                Body.Pos.z = world_gravity_pos.z;
+                Body.gForce.z = 0.0f;
+                gravity.z = 0.0f;
+                return 1;
+            }
+            else if(Body.gForce.z > 0.0f && Body.Pos.z > Body.gFloor.z)
+            {
+                Body.Pos.z = world_gravity_pos.z;
+                Body.gForce.z = 0.0f;
+                gravity.z = 0.0f;
+                return 1;
+            }
+            return 0;
+
+        default:
+
+            if(DisplayErrorGravEnum)
+            {
+                MessageBox
+                (
+                    NULL,
+                    TEXT("Enum Error: PhysicsData GravityFloor()"),
+                    TEXT("Error"),
+                    MB_OK | MB_ICONERROR 
+                );
+                DisplayErrorGravEnum = FALSE;
+            }
+            return -1;
+    }
+    
+    return 0;
 }
