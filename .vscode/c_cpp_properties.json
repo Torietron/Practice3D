@@ -8,7 +8,7 @@
                 "${workspaceFolder}/ae/input_sys/**",
                 "${workspaceFolder}/ae/scene_sys/**",
                 "${workspaceFolder}/ae/core_sys/**",
-                "D:\\Grimoire\\DxLib ライブラリ\\プロジェクトに追加すべきファイル_VC用"
+                "D:\\Grimoire\\DXライブラリ\\プロジェクトに追加すべきファイル_VC用"
             ],
             "defines": [
                 "_DEBUG",
