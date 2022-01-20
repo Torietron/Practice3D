@@ -123,14 +123,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalIncludeDirectories><RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalLibraryDirectories></Link>
+      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -141,7 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalIncludeDirectories><AdditionalIncludeDirectories>ae</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -149,7 +151,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalLibraryDirectories></Link>
+      <AdditionalLibraryDirectories>..\プロジェクトに追加すべきファイル_VC用;ae;ae\input_sys;ae\scene_sys;ae\core_sys</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
