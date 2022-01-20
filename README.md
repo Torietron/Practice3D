@@ -1,5 +1,5 @@
 # Practice3D <br />
-###### 3rd Person view - Tab targeting system <br /> The pre-compiled windows binary (.exe) is available in the .zip in releases
+###### 3rd Person view - Tab targeting system <br /> The pre-compiled windows binary (exe) is available in the .zip in releases
 
 ### Controls <br />
 * Spells/Abilities are activated by pressing 1, 2 or 3
