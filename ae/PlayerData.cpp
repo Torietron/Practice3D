@@ -39,7 +39,7 @@ PlayerData::PlayerData()
     Rot = &MMD.Body.Rot;
     CastingTime = 0, Selected = -1; //-1 = no target
     SpeedBonus = 0.0f;
-    isCasting = FALSE, Jump = FALSE;
+    isHardCasting = FALSE, Jump = FALSE;
     Blinked = FALSE, Morphed = FALSE;
     MMD.Body.Grounded = TRUE;
     GCD.Event = FALSE;
@@ -123,9 +123,9 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     CaptureLast();
     
     //Player Movement controls
-    if(Key.Poll[KEY_INPUT_Q] >= 1 && isCasting == FALSE) Rot->y -= ROTATE_SPEED;
-    if(Key.Poll[KEY_INPUT_E] >= 1 && isCasting == FALSE) Rot->y += ROTATE_SPEED;
-    if(Key.Poll[KEY_INPUT_A] >= 1 && isCasting == FALSE)
+    if(Key.Poll[KEY_INPUT_Q] >= 1 && isHardCasting == FALSE) Rot->y -= ROTATE_SPEED;
+    if(Key.Poll[KEY_INPUT_E] >= 1 && isHardCasting == FALSE) Rot->y += ROTATE_SPEED;
+    if(Key.Poll[KEY_INPUT_A] >= 1 && isHardCasting == FALSE)
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED+SpeedBonus,-DX_PI_F/2);
         MMD.RotOffset.x = DX_PI_F*2;
@@ -134,7 +134,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         MMD.Reverse = FALSE;
         MMD.RotOffset.y = (DX_PI_F/2) * -1;
     }
-    if(Key.Poll[KEY_INPUT_D] >= 1 && isCasting == FALSE)
+    if(Key.Poll[KEY_INPUT_D] >= 1 && isHardCasting == FALSE)
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED+SpeedBonus,+DX_PI_F/2);
         MMD.RotOffset.x = DX_PI_F*2;
@@ -144,7 +144,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         MMD.RotOffset.y = DX_PI_F/2;
     }
     
-    if(Key.Poll[KEY_INPUT_W] >= 1 && isCasting == FALSE) 
+    if(Key.Poll[KEY_INPUT_W] >= 1 && isHardCasting == FALSE) 
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED+SpeedBonus);
         MMD.RotOffset.x = DX_PI_F*2;
@@ -156,7 +156,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(Key.Poll[KEY_INPUT_D] >= 1) MMD.RotOffset.y = DX_PI_F/4;
     }
     
-    if(Key.Poll[KEY_INPUT_S] >= 1 && isCasting == FALSE) 
+    if(Key.Poll[KEY_INPUT_S] >= 1 && isHardCasting == FALSE) 
     {
         Physics.Propel(MMD.Body,MOVEMENT_SPEED*0.75f+SpeedBonus,DX_PI_F);
         MMD.RotOffset.x = DX_PI_F/10; //Center of gravity would've been visually inconsistent
@@ -168,7 +168,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
         if(Key.Poll[KEY_INPUT_D] >= 1) MMD.RotOffset.y = (DX_PI_F/7)* -1;
     }
     
-    if(Key.Poll[KEY_INPUT_SPACE] == 1 && isCasting == FALSE)
+    if(Key.Poll[KEY_INPUT_SPACE] == 1 && isHardCasting == FALSE)
     {
         if(MMD.Body.Grounded == TRUE) 
         {
@@ -183,19 +183,19 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
     if(Key.Poll[KEY_INPUT_W] == 0 && Key.Poll[KEY_INPUT_S] == 0
     && Key.Poll[KEY_INPUT_A] == 0 && Key.Poll[KEY_INPUT_D] == 0)
     {
-        if(MMD.Body.Grounded == TRUE && isCasting == FALSE) MMD.AnimIndex = 0, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
-        if(MMD.Body.Grounded == FALSE && isCasting == FALSE) MMD.AnimIndex = 2, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
+        if(MMD.Body.Grounded == TRUE && isHardCasting == FALSE) MMD.AnimIndex = 0, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
+        if(MMD.Body.Grounded == FALSE && isHardCasting == FALSE) MMD.AnimIndex = 2, MMD.RotOffset.x = DX_PI_F*2, MMD.Reverse = FALSE;
         MMD.RotOffset.y = 0.0f;
     }
 
     //Camera
     //keep the camera a set distance from player
-    if(Key.Poll[KEY_INPUT_J] >= 1 && isCasting == FALSE)
+    if(Key.Poll[KEY_INPUT_J] >= 1 && isHardCasting == FALSE)
     {
         Rot->y -= ROTATE_SPEED;
         Screen.C3D.Anchor = Rot->y;
     }
-    if(Key.Poll[KEY_INPUT_K] >= 1 && isCasting == FALSE)
+    if(Key.Poll[KEY_INPUT_K] >= 1 && isHardCasting == FALSE)
     {
         Rot->y += ROTATE_SPEED; 
         Screen.C3D.Anchor = Rot->y;
@@ -358,6 +358,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 
             if(Morphed == TRUE && MMD.State == 2) SetState(3);
             if(Morphed == FALSE && MMD.State == 3) SetState(1);
+            if(Morphed == FALSE && MMD.State == 2 && Blinked == FALSE) SetState(1);
             Model.RunManualBlend(MMD,0.115f,0.001f);
             Model.Update(MainCircle,28);
             if(Cast[2].Count > 0) Key.Poll[KEY_INPUT_1] = 0; //force release/cancel to blink
@@ -393,7 +394,8 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
             
             if(Morphed == TRUE && MMD.State == 2) SetState(3);
             if(Morphed == FALSE && MMD.State == 3) SetState(1);
-            Model.RunManualBlend(MMD,0.115f,0.001f);
+            if(Morphed == FALSE && MMD.State == 2 && Blinked == FALSE) SetState(1);
+            Model.RunManualBlend(MMD,0.315f,0.001f);
             Model.Update(MainCircle,28);
             if(Cast[2].Count > 0) Key.Poll[KEY_INPUT_2] = 0; //force release/cancel to blink
         }
@@ -445,12 +447,6 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 
     UpdateSpells();
     Model.Update(MMD);
-    Ui.DrawValue(90,0,MMD.State);
-    Ui.DrawValue(140,0,Cancelled.Event);
-    Ui.DrawValue(160,0,Blinked);
-    Ui.DrawValue(180,0,Key.Poll[KEY_INPUT_1]);
-    Ui.DrawValue(200,0,Key.Poll[KEY_INPUT_3]);
-    Ui.DrawValue(220,0,(int)Cast[2].Count);
 }
 
 /*  0 = Idle/Normal
@@ -463,7 +459,7 @@ int PlayerData::SetState(const uint_fast8_t &state)
     {
         case 0:
 
-            isCasting = FALSE;
+            isHardCasting = FALSE;
             if(MMD.AutoBlend == FALSE) {MMD.AutoBlend = TRUE; Model.EndManualBlend(MMD);}
             CastingTime = 0;
             MainCircle.Flux = 0.0f;
@@ -475,7 +471,7 @@ int PlayerData::SetState(const uint_fast8_t &state)
         
         case 1:
 
-            isCasting = TRUE;
+            isHardCasting = TRUE;
             if(MMD.AutoBlend) MMD.AutoBlend = FALSE;
             else Model.EndManualBlend(MMD);
             MMD.AnimIndex = 4;
@@ -494,7 +490,7 @@ int PlayerData::SetState(const uint_fast8_t &state)
         
         case 2:
 
-            isCasting = FALSE;
+            isHardCasting = FALSE;
             if(MMD.AutoBlend) MMD.AutoBlend = FALSE;
             else Model.EndManualBlend(MMD);
             CastingTime = 0;
@@ -508,7 +504,7 @@ int PlayerData::SetState(const uint_fast8_t &state)
 
         case 3:
 
-            isCasting = FALSE;
+            isHardCasting = FALSE;
             if(MMD.AutoBlend) MMD.AutoBlend = FALSE;
             else Model.EndManualBlend(MMD);
             Sig.Body.Pos = VGet(Pos->x,Pos->y,Pos->z);
@@ -731,14 +727,14 @@ void PlayerData::Draw(const Sphere_t *sObj)
         }
     }
 
-    if(isCasting == TRUE && MMD.State == 1)
+    if(isHardCasting == TRUE && MMD.State == 1)
     {
         Model.Draw(Sig,11.0f,12.0f,-9.0f,-8.0f);
         Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
         Model.Draw(MiniCircle);
     }
 
-    if(isCasting == FALSE && (MMD.State == 2 || MMD.State == 3))
+    if(isHardCasting == FALSE && (MMD.State == 2 || MMD.State == 3))
     {
         if(Morphed == FALSE && Blinked == FALSE) Model.Draw(MainCircle,11.0f,12.0f,-9.0f,-8.0f);
         if(Morphed == FALSE || SpeedBonus > 0.0f) Model.Draw(Sig,11.0f,12.0f,-9.0f,-8.0f);

@@ -96,5 +96,10 @@ void PracticeScene::Draw()
         DrawFormatString(0,60,-256,"delta_x=%.2f, mouse-x=%d",Mouse.GetDeltaX(),Mouse.x);
         DrawFormatString(0,80,-1,"selected=%d",Player.Selected);
         DrawFormatString(0,180,-1,"CT=%d",Player.CastingTime);
+        DrawFormatString(90,0,-1,"%d",Player.MMD.State);
+        DrawFormatString(140,0,-1,"%d",Player.Cancelled.Event);
+        DrawFormatString(160,0,-1,"%d",Player.Blinked);
+        DrawFormatString(180,0,-1,"%d",Key.Poll[KEY_INPUT_1]);
+        DrawFormatString(200,0,-1,"%d",Key.Poll[KEY_INPUT_3]);
     }
 }

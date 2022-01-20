@@ -17,7 +17,7 @@ typedef struct {
 class PlayerData {
     public:
         int_fast8_t Selected;
-        uint_least8_t Jump, isCasting, PreBlink, Blinked, Morphed;
+        uint_least8_t Jump, isHardCasting, PreBlink, Blinked, Morphed;
         uint_fast8_t CastingTime;
         float SpeedBonus, BlinkDecay;
         VECTOR Last, Last2, BlinkRot, BlinkOffset;
