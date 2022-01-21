@@ -358,7 +358,7 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
 
             if(Morphed == TRUE && MMD.State == 2) SetState(3);
             if(Morphed == FALSE && MMD.State == 3) SetState(1);
-            if(Morphed == FALSE && MMD.State == 2 && Blinked == FALSE) SetState(1);
+            if(Morphed == FALSE && MMD.State == 2 && Blinked == FALSE && Cast[0].Count >= 3) SetState(1); //transition between casting states directly if Cast[0] is still active
             Model.RunManualBlend(MMD,0.115f,0.001f);
             Model.Update(MainCircle,28);
             if(Cast[2].Count > 0) Key.Poll[KEY_INPUT_1] = 0; //force release/cancel to blink
@@ -391,10 +391,10 @@ void PlayerData::Update(const Sphere_t *sObj, int_fast16_t Destroyed, const int_
                 if(Morphed) SetState(2);
                 else SetState(0);
             }
-            
+
             if(Morphed == TRUE && MMD.State == 2) SetState(3);
             if(Morphed == FALSE && MMD.State == 3) SetState(1);
-            if(Morphed == FALSE && MMD.State == 2 && Blinked == FALSE) SetState(1);
+            if(Morphed == FALSE && MMD.State == 2 && Blinked == FALSE && Cast[1].Count >= 3) SetState(1); //transition between casting states directly if Cast[1] is still active
             Model.RunManualBlend(MMD,0.315f,0.001f);
             Model.Update(MainCircle,28);
             if(Cast[2].Count > 0) Key.Poll[KEY_INPUT_2] = 0; //force release/cancel to blink
